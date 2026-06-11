@@ -40,10 +40,15 @@
   .src{position:absolute;top:16px;left:16px;font-size:11px;color:var(--muted)}
   .zh{font-size:23px;font-weight:700;line-height:1.5}
   .hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:13px;color:var(--muted)}
-  .en{font-size:19px;font-style:italic;color:var(--navy);line-height:1.5;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  .en{font-size:19px;font-style:italic;color:var(--navy);line-height:1.5;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .spk{background:none;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--navy);font-size:13px;padding:3px 9px;flex:none;line-height:1.4}
+  .spk:active{background:#eee}
+  .spk-sentence{display:inline-flex;align-items:center;gap:5px;margin-bottom:14px}
+  .zh-back{font-size:15px;color:var(--muted);line-height:1.55;margin-bottom:14px;padding:0 2px}
   .vocab{list-style:none}
-  .vocab li{font-size:15px;padding:5px 0;border-bottom:1px dashed var(--line)}
-  .vocab li::before{content:"・";color:var(--navy);font-weight:700}
+  .vocab li{font-size:15px;padding:5px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:8px}
+  .vocab li .vtxt{flex:1}
+  .vocab li::before{content:"・";color:var(--navy);font-weight:700;flex:none}
 
   .rate{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
   .rate button{border:none;border-radius:12px;padding:12px 4px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;}
@@ -121,7 +126,10 @@ function reviewScreen(){
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
       '<div class="face front"><span id="s1" class="src"></span><span id="b1" class="badge"></span>'+
         '<div class="zh" id="zh"></div><div class="hint">👆 點一下看答案</div></div>'+
-      '<div class="face back"><span id="b2" class="badge"></span><div class="en" id="en"></div><ul class="vocab" id="vocab"></ul></div>'+
+      '<div class="face back"><span id="b2" class="badge"></span><div class="en" id="en"></div>'+
+        '<button class="spk spk-sentence" id="enSpk">🔊 念整句</button>'+
+        '<div class="zh-back" id="zhBack"></div>'+
+        '<ul class="vocab" id="vocab"></ul></div>'+
     '</div></div>'+
     '<div id="rate" class="rate hidden">'+
       '<button class="b-x" onclick="rate(event,\'x\')">❌<small>不會 +1天</small></button>'+
@@ -136,7 +144,10 @@ function render(){
   el("counter").textContent=(i+1)+" / "+deck.length;
   el("prog").style.width=(i/deck.length*100)+"%";
   el("zh").textContent=c.zh; el("en").textContent=c.en; el("s1").textContent=c.source;
-  el("vocab").innerHTML=(c.vocab||[]).map(v=>"<li>"+v+"</li>").join("");
+  el("zhBack").textContent=c.zh;
+  el("vocab").innerHTML=(c.vocab||[]).map((v,k)=>'<li><span class="vtxt">'+v+'</span><button class="spk" data-vk="'+k+'">🔊</button></li>').join("");
+  el("enSpk").onclick=e=>{ e.stopPropagation(); speak(c.en); };
+  el("vocab").querySelectorAll("button[data-vk]").forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); speak((c.vocab[+b.dataset.vk]||"").split(/／|\//)[0].trim()); }; });
   for(const b of [el("b1"),el("b2")]){ b.className="badge role-"+c.role; b.textContent=roleName[c.role]; }
   el("card").classList.remove("flipped"); el("rate").classList.add("hidden");
 }
@@ -144,6 +155,10 @@ function flip(){
   flipped=!flipped;
   el("card").classList.toggle("flipped",flipped);
   el("rate").classList.toggle("hidden",!flipped);
+}
+function speak(text){
+  if(!text) return;
+  try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.92; speechSynthesis.speak(u); }catch(e){}
 }
 function rate(e,grade){
   e.stopPropagation();
