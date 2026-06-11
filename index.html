@@ -14,7 +14,7 @@
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{font-family:'Microsoft JhengHei','PingFang TC',sans-serif;background:var(--cream);color:var(--ink);
     min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;}
-  .app{width:100%;max-width:460px}
+  .app{width:100%;max-width:520px}
 
   /* 登入畫面 */
   .gate{text-align:center}
@@ -30,18 +30,18 @@
   .bar{height:6px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:18px}
   .bar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
 
-  .card{position:relative;width:100%;min-height:340px;cursor:pointer;perspective:1200px;}
-  .inner{position:relative;width:100%;min-height:340px;transition:transform .5s;transform-style:preserve-3d;}
+  .card{position:relative;width:100%;cursor:pointer;perspective:1400px;}
+  .inner{position:relative;width:100%;min-height:380px;transition:transform .5s;transform-style:preserve-3d;}
   .card.flipped .inner{transform:rotateY(180deg)}
   .face{position:absolute;inset:0;backface-visibility:hidden;background:#fff;border:1px solid var(--line);border-radius:18px;
-    box-shadow:0 8px 24px rgba(44,77,122,.12);padding:28px 24px;display:flex;flex-direction:column;justify-content:center;}
+    box-shadow:0 8px 24px rgba(44,77,122,.12);padding:30px 26px;display:flex;flex-direction:column;justify-content:center;}
   .back{transform:rotateY(180deg)}
   .badge{position:absolute;top:16px;right:16px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;color:#fff;}
   .role-other{background:var(--other)} .role-self{background:var(--self)} .role-both{background:var(--both)}
   .src{position:absolute;top:16px;left:16px;font-size:11px;color:var(--muted)}
-  .zh{font-size:23px;font-weight:700;line-height:1.5}
+  .zh{font-size:25px;font-weight:700;line-height:1.55}
   .hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:13px;color:var(--muted)}
-  .en{font-size:19px;font-style:italic;color:var(--navy);line-height:1.5;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .en{font-size:20px;font-style:italic;color:var(--navy);line-height:1.55;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
   .spk{background:none;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--navy);font-size:13px;padding:3px 9px;flex:none;line-height:1.4}
   .spk:active{background:#eee}
   .spk-sentence{display:inline-flex;align-items:center;gap:5px;margin-bottom:14px}
@@ -151,6 +151,19 @@ function render(){
   el("vocab").querySelectorAll("button[data-vk]").forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); speak((c.vocab[+b.dataset.vk]||"").split(/／|\//)[0].trim()); }; });
   for(const b of [el("b1"),el("b2")]){ b.className="badge role-"+c.role; b.textContent=roleName[c.role]; }
   el("card").classList.remove("flipped"); el("rate").classList.add("hidden");
+  requestAnimationFrame(fitCard); setTimeout(fitCard,80); setTimeout(fitCard,300);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitCard); // 字體載入後字會變高，要重量
+}
+function fitCard(){
+  const card=el("card"); if(!card) return;
+  const inner=card.querySelector(".inner");
+  let h=380;
+  card.querySelectorAll(".face").forEach(f=>{
+    const prev=f.style.justifyContent; f.style.justifyContent="flex-start"; // 量真實內容高，避開置中造成的溢出誤差
+    h=Math.max(h, f.scrollHeight);
+    f.style.justifyContent=prev;
+  });
+  card.style.height=h+"px"; inner.style.height=h+"px";
 }
 function flip(){
   flipped=!flipped;
