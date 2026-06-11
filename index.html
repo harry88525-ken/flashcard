@@ -62,6 +62,19 @@
   .center h2{color:var(--navy);margin-bottom:10px}
   .reset{margin-top:18px;background:none;border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:99px;font-size:13px;cursor:pointer}
   .sync{font-size:11px;color:var(--ok)}
+  .home{text-align:center;padding:8px 0}
+  .home-title{color:var(--navy);font-size:26px;margin-bottom:24px}
+  .home-btn{display:block;width:100%;padding:22px 20px;margin-bottom:14px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;font-size:20px;font-weight:700;color:var(--navy);box-shadow:0 6px 18px rgba(44,77,122,.08);text-align:left;line-height:1.3}
+  .home-btn small{display:block;margin-top:7px;font-size:13px;font-weight:400;color:var(--muted)}
+  .home-btn.alt{color:var(--self)}
+  .home-foot{margin-top:20px}
+  .top .back{cursor:pointer;text-decoration:underline;color:var(--navy)}
+  .ovcount{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .ovlist{display:flex;flex-direction:column;gap:14px}
+  .ovcard{position:relative;background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:14px;padding:18px;box-shadow:0 4px 14px rgba(44,77,122,.07)}
+  .ov-zh{font-size:18px;font-weight:700;line-height:1.5;margin-bottom:9px;padding-right:52px}
+  .ov-en{font-size:16px;color:var(--navy);background:#F5F1E8;border-radius:8px;padding:10px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .ov-en>span{flex:1}
 </style>
 </head>
 <body>
@@ -103,7 +116,7 @@ async function login(){
     cards = await fetchJSON(SUPA_URL+"/rest/v1/cards?select=*", {headers:H});
     const rows = await fetchJSON(SUPA_URL+"/rest/v1/progress?select=*&passcode=eq."+encodeURIComponent(code), {headers:H});
     prog={}; rows.forEach(r=> prog[r.card_id]={errorCount:r.error_count, nextReview:r.next_review});
-    deck = buildDeck(); i=0; reviewScreen();
+    homeScreen();
   }catch(e){ gateScreen("連線失敗，請再試一次"); }
 }
 function logout(){ localStorage.removeItem("fc_passcode"); passcode=""; gateScreen(); }
@@ -130,7 +143,7 @@ function srcLabel(s){
 function fillSources(){
   const sel=el("srcSel"); if(!sel) return;
   const srcs=[...new Set(cards.map(c=>c.source))].sort();
-  sel.innerHTML='<option value="ALL">全部（依遺忘曲線）</option>'+
+  sel.innerHTML='<option value="ALL">全部</option>'+
     srcs.map(s=>'<option value="'+s+'">'+srcLabel(s)+'（'+cards.filter(c=>c.source===s).length+' 張）</option>').join("");
   sel.value=selectedSource;
 }
@@ -138,11 +151,39 @@ function onSrcChange(){
   selectedSource=el("srcSel").value;
   deck=buildDeck(); i=0; reviewScreen();
 }
+function homeScreen(){
+  el("app").innerHTML=
+    '<div class="home"><h1 class="home-title">📖 英文單字卡</h1>'+
+      '<button class="home-btn" onclick="startReview()">🃏 單字卡複習<small>翻卡 + 遺忘曲線，幫你記住</small></button>'+
+      '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+
+      '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
+}
+function startReview(){ deck=buildDeck(); i=0; reviewScreen(); }
+function overviewScreen(){
+  el("app").innerHTML=
+    '<div class="top"><span class="back" onclick="homeScreen()">← 返回</span><span class="logout" onclick="logout()">換 passcode</span></div>'+
+    '<div class="srcrow">範圍：<select id="srcSel" onchange="onOvChange()"></select></div>'+
+    '<div id="ovlist" class="ovlist"></div>';
+  fillSources(); renderOverview();
+}
+function onOvChange(){ selectedSource=el("srcSel").value; renderOverview(); }
+function renderOverview(){
+  const pool=(selectedSource==="ALL")?cards:cards.filter(c=>c.source===selectedSource);
+  const box=el("ovlist");
+  if(!pool.length){ box.innerHTML='<div class="center"><p>這個範圍沒有卡片</p></div>'; return; }
+  box.innerHTML='<div class="ovcount">'+pool.length+' 張</div>'+pool.map((c,k)=>
+    '<div class="ovcard"><span class="badge role-'+c.role+'">'+roleName[c.role]+'</span>'+
+      '<div class="ov-zh">'+c.zh+'</div>'+
+      '<div class="ov-en"><span>'+c.en+'</span><button class="spk" data-ov="'+k+'">🔊</button></div>'+
+      '<ul class="vocab">'+(c.vocab||[]).map(v=>'<li><span class="vtxt">'+v+'</span></li>').join('')+'</ul></div>'
+  ).join('');
+  box.querySelectorAll("button[data-ov]").forEach(b=>{ b.onclick=()=>speak(pool[+b.dataset.ov].en); });
+}
 
 function reviewScreen(){
   if(i>=deck.length){ return finishScreen(); }
   el("app").innerHTML =
-    '<div class="top"><span id="counter"></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
+    '<div class="top"><span><span class="back" onclick="homeScreen()">🏠</span> <span id="counter"></span></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
     '<div class="srcrow">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
     '<div class="bar"><i id="prog"></i></div>'+
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
@@ -226,6 +267,7 @@ function finishScreen(){
   el("app").innerHTML='<div class="center"><h2>'+msg+'</h2>'+
     '<p>換個範圍繼續：</p>'+
     '<div class="srcrow" style="justify-content:center">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
+    '<button class="reset" onclick="homeScreen()">← 回首頁</button> '+
     '<button class="reset" onclick="login()">重新整理</button> '+
     '<button class="reset" onclick="logout()">換 passcode</button></div>';
   fillSources();
