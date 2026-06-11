@@ -86,8 +86,9 @@ function gateScreen(msg){
   el("pc").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
 }
 async function login(){
-  const code = el("pc").value.trim();
-  if(!code){ el("err").textContent="請輸入 passcode"; return; }
+  const input = el("pc");
+  const code = (input ? input.value : passcode).trim();   // 自動登入時沒有輸入框，改用已存的 passcode
+  if(!code){ if(input) el("err").textContent="請輸入 passcode"; else gateScreen("請輸入 passcode"); return; }
   passcode = code; localStorage.setItem("fc_passcode", code);
   el("app").innerHTML='<div class="center"><h2>載入中…</h2><p>從雲端讀取你的卡與進度</p></div>';
   try{
