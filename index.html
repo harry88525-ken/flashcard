@@ -27,6 +27,8 @@
   .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:14px;color:var(--muted)}
   .top .logout{cursor:pointer;text-decoration:underline}
   .top .del{cursor:pointer;color:var(--x);margin-right:16px}
+  .srcrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:12px}
+  .srcrow select{flex:1;padding:9px 11px;font-size:15px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
   .bar{height:6px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:18px}
   .bar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
 
@@ -41,7 +43,7 @@
   .src{position:absolute;top:16px;left:16px;font-size:11px;color:var(--muted)}
   .zh{font-size:25px;font-weight:700;line-height:1.55}
   .hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:13px;color:var(--muted)}
-  .en{font-size:20px;font-style:italic;color:var(--navy);line-height:1.55;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .en{font-size:20px;font-style:normal;color:var(--navy);line-height:1.55;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
   .spk{background:none;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--navy);font-size:13px;padding:3px 9px;flex:none;line-height:1.4}
   .spk:active{background:#eee}
   .spk-sentence{display:inline-flex;align-items:center;gap:5px;margin-bottom:14px}
@@ -79,7 +81,7 @@ async function fetchJSON(url, opts, tries=4){
   throw new Error("network");
 }
 let passcode = localStorage.getItem("fc_passcode") || "";
-let cards=[], prog={}, deck=[], i=0, flipped=false;
+let cards=[], prog={}, deck=[], i=0, flipped=false, selectedSource="ALL";
 const el = id => document.getElementById(id);
 const todayStr = () => new Date().toISOString().slice(0,10);
 const roleName = {other:"對方",self:"我",both:"兩人"};
@@ -109,7 +111,8 @@ function logout(){ localStorage.removeItem("fc_passcode"); passcode=""; gateScre
 function appearProb(e){ return e>=3?0.6 : e>=2?0.4 : e>=1?0.2 : 0.1; }
 function buildDeck(){
   const t = todayStr();
-  const due = cards.filter(c=>{
+  const pool = (selectedSource==="ALL") ? cards : cards.filter(c=>c.source===selectedSource); // 範圍只是過濾，記憶/遺忘曲線全域共用，不分週
+  const due = pool.filter(c=>{
     const p = prog[c.id];
     if(!p || !p.nextReview) return true;            // 從未複習 → 必出現
     if(p.nextReview > t) return false;               // 還沒到複習日 → 跳過（遺忘曲線）
@@ -118,11 +121,29 @@ function buildDeck(){
   for(let k=due.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[due[k],due[j]]=[due[j],due[k]];}
   return due;
 }
+function srcLabel(s){
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:_to_\d{4}-(\d{2})-(\d{2}))?$/);
+  if(!m) return s;
+  const a=(+m[2])+"/"+(+m[3]);
+  return m[4] ? a+"–"+((+m[4])+"/"+(+m[5])) : a;
+}
+function fillSources(){
+  const sel=el("srcSel"); if(!sel) return;
+  const srcs=[...new Set(cards.map(c=>c.source))].sort();
+  sel.innerHTML='<option value="ALL">全部（依遺忘曲線）</option>'+
+    srcs.map(s=>'<option value="'+s+'">'+srcLabel(s)+'（'+cards.filter(c=>c.source===s).length+' 張）</option>').join("");
+  sel.value=selectedSource;
+}
+function onSrcChange(){
+  selectedSource=el("srcSel").value;
+  deck=buildDeck(); i=0; reviewScreen();
+}
 
 function reviewScreen(){
   if(i>=deck.length){ return finishScreen(); }
   el("app").innerHTML =
     '<div class="top"><span id="counter"></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
+    '<div class="srcrow">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
     '<div class="bar"><i id="prog"></i></div>'+
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
       '<div class="face front"><span id="s1" class="src"></span><span id="b1" class="badge"></span>'+
@@ -138,7 +159,7 @@ function reviewScreen(){
       '<button class="b-ok" onclick="rate(event,\'o\')">✓<small>記得 +7天</small></button>'+
       '<button class="b-star" onclick="rate(event,\'s\')">⭐<small>很熟 +14天</small></button>'+
     '</div>';
-  render();
+  fillSources(); render();
 }
 function render(){
   const c = deck[i]; flipped=false;
@@ -201,11 +222,13 @@ function rate(e,grade){
   i++; reviewScreen();
 }
 function finishScreen(){
-  const msg = deck.length===0 ? "今天沒有到期的卡 🎉" : "🎉 今天複習完了";
+  const msg = deck.length===0 ? (selectedSource==="ALL"?"今天沒有到期的卡 🎉":"這個範圍今天沒到期的卡 🎉") : "🎉 複習完了";
   el("app").innerHTML='<div class="center"><h2>'+msg+'</h2>'+
-    '<p>進度已同步到雲端，手機/電腦都會看到（遺忘曲線：答錯+1 / 印象+3 / 記得+7 / 很熟+14 天）。</p>'+
+    '<p>換個範圍繼續：</p>'+
+    '<div class="srcrow" style="justify-content:center">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
     '<button class="reset" onclick="login()">重新整理</button> '+
     '<button class="reset" onclick="logout()">換 passcode</button></div>';
+  fillSources();
 }
 
 if(passcode) login(); else gateScreen();
