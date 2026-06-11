@@ -175,15 +175,15 @@ function renderOverview(){
     '<div class="ovcard"><span class="badge role-'+c.role+'">'+roleName[c.role]+'</span>'+
       '<div class="ov-zh">'+c.zh+'</div>'+
       '<div class="ov-en"><span>'+c.en+'</span><button class="spk" data-ov="'+k+'">🔊</button></div>'+
-      '<ul class="vocab">'+(c.vocab||[]).map(v=>'<li><span class="vtxt">'+v+'</span></li>').join('')+'</ul></div>'
+      '<ul class="vocab">'+(c.vocab||[]).map((v,vk)=>'<li><span class="vtxt">'+v+'</span><button class="spk" data-ov="'+k+'" data-vk="'+vk+'">🔊</button></li>').join('')+'</ul></div>'
   ).join('');
-  box.querySelectorAll("button[data-ov]").forEach(b=>{ b.onclick=()=>speak(pool[+b.dataset.ov].en); });
+  box.querySelectorAll("button[data-ov]").forEach(b=>{ b.onclick=()=>{ const c=pool[+b.dataset.ov]; if(b.dataset.vk!==undefined) speak((c.vocab[+b.dataset.vk]||"").split(/／|\//)[0].trim()); else speak(c.en); }; });
 }
 
 function reviewScreen(){
   if(i>=deck.length){ return finishScreen(); }
   el("app").innerHTML =
-    '<div class="top"><span><span class="back" onclick="homeScreen()">🏠</span> <span id="counter"></span></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
+    '<div class="top"><span><span class="back" onclick="homeScreen()">← 返回</span> <span id="counter"></span></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
     '<div class="srcrow">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
     '<div class="bar"><i id="prog"></i></div>'+
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
@@ -232,9 +232,23 @@ function flip(){
   el("card").classList.toggle("flipped",flipped);
   el("rate").classList.toggle("hidden",!flipped);
 }
+function bestVoice(){
+  const all=speechSynthesis.getVoices();
+  const enUS=all.filter(v=>/^en[-_]US/i.test(v.lang));
+  const pool=enUS.length?enUS:all.filter(v=>/^en/i.test(v.lang));
+  const prefer=["Natural","Google US English","Samantha","Aria","Jenny","Google"]; // 挑較自然的
+  for(const p of prefer){ const m=pool.find(v=>v.name.includes(p)); if(m) return m; }
+  return pool[0]||null;
+}
 function speak(text){
   if(!text) return;
-  try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.92; speechSynthesis.speak(u); }catch(e){}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US"; u.rate=.75; u.pitch=1;   // 慢約 20%、自然語調
+    const v=bestVoice(); if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
 async function delCard(e){
   e.stopPropagation();
