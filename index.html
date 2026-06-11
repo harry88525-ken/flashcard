@@ -27,8 +27,11 @@
   .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:14px;color:var(--muted)}
   .top .logout{cursor:pointer;text-decoration:underline}
   .top .del{cursor:pointer;color:var(--x);margin-right:16px}
-  .srcrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:12px}
-  .srcrow select{flex:1;padding:9px 11px;font-size:15px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+  .srcrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.9}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .chip small{font-size:11px;opacity:.75}
   .bar{height:6px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:18px}
   .bar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
 
@@ -94,7 +97,7 @@ async function fetchJSON(url, opts, tries=4){
   throw new Error("network");
 }
 let passcode = localStorage.getItem("fc_passcode") || "";
-let cards=[], prog={}, deck=[], i=0, flipped=false, selectedSource="ALL";
+let cards=[], prog={}, deck=[], i=0, flipped=false, selectedSources=new Set(); // 空集合=全部；可複選多週
 const el = id => document.getElementById(id);
 const todayStr = () => new Date().toISOString().slice(0,10);
 const roleName = {other:"對方",self:"我",both:"兩人"};
@@ -124,7 +127,7 @@ function logout(){ localStorage.removeItem("fc_passcode"); passcode=""; gateScre
 function appearProb(e){ return e>=3?0.6 : e>=2?0.4 : e>=1?0.2 : 0.1; }
 function buildDeck(){
   const t = todayStr();
-  const pool = (selectedSource==="ALL") ? cards : cards.filter(c=>c.source===selectedSource); // 範圍只是過濾，記憶/遺忘曲線全域共用，不分週
+  const pool = selectedSources.size===0 ? cards : cards.filter(c=>selectedSources.has(c.source)); // 範圍只是過濾，記憶/遺忘曲線全域共用，不分週
   const due = pool.filter(c=>{
     const p = prog[c.id];
     if(!p || !p.nextReview) return true;            // 從未複習 → 必出現
@@ -140,16 +143,20 @@ function srcLabel(s){
   const a=(+m[2])+"/"+(+m[3]);
   return m[4] ? a+"–"+((+m[4])+"/"+(+m[5])) : a;
 }
-function fillSources(){
-  const sel=el("srcSel"); if(!sel) return;
+function fillChips(onChange){
+  const box=el("srcChips"); if(!box) return;
   const srcs=[...new Set(cards.map(c=>c.source))].sort();
-  sel.innerHTML='<option value="ALL">全部</option>'+
-    srcs.map(s=>'<option value="'+s+'">'+srcLabel(s)+'（'+cards.filter(c=>c.source===s).length+' 張）</option>').join("");
-  sel.value=selectedSource;
-}
-function onSrcChange(){
-  selectedSource=el("srcSel").value;
-  deck=buildDeck(); i=0; reviewScreen();
+  box.innerHTML='<button class="chip'+(selectedSources.size===0?' on':'')+'" data-src="ALL">全部</button>'+
+    srcs.map(s=>'<button class="chip'+(selectedSources.has(s)?' on':'')+'" data-src="'+s+'">'+srcLabel(s)+'<small>'+cards.filter(c=>c.source===s).length+'</small></button>').join('');
+  box.querySelectorAll('button[data-src]').forEach(b=>{
+    b.onclick=()=>{
+      const src=b.dataset.src;
+      if(src==="ALL") selectedSources.clear();
+      else selectedSources.has(src)?selectedSources.delete(src):selectedSources.add(src);
+      fillChips(onChange); // 重畫 chips 更新高亮
+      onChange();
+    };
+  });
 }
 function homeScreen(){
   el("app").innerHTML=
@@ -162,13 +169,12 @@ function startReview(){ deck=buildDeck(); i=0; reviewScreen(); }
 function overviewScreen(){
   el("app").innerHTML=
     '<div class="top"><span class="back" onclick="homeScreen()">← 返回</span><span class="logout" onclick="logout()">換 passcode</span></div>'+
-    '<div class="srcrow">範圍：<select id="srcSel" onchange="onOvChange()"></select></div>'+
+    '<div class="srcrow">範圍：<div class="chips" id="srcChips"></div></div>'+
     '<div id="ovlist" class="ovlist"></div>';
-  fillSources(); renderOverview();
+  fillChips(()=>renderOverview()); renderOverview();
 }
-function onOvChange(){ selectedSource=el("srcSel").value; renderOverview(); }
 function renderOverview(){
-  const pool=(selectedSource==="ALL")?cards:cards.filter(c=>c.source===selectedSource);
+  const pool=selectedSources.size===0?cards:cards.filter(c=>selectedSources.has(c.source));
   const box=el("ovlist");
   if(!pool.length){ box.innerHTML='<div class="center"><p>這個範圍沒有卡片</p></div>'; return; }
   box.innerHTML='<div class="ovcount">'+pool.length+' 張</div>'+pool.map((c,k)=>
@@ -184,7 +190,7 @@ function reviewScreen(){
   if(i>=deck.length){ return finishScreen(); }
   el("app").innerHTML =
     '<div class="top"><span><span class="back" onclick="homeScreen()">← 返回</span> <span id="counter"></span></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
-    '<div class="srcrow">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
+    '<div class="srcrow">範圍：<div class="chips" id="srcChips"></div></div>'+
     '<div class="bar"><i id="prog"></i></div>'+
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
       '<div class="face front"><span id="s1" class="src"></span><span id="b1" class="badge"></span>'+
@@ -200,7 +206,7 @@ function reviewScreen(){
       '<button class="b-ok" onclick="rate(event,\'o\')">✓<small>記得 +7天</small></button>'+
       '<button class="b-star" onclick="rate(event,\'s\')">⭐<small>很熟 +14天</small></button>'+
     '</div>';
-  fillSources(); render();
+  fillChips(()=>{ deck=buildDeck(); i=0; reviewScreen(); }); render();
 }
 function render(){
   const c = deck[i]; flipped=false;
@@ -277,14 +283,14 @@ function rate(e,grade){
   i++; reviewScreen();
 }
 function finishScreen(){
-  const msg = deck.length===0 ? (selectedSource==="ALL"?"今天沒有到期的卡 🎉":"這個範圍今天沒到期的卡 🎉") : "🎉 複習完了";
+  const msg = deck.length===0 ? (selectedSources.size===0?"今天沒有到期的卡 🎉":"這個範圍今天沒到期的卡 🎉") : "🎉 複習完了";
   el("app").innerHTML='<div class="center"><h2>'+msg+'</h2>'+
-    '<p>換個範圍繼續：</p>'+
-    '<div class="srcrow" style="justify-content:center">範圍：<select id="srcSel" onchange="onSrcChange()"></select></div>'+
+    '<p>換個範圍繼續（可複選）：</p>'+
+    '<div class="srcrow" style="justify-content:center">範圍：<div class="chips" id="srcChips"></div></div>'+
     '<button class="reset" onclick="homeScreen()">← 回首頁</button> '+
     '<button class="reset" onclick="login()">重新整理</button> '+
     '<button class="reset" onclick="logout()">換 passcode</button></div>';
-  fillSources();
+  fillChips(()=>{ deck=buildDeck(); i=0; reviewScreen(); });
 }
 
 if(passcode) login(); else gateScreen();
