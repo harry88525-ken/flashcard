@@ -18,13 +18,12 @@
   .wrap{max-width:560px;margin:0 auto;}
   h1{font-size:19px;font-weight:600;margin:4px 0 2px;}
   .sub{font-size:13px;color:var(--mut);margin:0 0 16px;}
-  .tabs{display:flex;gap:8px;margin-bottom:16px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;}
   .tab{flex:1;padding:11px;border:1px solid var(--line);background:var(--card);
-    color:var(--mut);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;
-    transition:.15s;}
+    color:var(--mut);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
   .tab.on{background:var(--card2);color:var(--txt);border-color:var(--blue);}
-  .panel{display:none;}
-  .panel.on{display:block;}
+  .panel{display:none;} .panel.on{display:block;}
+  .seglbl{font-size:12px;color:var(--mut);margin:2px 0 5px;}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
   .f{display:flex;flex-direction:column;gap:5px;}
   .f.full{grid-column:1 / -1;}
@@ -32,21 +31,25 @@
   input,select{background:var(--card);border:1px solid var(--line);color:var(--txt);
     border-radius:8px;padding:10px;font-size:15px;width:100%;outline:none;}
   input:focus,select:focus{border-color:var(--blue);}
+  input[readonly]{opacity:.5;background:#10141c;border-style:dashed;}
   .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
-  .seg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:10px;
-    font-size:14px;font-weight:600;cursor:pointer;}
-  .seg button.on.long{background:rgba(22,199,132,.16);color:var(--green);}
-  .seg button.on.short{background:rgba(234,57,67,.16);color:var(--red);}
+  .seg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:10px 6px;
+    font-size:13px;font-weight:600;cursor:pointer;}
+  .seg.dir button.on.long{background:rgba(22,199,132,.16);color:var(--green);}
+  .seg.dir button.on.short{background:rgba(234,57,67,.16);color:var(--red);}
+  .seg.mode button.on{background:rgba(59,130,246,.18);color:#7eb6ff;}
+  .warn{display:none;background:rgba(240,185,11,.12);color:var(--amber);
+    font-size:12px;padding:8px 10px;border-radius:8px;margin-bottom:12px;}
+  .warn.on{display:block;}
   .hero{background:var(--card2);border:1px solid var(--line);border-radius:var(--r);
-    padding:16px;margin:16px 0;text-align:center;}
+    padding:16px;margin:14px 0;text-align:center;}
+  .hero.risk{border-color:rgba(234,57,67,.4);}
   .hero .k{font-size:13px;color:var(--mut);margin-bottom:4px;}
-  .hero .v{font-size:30px;font-weight:700;letter-spacing:.5px;}
+  .hero .v{font-size:28px;font-weight:700;letter-spacing:.5px;}
   .hero .v small{font-size:15px;font-weight:500;color:var(--mut);}
   .hero .note{font-size:12px;color:var(--dim);margin-top:6px;}
-  .out{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-    padding:4px 14px;margin-bottom:12px;}
-  .row{display:flex;justify-content:space-between;align-items:baseline;
-    padding:9px 0;border-bottom:1px solid var(--line);}
+  .out{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:4px 14px;margin-bottom:12px;}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);}
   .row:last-child{border-bottom:none;}
   .row .l{font-size:13px;color:var(--mut);}
   .row .r{font-size:14px;font-weight:600;text-align:right;}
@@ -65,7 +68,7 @@
 <body>
 <div class="wrap">
   <h1>合約開倉計算機</h1>
-  <p class="sub">風險優先 · 先定願虧多少，反推該下多少保證金</p>
+  <p class="sub">兩種模式 · 定風險反推保證金，或自己填保證金看風險</p>
 
   <div class="tabs">
     <button class="tab on" data-t="u">U 本位 (USDT-M)</button>
@@ -74,21 +77,27 @@
 
   <!-- ============ U 本位 ============ -->
   <div class="panel on" id="p-u">
-    <div class="f full" style="margin-bottom:14px;">
-      <label>方向</label>
-      <div class="seg" id="u-dir-seg">
-        <button class="on long" data-d="1">做多</button>
-        <button data-d="-1">做空</button>
-      </div>
-      <input type="hidden" id="u-dir" value="1">
+    <div class="seglbl">方向</div>
+    <div class="seg dir" id="u-dir-seg" style="margin-bottom:12px;">
+      <button class="on long" data-d="1">做多</button><button data-d="-1">做空</button>
     </div>
+    <input type="hidden" id="u-dir" value="1">
+    <div class="seglbl">計算模式</div>
+    <div class="seg mode" id="u-mode-seg" style="margin-bottom:12px;">
+      <button class="on" data-m="risk">定風險 → 算保證金</button><button data-m="mgn">定保證金 → 算風險</button>
+    </div>
+    <input type="hidden" id="u-mode" value="risk">
+    <div class="warn" id="u-warn"></div>
+
     <div class="grid">
-      <div class="f"><label>進場價</label><input type="number" id="u-pin" value="63600" step="1"></div>
-      <div class="f"><label>止損價</label><input type="number" id="u-psl" value="61000" step="1"></div>
-      <div class="f"><label>止盈價</label><input type="number" id="u-ptp" value="69000" step="1"></div>
+      <div class="f"><label>標的</label><input type="text" id="u-sym" value="BTC"></div>
+      <div class="f"><label>槓桿 x</label><input type="number" id="u-lev" value="5" step="1"></div>
+      <div class="f"><label>進場價</label><input type="number" id="u-pin" value="63600" step="any"></div>
+      <div class="f"><label>止損價</label><input type="number" id="u-psl" value="61000" step="any"></div>
+      <div class="f"><label>止盈價</label><input type="number" id="u-ptp" value="69000" step="any"></div>
       <div class="f"><label>帳戶權益 (USDT)</label><input type="number" id="u-acct" value="4700" step="10"></div>
       <div class="f"><label>單筆風險 %</label><input type="number" id="u-risk" value="2" step="0.5"></div>
-      <div class="f"><label>槓桿 x</label><input type="number" id="u-lev" value="5" step="1"></div>
+      <div class="f"><label>保證金 (USDT)</label><input type="number" id="u-mgn" value="0" step="10" readonly></div>
       <div class="f"><label>Maker 費率 %</label><input type="number" id="u-mk" value="0.018" step="0.001"></div>
       <div class="f"><label>Taker 費率 %</label><input type="number" id="u-tk" value="0.045" step="0.001"></div>
       <div class="f"><label>開倉用</label><select id="u-ot"><option value="tk">Taker (市價)</option><option value="mk">Maker (限價)</option></select></div>
@@ -98,14 +107,15 @@
       </div>
     </div>
 
-    <div class="hero">
-      <div class="k">該下保證金</div>
-      <div class="v" id="u-margin">—</div>
-      <div class="note" id="u-marginnote"></div>
+    <div class="hero" id="u-hero">
+      <div class="k" id="u-herok">該下保證金</div>
+      <div class="v" id="u-herov">—</div>
+      <div class="note" id="u-heron"></div>
     </div>
 
     <div class="out">
       <div class="row"><span class="l">倉位</span><span class="r" id="u-pos">—</span></div>
+      <div class="row"><span class="l">單筆風險</span><span class="r" id="u-riskamt">—</span></div>
       <div class="row"><span class="l">強平價 (近似)</span><span class="r liq" id="u-liq">—</span></div>
       <div class="row"><span class="l">爆倉/停損檢查</span><span class="r"><span class="badge" id="u-safe">—</span></span></div>
       <div class="row"><span class="l">來回手續費 (止盈時)</span><span class="r neg" id="u-fee">—</span></div>
@@ -118,22 +128,28 @@
 
   <!-- ============ 幣本位 ============ -->
   <div class="panel" id="p-c">
-    <div class="f full" style="margin-bottom:14px;">
-      <label>方向</label>
-      <div class="seg" id="c-dir-seg">
-        <button class="on long" data-d="1">做多</button>
-        <button data-d="-1">做空</button>
-      </div>
-      <input type="hidden" id="c-dir" value="1">
+    <div class="seglbl">方向</div>
+    <div class="seg dir" id="c-dir-seg" style="margin-bottom:12px;">
+      <button class="on long" data-d="1">做多</button><button data-d="-1">做空</button>
     </div>
+    <input type="hidden" id="c-dir" value="1">
+    <div class="seglbl">計算模式</div>
+    <div class="seg mode" id="c-mode-seg" style="margin-bottom:12px;">
+      <button class="on" data-m="risk">定風險 → 算保證金</button><button data-m="mgn">定保證金 → 算風險</button>
+    </div>
+    <input type="hidden" id="c-mode" value="risk">
+    <div class="warn" id="c-warn"></div>
+
     <div class="grid">
-      <div class="f"><label>進場價</label><input type="number" id="c-pin" value="63600" step="1"></div>
-      <div class="f"><label>止損價</label><input type="number" id="c-psl" value="61000" step="1"></div>
-      <div class="f"><label>止盈價</label><input type="number" id="c-ptp" value="69000" step="1"></div>
+      <div class="f"><label>標的</label><input type="text" id="c-sym" value="BTC"></div>
+      <div class="f"><label>面值 (USD/張)</label><input type="number" id="c-cv" value="100" step="10"></div>
+      <div class="f"><label>進場價</label><input type="number" id="c-pin" value="63600" step="any"></div>
+      <div class="f"><label>止損價</label><input type="number" id="c-psl" value="61000" step="any"></div>
+      <div class="f"><label>止盈價</label><input type="number" id="c-ptp" value="69000" step="any"></div>
       <div class="f"><label>帳戶權益 (USDT 等值)</label><input type="number" id="c-acct" value="4700" step="10"></div>
       <div class="f"><label>單筆風險 %</label><input type="number" id="c-risk" value="2" step="0.5"></div>
+      <div class="f"><label>保證金 (USDT 等值)</label><input type="number" id="c-mgn" value="0" step="10" readonly></div>
       <div class="f"><label>槓桿 x</label><input type="number" id="c-lev" value="5" step="1"></div>
-      <div class="f"><label>面值 (USD/張)</label><input type="number" id="c-cv" value="100" step="10"></div>
       <div class="f"><label>Maker 費率 %</label><input type="number" id="c-mk" value="0.02" step="0.001"></div>
       <div class="f"><label>Taker 費率 %</label><input type="number" id="c-tk" value="0.05" step="0.001"></div>
       <div class="f"><label>開倉用</label><select id="c-ot"><option value="tk">Taker (市價)</option><option value="mk">Maker (限價)</option></select></div>
@@ -143,14 +159,15 @@
       </div>
     </div>
 
-    <div class="hero">
-      <div class="k">該下保證金</div>
-      <div class="v" id="c-margin">—</div>
-      <div class="note" id="c-marginnote"></div>
+    <div class="hero" id="c-hero">
+      <div class="k" id="c-herok">該下保證金</div>
+      <div class="v" id="c-herov">—</div>
+      <div class="note" id="c-heron"></div>
     </div>
 
     <div class="out">
       <div class="row"><span class="l">倉位</span><span class="r" id="c-pos">—</span></div>
+      <div class="row"><span class="l">單筆風險</span><span class="r" id="c-riskamt">—</span></div>
       <div class="row"><span class="l">強平價 (近似)</span><span class="r liq" id="c-liq">—</span></div>
       <div class="row"><span class="l">爆倉/停損檢查</span><span class="r"><span class="badge" id="c-safe">—</span></span></div>
       <div class="row"><span class="l">來回手續費 (止盈時)</span><span class="r neg" id="c-fee">—</span></div>
@@ -163,10 +180,10 @@
 
   <details>
     <summary>計算邏輯說明</summary>
-    <p><b>風險優先</b>：先用「帳戶 × 風險%」算出單筆願虧金額 R，再用 R ÷ 止損距離反推倉位，所以不管幾倍槓桿，價格走到止損你都只虧約 R（手續費另計）。</p>
-    <p><b>槓桿</b>只決定鎖多少保證金，不改變你的價格風險。唯一紀律：強平價要遠在止損之外（看「爆倉/停損檢查」徽章，紅色代表會在止損前先爆倉，槓桿太高了）。</p>
-    <p><b>幣本位</b>是反向合約：保證金與盈虧用「幣」計，強平公式為 P進 ÷ (1+1/L)，比 U 本位早一點爆；且盈虧帶 1/price 凸性，淨風報比通常略低於 U 本位。要先持有對應的幣當保證金，USDT 不能直接用。</p>
-    <p>強平價為近似值 (維持保證金率假設 0.4%、未計資金費率)，實際以幣安下單預覽為準。</p>
+    <p><b>定風險 → 算保證金</b>：先用「帳戶 × 風險%」算出願虧 R，再用 R ÷ 止損距離反推倉位與保證金。適合開倉前抓紀律。</p>
+    <p><b>定保證金 → 算風險</b>：你自己填保證金，工具用「保證金 × 槓桿」算名目倉位，回推這筆碰到止損會虧多少、等於賭帳戶幾 %。適合「我就想下這麼多」時檢查風險。</p>
+    <p><b>槓桿</b>只決定鎖多少保證金，不改變價格風險。看「爆倉/停損檢查」徽章：紅色代表強平價在止損之內，止損還沒到就先爆倉，槓桿太高。</p>
+    <p><b>幣本位</b>是反向合約：強平公式 P進 ÷ (1+1/L)，比 U 本位早爆；要先持有對應的幣當保證金。強平價為近似值 (MMR 0.4%、未計資金費率)，以交易所為準。</p>
   </details>
 
   <p class="foot">僅為風控試算工具，非投資建議 · 數字以交易所實際成交為準</p>
@@ -179,8 +196,32 @@
   function num(id){return parseFloat($(id).value);}
   function usd(x){return (x<0?'-':'')+'$'+Math.round(Math.abs(x)).toLocaleString();}
   function usd2(x){return (x<0?'-':'')+'$'+Math.abs(x).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-  function price(x){return Math.round(x).toLocaleString();}
-  function btc(x,d){return x.toFixed(d||4);}
+  function pr(x){ if(!isFinite(x))return '—'; var a=Math.abs(x);
+    if(a>=1000)return Math.round(x).toLocaleString();
+    if(a>=1)return x.toFixed(2);
+    if(a>=0.01)return x.toFixed(4);
+    return x.toPrecision(4);
+  }
+  function qf(x){ if(!isFinite(x))return '—'; var a=Math.abs(x);
+    if(a>=1000)return Math.round(x).toLocaleString();
+    if(a>=1)return x.toFixed(2);
+    return x.toFixed(4);
+  }
+  function feeRate(prefix,which){
+    var mk=num(prefix+'-mk')/100, tk=num(prefix+'-tk')/100;
+    var bnb=$(prefix+'-bnb').checked?0.9:1;
+    return ($(prefix+'-'+which).value==='mk'?mk:tk)*bnb;
+  }
+  function setSafe(el,safe){ el.className='badge '+(safe?'ok':'bad');
+    el.textContent=safe?'安全 · 停損先觸發':'危險 · 會先爆倉'; }
+  function checkDir(prefix,dir,pin,psl,ptp){
+    var w=$(prefix+'-warn'), msg='';
+    if(dir>0 && psl>=pin) msg='做多時止損價應低於進場價';
+    else if(dir<0 && psl<=pin) msg='做空時止損價應高於進場價';
+    else if(dir>0 && ptp<=pin) msg='做多時止盈價應高於進場價';
+    else if(dir<0 && ptp>=pin) msg='做空時止盈價應低於進場價';
+    if(msg){w.textContent='⚠ '+msg;w.classList.add('on');} else w.classList.remove('on');
+  }
 
   function tabs(){
     document.querySelectorAll('.tab').forEach(function(b){
@@ -192,102 +233,124 @@
       });
     });
   }
-  function dirSeg(prefix,cb){
-    var seg=$(prefix+'-dir-seg');
-    seg.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click',function(){
-        seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on','long','short');});
-        b.classList.add('on', b.dataset.d==='1'?'long':'short');
-        $(prefix+'-dir').value=b.dataset.d;
-        cb();
-      });
-    });
+  function segDir(prefix,cb){
+    var s=$(prefix+'-dir-seg');
+    s.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
+      s.querySelectorAll('button').forEach(function(x){x.classList.remove('on','long','short');});
+      b.classList.add('on', b.dataset.d==='1'?'long':'short');
+      $(prefix+'-dir').value=b.dataset.d; cb();
+    });});
   }
-  function feeRate(prefix,which){
-    var mk=num(prefix+'-mk')/100, tk=num(prefix+'-tk')/100;
-    var bnb=$(prefix+'-bnb').checked?0.9:1;
-    var type=$(prefix+'-'+which).value;
-    return (type==='mk'?mk:tk)*bnb;
-  }
-  function setSafe(el,safe){
-    el.className='badge '+(safe?'ok':'bad');
-    el.textContent=safe?'安全 · 停損先觸發':'危險 · 會先爆倉';
+  function segMode(prefix,cb){
+    var s=$(prefix+'-mode-seg');
+    s.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
+      s.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); var m=b.dataset.m; $(prefix+'-mode').value=m;
+      $(prefix+'-risk').readOnly=(m!=='risk'); $(prefix+'-mgn').readOnly=(m==='risk');
+      cb();
+    });});
   }
 
   function calcU(){
-    var dir=num('u-dir'),pin=num('u-pin'),psl=num('u-psl'),ptp=num('u-ptp');
-    var acct=num('u-acct'),risk=num('u-risk'),L=num('u-lev');
-    if(!(pin>0&&L>0&&acct>0)) return;
+    var mode=$('u-mode').value, dir=num('u-dir');
+    var pin=num('u-pin'),psl=num('u-psl'),ptp=num('u-ptp'),acct=num('u-acct'),L=num('u-lev');
+    var sym=$('u-sym').value||'幣';
+    if(!(pin>0&&L>0)) return;
     var fo=feeRate('u','ot'), fc=feeRate('u','ct');
-    var R=acct*risk/100;
-    var dist=Math.abs(pin-psl), tpd=Math.abs(ptp-pin);
-    var isLong=dir>0;
-    var qty=dist>0?R/dist:0;
-    var notional=qty*pin;
-    var margin=notional/L;
+    var dist=Math.abs(pin-psl), tpd=Math.abs(ptp-pin), isLong=dir>0;
+    checkDir('u',dir,pin,psl,ptp);
+    var R,qty,notional,margin;
+    if(mode==='risk'){
+      R=acct*num('u-risk')/100; qty=dist>0?R/dist:0; notional=qty*pin; margin=notional/L;
+      $('u-mgn').value=margin.toFixed(2);
+    }else{
+      margin=num('u-mgn'); notional=margin*L; qty=pin>0?notional/pin:0; R=qty*dist;
+      $('u-risk').value=acct>0?(R/acct*100).toFixed(2):'0';
+    }
     var liq=isLong?pin*(1-1/L+MMR):pin*(1+1/L-MMR);
     var feeOpen=notional*fo, feeTP=qty*ptp*fc, feeSL=qty*psl*fc;
-    var netLoss=qty*dist+feeOpen+feeSL;
-    var netWin=qty*tpd-feeOpen-feeTP;
+    var netLoss=qty*dist+feeOpen+feeSL, netWin=qty*tpd-feeOpen-feeTP;
     var rr=netLoss>0?netWin/netLoss:0;
     var be=isLong?pin*(1+fo)/(1-fc):pin*(1-fo)/(1+fc);
+    var riskPct=acct>0?R/acct*100:0;
 
-    $('u-margin').innerHTML=usd(margin)+' <small>USDT</small>';
-    $('u-marginnote').textContent=(L)+'x · 名目 '+usd(notional)+' · 佔帳戶 '+(margin/acct*100).toFixed(1)+'%';
-    $('u-pos').innerHTML=btc(qty,4)+' BTC<small>名目 '+usd(notional)+'</small>';
-    $('u-liq').textContent=price(liq);
+    if(mode==='risk'){
+      $('u-hero').className='hero'; $('u-herok').textContent='該下保證金';
+      $('u-herov').innerHTML=usd(margin)+' <small>USDT</small>';
+      $('u-heron').textContent=L+'x · 名目 '+usd(notional)+' · 佔帳戶 '+riskPct.toFixed(1)+'% 風險';
+    }else{
+      $('u-hero').className='hero risk'; $('u-herok').textContent='這筆風險';
+      $('u-herov').innerHTML=usd(R)+' <small>USDT</small>';
+      $('u-heron').textContent='= 帳戶 '+riskPct.toFixed(1)+'% · 保證金 '+usd(margin)+' · '+L+'x';
+    }
+    $('u-pos').innerHTML=qf(qty)+' '+sym+'<small>名目 '+usd(notional)+'</small>';
+    $('u-riskamt').innerHTML=usd(R)+'<small>帳戶 '+riskPct.toFixed(1)+'%</small>';
+    $('u-liq').textContent=pr(liq);
     setSafe($('u-safe'), isLong?liq<psl:liq>psl);
     $('u-fee').textContent=usd2(feeOpen+feeTP);
     $('u-nl').textContent=usd2(netLoss);
     $('u-nw').textContent=usd2(netWin);
-    $('u-rr').textContent=(rr).toFixed(2)+' : 1';
-    $('u-be').textContent=price(be);
+    $('u-rr').textContent=rr.toFixed(2)+' : 1';
+    $('u-be').textContent=pr(be);
   }
 
   function calcC(){
-    var dir=num('c-dir'),pin=num('c-pin'),psl=num('c-psl'),ptp=num('c-ptp');
-    var acct=num('c-acct'),risk=num('c-risk'),L=num('c-lev'),cv=num('c-cv');
-    if(!(pin>0&&L>0&&acct>0&&cv>0)) return;
+    var mode=$('c-mode').value, dir=num('c-dir');
+    var pin=num('c-pin'),psl=num('c-psl'),ptp=num('c-ptp'),acct=num('c-acct'),L=num('c-lev'),cv=num('c-cv');
+    var sym=$('c-sym').value||'幣';
+    if(!(pin>0&&L>0&&cv>0)) return;
     var fo=feeRate('c','ot'), fc=feeRate('c','ct');
-    var R=acct*risk/100;
-    var dist=Math.abs(pin-psl);
-    var isLong=dir>0;
-    var N=dist>0?Math.round(R*pin/(cv*dist)):0;
-    var notUSD=N*cv, notBTC=N*cv/pin;
-    var marginBTC=notBTC/L, marginUSD=marginBTC*pin;
+    var dist=Math.abs(pin-psl), isLong=dir>0;
+    checkDir('c',dir,pin,psl,ptp);
+    var R,N,notUSD,marginBTC,marginUSD;
+    if(mode==='risk'){
+      R=acct*num('c-risk')/100; N=dist>0?Math.round(R*pin/(cv*dist)):0;
+      notUSD=N*cv; marginBTC=pin>0?notUSD/pin/L:0; marginUSD=marginBTC*pin;
+      $('c-mgn').value=marginUSD.toFixed(2);
+    }else{
+      marginUSD=num('c-mgn'); notUSD=marginUSD*L; N=cv>0?Math.round(notUSD/cv):0;
+      notUSD=N*cv; marginBTC=pin>0?notUSD/pin/L:0;
+      var grLoss0=N*cv*Math.abs(1/psl-1/pin); R=grLoss0*psl;
+      $('c-risk').value=acct>0?(R/acct*100).toFixed(2):'0';
+    }
+    var notBTC=pin>0?notUSD/pin:0;
     var liq=isLong?pin/(1+1/L-MMR):pin/(1-1/L+MMR);
-    var grWinBTC=N*cv*Math.abs(1/pin-1/ptp);
-    var grLossBTC=N*cv*Math.abs(1/psl-1/pin);
+    var grWinBTC=N*cv*Math.abs(1/pin-1/ptp), grLossBTC=N*cv*Math.abs(1/psl-1/pin);
     var feeOpenBTC=N*cv/pin*fo, feeTPBTC=N*cv/ptp*fc, feeSLBTC=N*cv/psl*fc;
-    var netWinBTC=grWinBTC-feeOpenBTC-feeTPBTC;
-    var netLossBTC=grLossBTC+feeOpenBTC+feeSLBTC;
-    var netWinUSD=netWinBTC*ptp, netLossUSD=netLossBTC*psl;
+    var netWinUSD=(grWinBTC-feeOpenBTC-feeTPBTC)*ptp, netLossUSD=(grLossBTC+feeOpenBTC+feeSLBTC)*psl;
     var rr=netLossUSD>0?netWinUSD/netLossUSD:0;
     var be=isLong?pin*(1+fo)/(1-fc):pin*(1-fo)/(1+fc);
-    var feeRtUSD=feeOpenBTC*pin+feeTPBTC*ptp;
+    var riskPct=acct>0?R/acct*100:0, feeRt=feeOpenBTC*pin+feeTPBTC*ptp;
 
-    $('c-margin').innerHTML=btc(marginBTC,4)+' <small>BTC ≈ '+usd(marginUSD)+'</small>';
-    $('c-marginnote').textContent='需先用約 '+usd(marginUSD)+' USDT 換成 BTC 當保證金 · 名目 '+usd(notUSD);
-    $('c-pos').innerHTML=N.toLocaleString()+' 張<small>名目 '+usd(notUSD)+' · '+btc(notBTC,4)+' BTC</small>';
-    $('c-liq').textContent=price(liq);
+    if(mode==='risk'){
+      $('c-hero').className='hero'; $('c-herok').textContent='該下保證金';
+      $('c-herov').innerHTML=qf(marginBTC)+' <small>'+sym+' ≈ '+usd(marginUSD)+'</small>';
+      $('c-heron').textContent='需用約 '+usd(marginUSD)+' 換成 '+sym+' · '+N.toLocaleString()+' 張 · 佔帳戶 '+riskPct.toFixed(1)+'% 風險';
+    }else{
+      $('c-hero').className='hero risk'; $('c-herok').textContent='這筆風險';
+      $('c-herov').innerHTML=usd(R)+' <small>USDT</small>';
+      $('c-heron').textContent='= 帳戶 '+riskPct.toFixed(1)+'% · 保證金 '+qf(marginBTC)+' '+sym+' (≈'+usd(marginUSD)+')';
+    }
+    $('c-pos').innerHTML=N.toLocaleString()+' 張<small>名目 '+usd(notUSD)+' · '+qf(notBTC)+' '+sym+'</small>';
+    $('c-riskamt').innerHTML=usd(R)+'<small>帳戶 '+riskPct.toFixed(1)+'%</small>';
+    $('c-liq').textContent=pr(liq);
     setSafe($('c-safe'), isLong?liq<psl:liq>psl);
-    $('c-fee').textContent=usd2(feeRtUSD);
-    $('c-nl').innerHTML=usd2(netLossUSD)+'<small>'+btc(netLossBTC,5)+' BTC</small>';
-    $('c-nw').innerHTML=usd2(netWinUSD)+'<small>'+btc(netWinBTC,5)+' BTC</small>';
-    $('c-rr').textContent=(rr).toFixed(2)+' : 1';
-    $('c-be').textContent=price(be);
+    $('c-fee').textContent=usd2(feeRt);
+    $('c-nl').textContent=usd2(netLossUSD);
+    $('c-nw').textContent=usd2(netWinUSD);
+    $('c-rr').textContent=rr.toFixed(2)+' : 1';
+    $('c-be').textContent=pr(be);
   }
 
   function bindAll(prefix,fn){
-    ['pin','psl','ptp','acct','risk','lev','cv','mk','tk','ot','ct','bnb'].forEach(function(s){
+    ['sym','lev','cv','pin','psl','ptp','acct','risk','mgn','mk','tk','ot','ct','bnb'].forEach(function(s){
       var el=$(prefix+'-'+s); if(!el) return;
       el.addEventListener('input',fn); el.addEventListener('change',fn);
     });
   }
-
   tabs();
-  dirSeg('u',calcU); dirSeg('c',calcC);
-  bindAll('u',calcU); bindAll('c',calcC);
+  segDir('u',calcU); segMode('u',calcU); bindAll('u',calcU);
+  segDir('c',calcC); segMode('c',calcC); bindAll('c',calcC);
   calcU(); calcC();
 })();
 </script>
