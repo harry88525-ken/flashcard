@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Pattern Drill 口說訓練</title>
+<style>
+  :root{--navy:#2C4D7A;--cream:#F5F1E8;--line:#e3ddcf;--ink:#22303f;--muted:#6b7785;
+    --x:#c62828;--warn:#b8860b;--ok:#2e7d32;--star:#7b5cd6;--navy2:#3a6ea5;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Microsoft JhengHei','PingFang TC',sans-serif;background:var(--cream);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;}
+  .app{width:100%;max-width:520px}
+  h1{color:var(--navy);font-size:23px;text-align:center;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:13px;text-align:center;margin-bottom:18px;line-height:1.6}
+  button{font-family:inherit}
+  .btn{display:block;width:100%;padding:16px;font-size:17px;font-weight:700;color:#fff;background:var(--navy);border:none;border-radius:12px;cursor:pointer;margin-bottom:10px}
+  .btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line)}
+  .lbl{font-size:13px;color:var(--muted);margin-bottom:6px}
+  /* 主題卡 */
+  .theme{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;margin-bottom:12px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(44,77,122,.08);text-align:left}
+  .theme:disabled{opacity:.5;cursor:default;box-shadow:none}
+  .theme .emo{font-size:30px;flex:none}
+  .theme .nm{flex:1}
+  .theme .nm b{font-size:18px;color:var(--navy);display:block}
+  .theme .nm small{font-size:12px;color:var(--muted)}
+  .tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;flex:none}
+  .tag.new{background:#D4E8FC;color:#0E5A8A} .tag.due{background:#FCE5D4;color:#A85008} .tag.ok{background:#E1F0E1;color:#2e7d32}
+  /* drill */
+  .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .top .back{cursor:pointer;color:var(--navy);text-decoration:underline}
+  .stage{font-weight:700;color:var(--navy)}
+  .bar{height:7px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:16px}
+  .bar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
+  .seglab{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px}
+  .seglab b{color:var(--navy2)}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(44,77,122,.12);padding:24px 20px;min-height:215px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  .base{font-size:17px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+  .base b{color:var(--ink);font-size:22px}
+  .cuelab{font-size:16px;color:var(--muted);margin-bottom:6px}
+  .cuelab b{color:var(--navy2);font-size:18px}
+  .cue{font-size:32px;font-weight:800;color:var(--navy);line-height:1.3;margin-bottom:8px;word-break:break-word}
+  .cue.zh{font-size:27px}
+  .cue.sent{font-size:26px}
+  .timer{font-size:17px;color:var(--warn);font-weight:700;min-height:24px;margin-top:4px}
+  .timer.out{color:var(--x)}
+  .heard{font-size:17px;margin:10px 0 4px;line-height:1.5}
+  .heard .lab{color:var(--muted);font-size:13px}
+  .answer{font-size:22px;color:var(--navy);font-weight:700;line-height:1.5;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin:6px 0 2px}
+  .answerzh{font-size:17px;color:var(--muted);line-height:1.5;margin:0 0 6px}
+  .spd{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+  .spd button{flex:1;padding:10px 4px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .spd button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .diff-ok{color:var(--ok)} .diff-bad{color:var(--x);text-decoration:underline}
+  .verdict{font-size:14px;font-weight:700;margin:6px 0}
+  .mic{width:100%;padding:18px;font-size:18px;font-weight:800;color:#fff;background:var(--navy2);border:none;border-radius:14px;cursor:pointer;margin-top:14px}
+  .mic.rec{background:var(--x);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .row button{flex:1;padding:12px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px;cursor:pointer;color:var(--muted)}
+  .grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .grade button{border:none;border-radius:12px;padding:14px 4px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center}
+  .grade small{font-weight:400;opacity:.85;font-size:10px}
+  .b-x{background:var(--x)} .b-w{background:var(--warn)} .b-o{background:var(--ok)} .b-s{background:var(--star)}
+  .hint{font-size:12px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6}
+  .done{text-align:center}
+  .done h2{color:var(--navy);margin-bottom:10px}
+  .stat{font-size:15px;margin-bottom:14px;line-height:1.8}
+  textarea{width:100%;height:130px;font-family:monospace;font-size:12px;border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+  .warnbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;text-align:left}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+/* ===== Pattern Drill 口說訓練 App v2 =====
+ 1 主題 = 63 題：Echo 3 + 替換 15 + 轉換 15 + 回應 15 + 擴展 15（4 段全自動判對錯）
+ 內容 Claude 內嵌；節奏/計數/倒數/換段全程式控；語音 speak + STT 混合判定（你最後一票）
+ 主題級遺忘曲線（localStorage）；練完一輪提醒；收工 weak JSON → 貼回 Claude 存 Drive+單字卡
+ 出題引擎參考 YT FSI：4 種都有固定答案 → 都能自動判
+===================================== */
+
+const THEMES = [
+{ id:"airport", emoji:"✈️", label:"機場", desc:"報到、登機、行李、轉機",
+  echo:[
+    {en:"I'd like to check in, please.", zh:"我要辦理登機手續，謝謝。"},
+    {en:"Where is the boarding gate?", zh:"登機門在哪裡？"},
+    {en:"Is my flight on time?", zh:"我的班機準時嗎？"},
+  ],
+  sub:{ base:"I'd like a window seat.", baseZh:"我想要靠窗的位子。", slot:"a window seat", slotZh:"靠窗的位子",
+    cues:[
+      {w:"an aisle seat",zh:"走道的位子"},{w:"to check in",zh:"辦理登機"},{w:"to check this bag",zh:"託運這件行李"},
+      {w:"a vegetarian meal",zh:"素食餐"},{w:"some water",zh:"一些水"},{w:"to change my seat",zh:"換位子"},
+      {w:"a receipt",zh:"一張收據"},{w:"to upgrade my seat",zh:"升等座位"},{w:"a boarding pass",zh:"一張登機證"},
+      {w:"to sit with my family",zh:"跟家人坐一起"},{w:"an earlier flight",zh:"早一點的班機"},{w:"help with my luggage",zh:"行李方面的幫忙"},
+      {w:"a refund",zh:"退款"},{w:"to declare this",zh:"申報這個"},{w:"a blanket",zh:"一條毯子"},
+    ]},
+  trans:[
+    {base:"My flight is delayed.",instr:"改疑問句",expected:"Is my flight delayed?",zh:"我的班機延誤了嗎？"},
+    {base:"I have checked in.",instr:"改否定句",expected:"I haven't checked in.",zh:"我還沒辦登機。"},
+    {base:"The gate has changed.",instr:"改疑問句",expected:"Has the gate changed?",zh:"登機門換了嗎？"},
+    {base:"I can carry this on.",instr:"改否定句",expected:"I can't carry this on.",zh:"我不能帶這個上機。"},
+    {base:"The flight is boarding.",instr:"改疑問句",expected:"Is the flight boarding?",zh:"班機在登機了嗎？"},
+    {base:"I have a connecting flight.",instr:"改否定句",expected:"I don't have a connecting flight.",zh:"我沒有要轉機。"},
+    {base:"My bag is overweight.",instr:"改疑問句",expected:"Is my bag overweight?",zh:"我的行李超重了嗎？"},
+    {base:"I need a visa.",instr:"改否定句",expected:"I don't need a visa.",zh:"我不需要簽證。"},
+    {base:"The lounge is open.",instr:"改疑問句",expected:"Is the lounge open?",zh:"貴賓室開著嗎？"},
+    {base:"I checked two bags.",instr:"改否定句",expected:"I didn't check two bags.",zh:"我沒有託運兩件行李。"},
+    {base:"We will land on time.",instr:"改疑問句",expected:"Will we land on time?",zh:"我們會準時降落嗎？"},
+    {base:"The flight was canceled.",instr:"改疑問句",expected:"Was the flight canceled?",zh:"班機取消了嗎？"},
+    {base:"I have my passport.",instr:"改否定句",expected:"I don't have my passport.",zh:"我沒帶護照。"},
+    {base:"Boarding has started.",instr:"改疑問句",expected:"Has boarding started?",zh:"開始登機了嗎？"},
+    {base:"This seat is taken.",instr:"改疑問句",expected:"Is this seat taken?",zh:"這位子有人坐嗎？"},
+  ],
+  resp:[
+    {zh:"（跟櫃檯）我要辦登機。",expected:"I'd like to check in."},
+    {zh:"請問登機門在哪裡？",expected:"Where is the boarding gate?"},
+    {zh:"我的班機幾點登機？",expected:"What time does my flight board?"},
+    {zh:"我可以託運這件行李嗎？",expected:"Can I check this bag?"},
+    {zh:"我快趕不上轉機了。",expected:"I'm going to miss my connecting flight."},
+    {zh:"我的行李沒有出來。",expected:"My luggage didn't come out."},
+    {zh:"這班飛機要飛多久？",expected:"How long is the flight?"},
+    {zh:"我想換到走道的位子。",expected:"I'd like to change to an aisle seat."},
+    {zh:"登機門有改嗎？",expected:"Has the gate changed?"},
+    {zh:"請問哪裡可以換錢？",expected:"Where can I exchange money?"},
+    {zh:"我需要填入境卡嗎？",expected:"Do I need to fill out an arrival card?"},
+    {zh:"免稅店在哪裡？",expected:"Where is the duty-free shop?"},
+    {zh:"我可以帶這個上飛機嗎？",expected:"Can I bring this on board?"},
+    {zh:"請問廁所在哪裡？",expected:"Where is the restroom?"},
+    {zh:"我的班機延誤了，下一班幾點？",expected:"My flight is delayed. When is the next one?"},
+  ],
+  exp:[
+    {base:"I need help.",baseZh:"我需要幫忙。",adds:[
+      {cue:"with my bags",full:"I need help with my bags.",zh:"我需要行李的幫忙。"},
+      {cue:"right now",full:"I need help with my bags right now.",zh:"我現在需要行李的幫忙。"},
+      {cue:"at gate 5",full:"I need help with my bags right now at gate 5.",zh:"我現在在 5 號登機門需要行李的幫忙。"}]},
+    {base:"Is there a flight?",baseZh:"有班機嗎？",adds:[
+      {cue:"to Tokyo",full:"Is there a flight to Tokyo?",zh:"有到東京的班機嗎？"},
+      {cue:"this evening",full:"Is there a flight to Tokyo this evening?",zh:"今晚有到東京的班機嗎？"},
+      {cue:"with seats left",full:"Is there a flight to Tokyo this evening with seats left?",zh:"今晚有到東京、還有空位的班機嗎？"}]},
+    {base:"I'd like to change my seat.",baseZh:"我想換位子。",adds:[
+      {cue:"to an aisle",full:"I'd like to change my seat to an aisle.",zh:"我想換到走道位。"},
+      {cue:"near the front",full:"I'd like to change my seat to an aisle near the front.",zh:"我想換到前面的走道位。"},
+      {cue:"if possible",full:"I'd like to change my seat to an aisle near the front, if possible.",zh:"如果可以的話，我想換到前面的走道位。"}]},
+    {base:"My flight was canceled.",baseZh:"我的班機取消了。",adds:[
+      {cue:"this morning",full:"My flight was canceled this morning.",zh:"我的班機今天早上取消了。"},
+      {cue:"because of the weather",full:"My flight was canceled this morning because of the weather.",zh:"我的班機今天早上因為天氣取消了。"},
+      {cue:"so I need a new one",full:"My flight was canceled this morning because of the weather, so I need a new one.",zh:"我的班機今早因天氣取消，所以我需要改一班。"}]},
+    {base:"Can I bring this?",baseZh:"我可以帶這個嗎？",adds:[
+      {cue:"on the plane",full:"Can I bring this on the plane?",zh:"我可以帶這個上飛機嗎？"},
+      {cue:"in my carry-on",full:"Can I bring this on the plane in my carry-on?",zh:"我可以把這個放隨身行李帶上飛機嗎？"},
+      {cue:"or should I check it",full:"Can I bring this on the plane in my carry-on, or should I check it?",zh:"我可以放隨身帶上機，還是要託運？"}]},
+  ]
+},
+];
+// 其餘 9 個出國主題（點餐/問路/飯店/購物/叫車/換錢/求助/寒暄/緊急）待機場測 OK 後補上
+
+const RATE={slow:0.7,mid:0.85,fast:1.0};   // 教練念的速度
+const curSpeed=()=>localStorage.getItem("pd_speed")||"slow";
+const getRate=()=>RATE[curSpeed()];
+function setSpeed(s){localStorage.setItem("pd_speed",s);home();}
+const CD=3;   // 倒數秒數（固定 3 秒）
+const el=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const norm=s=>(s||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const prog=JSON.parse(localStorage.getItem("pd_prog")||"{}");  // {themeId:{next,score}}
+function saveProg(){ localStorage.setItem("pd_prog",JSON.stringify(prog)); }
+
+let theme=null, flat=[], idx=0, weak=[], heardText="", timer=null, recog=null, recording=false, cdStarted=false;
+
+// ---- 把一個主題攤平成 63 題 ----
+function buildFlat(t){
+  const f=[];
+  t.echo.forEach((e,k)=>f.push({seg:"暖身",type:"echo",n:k+1,total:t.echo.length,speak:e.en,expected:e.en,zh:e.zh}));
+  const sb=t.sub;
+  sb.cues.forEach((c,k)=>f.push({seg:"替換",type:"sub",n:k+1,total:sb.cues.length,speak:c.w,
+    base:sb.base,expected:sb.base.replace(sb.slot,c.w),zh:sb.baseZh.replace(sb.slotZh,c.zh),announce:(k===0?sb.base:null)}));
+  t.trans.forEach((it,k)=>f.push({seg:"轉換",type:"trans",n:k+1,total:t.trans.length,speak:it.base,
+    base:it.base,instr:it.instr,expected:it.expected,zh:it.zh}));
+  t.resp.forEach((it,k)=>f.push({seg:"回應",type:"resp",n:k+1,total:t.resp.length,speak:null,
+    show:it.zh,expected:it.expected,zh:it.zh}));
+  let en=0; const etot=t.exp.reduce((s,c)=>s+c.adds.length,0);
+  t.exp.forEach(chain=>{ let prev=chain.base;
+    chain.adds.forEach((a,ai)=>{ en++; f.push({seg:"擴展",type:"exp",n:en,total:etot,speak:a.cue,
+      prev:prev,expected:a.full,zh:a.zh,announce:(ai===0?chain.base:null),chainZh:(ai===0?chain.baseZh:null)}); prev=a.full; });
+  });
+  return f;
+}
+
+// ---- 語音 ----
+function bestVoice(){const all=speechSynthesis.getVoices();const en=all.filter(v=>/^en[-_]US/i.test(v.lang));const pool=en.length?en:all.filter(v=>/^en/i.test(v.lang));for(const p of["Natural","Google US English","Samantha","Aria","Jenny","Google"]){const m=pool.find(v=>v.name.includes(p));if(m)return m;}return pool[0]||null;}
+function say(text,rate,cb){try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||.95;const v=bestVoice();if(v)u.voice=v;if(cb)u.onend=cb;speechSynthesis.speak(u);}catch(e){if(cb)setTimeout(cb,300);}}
+function fallbackCD(cb,ms){setTimeout(cb,ms);}
+
+// ---- 首頁：選主題 ----
+function home(){
+  const sttOK=('webkitSpeechRecognition'in window)||('SpeechRecognition'in window);
+  const allDone=THEMES.every(t=>prog[t.id]);
+  el("app").innerHTML=
+    '<h1>🎯 Pattern Drill 口說訓練</h1>'+
+    '<p class="sub">出國主題 · 一個主題 63 題（替換/轉換/回應/擴展 各15 + 暖身3）<br>聽提示 → 開口講 → App 聽你說、比對正解</p>'+
+    (allDone?'<div class="warnbox">🎉 這批主題你都練過一輪了！弱的會靠遺忘曲線回來；想要更多主題（點餐／問路／飯店…）跟 Claude 說一聲。</div>':'')+
+    '<div class="lbl">教練念句子的速度</div>'+
+    '<div class="spd">'+["slow","mid","fast"].map(s=>'<button class="'+(curSpeed()===s?"on":"")+'" onclick="setSpeed(\''+s+'\')">'+({slow:"🐢 慢",mid:"中",fast:"🐇 快"}[s])+'</button>').join("")+'</div>'+
+    '<div class="lbl">選一個主題開始（🚧 出國 10 主題陸續加入）</div>'+
+    THEMES.map((t,k)=>{
+      const p=prog[t.id]; let tag='<span class="tag new">新</span>';
+      if(p){ tag = (p.next<=today())?'<span class="tag due">該複習</span>':'<span class="tag ok">已練 '+(p.score||0)+'%</span>'; }
+      return '<button class="theme" onclick="start('+k+')"><span class="emo">'+t.emoji+'</span>'+
+        '<span class="nm"><b>'+t.label+'</b><small>'+t.desc+'</small></span>'+tag+'</button>';
+    }).join('')+
+    '<button class="theme" disabled><span class="emo">➕</span><span class="nm"><b>更多出國主題</b><small>點餐 / 問路 / 飯店 / 購物 / 叫車 / 換錢 / 求助 / 寒暄 / 緊急</small></span><span class="tag new">即將</span></button>'+
+    (sttOK?'<p class="sub">🎤 用 Chrome 開、允許麥克風最準。</p>':'<div class="warnbox">⚠️ 這瀏覽器沒有語音辨識（建議電腦版 Chrome）。仍可練：講完按「看正解」自評。</div>');
+}
+function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; drill(); }
+
+// ---- 每一題 ----
+function drill(){
+  if(idx>=flat.length) return themeDone();
+  const q=flat[idx]; heardText="";
+  let body='';
+  if(q.type==="echo")
+    body='<div class="cuelab">跟我念一次（暖身）</div><div class="cue sent">'+q.expected+'</div><div class="answerzh">'+q.zh+'</div>';
+  else if(q.type==="sub")
+    body='<div class="base">基礎句：<b>'+q.base+'</b></div><div class="cuelab">替換 → 講出整句</div><div class="cue">'+q.speak+'</div><div class="timer" id="timer"></div>';
+  else if(q.type==="trans")
+    body='<div class="cue sent">'+q.base+'</div><div class="cuelab">指令：<b>'+q.instr+'</b> → 講出來</div><div class="timer" id="timer"></div>';
+  else if(q.type==="resp")
+    body='<div class="cuelab">情境（用英文說出來）</div><div class="cue zh">'+q.show+'</div><div class="timer" id="timer"></div>';
+  else if(q.type==="exp")
+    body='<div class="base" style="font-size:18px;color:var(--ink)">'+q.prev+'</div><div class="cuelab">加上 → 講出整句</div><div class="cue">'+q.speak+'</div><div class="timer" id="timer"></div>';
+
+  el("app").innerHTML=
+    '<div class="top"><span class="back" onclick="home()">← 結束</span>'+
+      '<span class="stage">'+theme.emoji+' '+q.seg+' '+q.n+'/'+q.total+'</span></div>'+
+    '<div class="bar"><i id="prog"></i></div>'+
+    '<div class="seglab">主題：<b>'+theme.label+'</b></div>'+
+    '<div class="panel" id="panel">'+body+'</div>'+
+    (q.type==="echo"
+      ? '<button class="mic" onclick="nextItem()">✓ 念好了，下一個</button>'
+      : '<button class="mic" id="mic" onclick="toggleRec()">🎤 點一下開始講</button>'+
+        '<div class="row"><button onclick="replay()">🔊 再聽提示</button><button onclick="showAnswer()">看正解／自評</button></div>'+
+        '<div class="hint">講完它會比對；聽錯也沒關係，最後一票你按。</div>');
+  el("prog").style.width=(idx/flat.length*100)+"%";
+
+  // 唸提示 + 倒數（echo 只唸、不倒數）
+  cdStarted=false;
+  const startCD=()=>{ if(cdStarted)return; cdStarted=true; if(el("timer")) countdown(); };
+  speechSynthesis.cancel();
+  setTimeout(()=>{
+    if(q.type==="echo"){ say(q.expected,getRate()); return; }
+    if(q.type==="resp"){ startCD(); return; }            // 中文情境不唸，直接倒數
+    if(q.announce){ say(q.announce,getRate(),()=>say(q.speak,getRate(),startCD)); fallbackCD(startCD,7000); }
+    else { say(q.speak,getRate(),startCD); fallbackCD(startCD, q.type==="trans"?5000:3000); }
+  },150);
+}
+function countdown(){let t=CD;const e=el("timer");if(!e)return;e.className="timer";e.textContent="⏱ "+t;clearInterval(timer);
+  timer=setInterval(()=>{t--;if(t>0){e.textContent="⏱ "+t;}else{clearInterval(timer);e.className="timer out";e.textContent="⏱ time out！趕快講～";}},1000);}
+function replay(){const q=flat[idx];if(!q)return;speechSynthesis.cancel();
+  if(q.type==="sub"||q.type==="exp"){say(q.announce||q.base||q.prev,getRate(),()=>say(q.speak,getRate()));}
+  else if(q.type==="trans")say(q.base,getRate());
+  else if(q.type==="echo")say(q.expected,getRate());}
+function nextItem(){ idx++; drill(); }
+
+// ---- 語音辨識 ----
+function toggleRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ showAnswer(); return; }
+  if(recording){ try{recog.stop();}catch(e){} return; }
+  try{
+    recog=new SR(); recog.lang="en-US"; recog.interimResults=false; recog.maxAlternatives=1;
+    recording=true; el("mic").classList.add("rec"); el("mic").textContent="🔴 聽你說…（再點停止）";
+    recog.onresult=e=>{ heardText=e.results[0][0].transcript; };
+    recog.onerror=()=>{};
+    recog.onend=()=>{ recording=false; const m=el("mic"); if(m){m.classList.remove("rec");m.textContent="🎤 點一下開始講";} showAnswer(); };
+    recog.start();
+  }catch(e){ recording=false; showAnswer(); }
+}
+// ---- 比對 + 正解 + 自評 ----
+function showAnswer(){
+  clearInterval(timer);
+  const q=flat[idx]; const exp=norm(q.expected), got=norm(heardText);
+  let verdict, suggest;
+  if(!heardText){ verdict='<span class="diff-bad">（沒聽到 / 你自評）</span>'; suggest="w"; }
+  else if(got===exp){ verdict='<span class="diff-ok">✓ 跟正解一致</span>'; suggest="o"; }
+  else { const d=wordDiff(got,exp); verdict='差異：'+d.html; suggest=d.close?"w":"x"; }
+  el("panel").innerHTML=
+    (heardText?'<div class="heard"><span class="lab">你說的：</span>'+heardText+'</div>':'<div class="heard"><span class="lab">（沒收到語音）</span></div>')+
+    '<div class="answer">'+q.expected+'</div>'+(q.zh?'<div class="answerzh">'+q.zh+'</div>':'')+
+    '<div class="verdict">'+verdict+'</div>';
+  say(q.expected,getRate());
+  document.querySelectorAll(".mic,.row,.hint").forEach(e=>e.remove());
+  const g=document.createElement("div"); g.className="grade";
+  g.innerHTML='<button class="b-x" onclick="grade(\'x\')">❌<small>不會</small></button>'+
+    '<button class="b-w" onclick="grade(\'w\')">⚠️<small>差一點</small></button>'+
+    '<button class="b-o" onclick="grade(\'o\')">✓<small>講對了</small></button>'+
+    '<button class="b-s" onclick="grade(\'s\')">⭐<small>很順</small></button>';
+  el("panel").after(g);
+  const tip=document.createElement("div"); tip.className="hint";
+  tip.innerHTML="建議："+({x:"❌不會",w:"⚠️差一點",o:"✓講對了",s:"⭐很順"}[suggest])+" — 但<b>你按了算</b>。";
+  g.after(tip);
+}
+function wordDiff(got,exp){const g=got.split(" "),e=exp.split(" ");
+  const html=e.map(w=>g.includes(w)?'<span class="diff-ok">'+w+'</span>':'<span class="diff-bad">'+w+'</span>').join(" ");
+  const hit=e.filter(w=>g.includes(w)).length; return {html,close:hit>=e.length-1};}
+function grade(gr){
+  const q=flat[idx];
+  if(gr==="x"||gr==="w") weak.push({id:norm(q.expected).replace(/ /g,"").slice(0,24)||("pd"+idx),role:"self",
+    zh:q.zh||"",en:q.expected,source:"pattern-drill_"+today(),vocab:[theme.label+"／"+q.seg],weak:true});
+  idx++; drill();
+}
+
+// ---- 主題練完：算分 + 遺忘曲線 + weak JSON ----
+function themeDone(){
+  speechSynthesis.cancel();
+  const graded=flat.filter(q=>q.type!=="echo").length, w=weak.length, right=graded-w;
+  const pct=Math.round(right/graded*100);
+  const days=pct>=90?7:pct>=70?3:1; const d=new Date(); d.setDate(d.getDate()+days);
+  prog[theme.id]={next:d.toISOString().slice(0,10),score:pct}; saveProg();
+  const allDone=THEMES.every(t=>prog[t.id]);
+  const json=JSON.stringify(weak,null,1);
+  el("app").innerHTML='<div class="done"><h2>🎉 '+theme.label+' 練完了</h2>'+
+    '<div class="stat">共 <b>'+graded+'</b> 題（不含暖身）· 順 <b style="color:var(--ok)">'+right+'</b> · 要加強 <b style="color:var(--x)">'+w+'</b><br>得分 <b>'+pct+'%</b> → '+days+' 天後再排這主題複習</div>'+
+    (allDone?'<div class="warnbox">🎉🎉 你把目前所有出國主題都練過一輪了！想加新主題跟 Claude 說。</div>':'')+
+    (w?'<div class="lbl">要加強的句子（複製貼給 Claude → 存 Drive＋進單字卡 Pattern Drill 複習）</div><textarea id="out" readonly>'+json+'</textarea><button class="btn" onclick="copyOut()">📋 複製 JSON</button>':'<p class="sub">全部都順，今天沒有要加強的 👏</p>')+
+    '<button class="btn alt" onclick="home()">← 回主題選單</button></div>';
+}
+function copyOut(){const t=el("out");t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand("copy");}event.target.textContent="✓ 已複製";setTimeout(()=>event.target.textContent="📋 複製 JSON",1500);}
+
+if(speechSynthesis.getVoices().length===0) speechSynthesis.onvoiceschanged=()=>{};
+home();
+</script>
+</body>
+</html>
