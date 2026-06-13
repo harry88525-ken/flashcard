@@ -78,6 +78,73 @@
   .ov-zh{font-size:18px;font-weight:700;line-height:1.5;margin-bottom:9px;padding-right:52px}
   .ov-en{font-size:16px;color:var(--navy);background:#F5F1E8;border-radius:8px;padding:10px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;justify-content:space-between}
   .ov-en>span{flex:1}
+
+/* ===== Pattern Drill 模組樣式（top/bar/hint/zh 已改名避開單字卡） ===== */
+
+  :root{--navy:#2C4D7A;--cream:#F5F1E8;--line:#e3ddcf;--ink:#22303f;--muted:#6b7785;
+    --x:#c62828;--warn:#b8860b;--ok:#2e7d32;--star:#7b5cd6;--navy2:#3a6ea5;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Microsoft JhengHei','PingFang TC',sans-serif;background:var(--cream);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;}
+  .app{width:100%;max-width:520px}
+  h1{color:var(--navy);font-size:23px;text-align:center;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:13px;text-align:center;margin-bottom:18px;line-height:1.6}
+  button{font-family:inherit}
+  .btn{display:block;width:100%;padding:16px;font-size:17px;font-weight:700;color:#fff;background:var(--navy);border:none;border-radius:12px;cursor:pointer;margin-bottom:10px}
+  .btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line)}
+  .lbl{font-size:13px;color:var(--muted);margin-bottom:6px}
+  /* 主題卡 */
+  .theme{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;margin-bottom:12px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(44,77,122,.08);text-align:left}
+  .theme:disabled{opacity:.5;cursor:default;box-shadow:none}
+  .theme .emo{font-size:30px;flex:none}
+  .theme .nm{flex:1}
+  .theme .nm b{font-size:18px;color:var(--navy);display:block}
+  .theme .nm small{font-size:12px;color:var(--muted)}
+  .tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;flex:none}
+  .tag.new{background:#D4E8FC;color:#0E5A8A} .tag.due{background:#FCE5D4;color:#A85008} .tag.ok{background:#E1F0E1;color:#2e7d32}
+  /* drill */
+  .pdtop{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .pdtop .back{cursor:pointer;color:var(--navy);text-decoration:underline}
+  .stage{font-weight:700;color:var(--navy)}
+  .pdbar{height:7px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:16px}
+  .pdbar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
+  .seglab{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px}
+  .seglab b{color:var(--navy2)}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(44,77,122,.12);padding:24px 20px;min-height:215px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  .base{font-size:17px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+  .base b{color:var(--ink);font-size:22px}
+  .cuelab{font-size:16px;color:var(--muted);margin-bottom:6px}
+  .cuelab b{color:var(--navy2);font-size:18px}
+  .cue{font-size:32px;font-weight:800;color:var(--navy);line-height:1.3;margin-bottom:8px;word-break:break-word}
+  .cue.pdzh{font-size:27px}
+  .cue.sent{font-size:26px}
+  .timer{font-size:17px;color:var(--warn);font-weight:700;min-height:24px;margin-top:4px}
+  .timer.out{color:var(--x)}
+  .heard{font-size:17px;margin:10px 0 4px;line-height:1.5}
+  .heard .lab{color:var(--muted);font-size:13px}
+  .answer{font-size:22px;color:var(--navy);font-weight:700;line-height:1.5;background:#F5F1E8;border-radius:10px;padding:14px 16px;margin:6px 0 2px}
+  .answerzh{font-size:17px;color:var(--muted);line-height:1.5;margin:0 0 6px}
+  .spd{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+  .spd button{flex:1;padding:10px 4px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .spd button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .diff-ok{color:var(--ok)} .diff-bad{color:var(--x);text-decoration:underline}
+  .verdict{font-size:14px;font-weight:700;margin:6px 0}
+  .mic{width:100%;padding:18px;font-size:18px;font-weight:800;color:#fff;background:var(--navy2);border:none;border-radius:14px;cursor:pointer;margin-top:14px}
+  .mic.rec{background:var(--x);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .row button{flex:1;padding:12px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:14px;cursor:pointer;color:var(--muted)}
+  .grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .grade button{border:none;border-radius:12px;padding:14px 4px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center}
+  .grade small{font-weight:400;opacity:.85;font-size:10px}
+  .b-x{background:var(--x)} .b-w{background:var(--warn)} .b-o{background:var(--ok)} .b-s{background:var(--star)}
+  .pdhint{font-size:12px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6}
+  .done{text-align:center}
+  .done h2{color:var(--navy);margin-bottom:10px}
+  .stat{font-size:15px;margin-bottom:14px;line-height:1.8}
+  textarea{width:100%;height:130px;font-family:monospace;font-size:12px;border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+  .warnbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;text-align:left}
+
 </style>
 </head>
 <body>
@@ -162,7 +229,7 @@ function homeScreen(){
   el("app").innerHTML=
     '<div class="home"><h1 class="home-title">📖 英文單字卡</h1>'+
       '<button class="home-btn" onclick="startReview()">🃏 單字卡複習<small>翻卡 + 遺忘曲線，幫你記住</small></button>'+
-      '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+
+      '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+'<button class="home-btn" style="color:var(--star)" onclick="PD.open()">🎯 Pattern Drill 口說<small>出國 10 主題，聽提示開口講</small></button>'+
       '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
 }
 function startReview(){ deck=buildDeck(); i=0; reviewScreen(); }
@@ -294,6 +361,898 @@ function finishScreen(){
 }
 
 if(passcode) login(); else gateScreen();
+
+/* ===== Pattern Drill 模組（IIFE 隔離，不動單字卡程式） ===== */
+;(function(){
+
+/* ===== Pattern Drill 口說訓練 App v2 =====
+ 1 主題 = 63 題：Echo 3 + 替換 15 + 轉換 15 + 回應 15 + 擴展 15（4 段全自動判對錯）
+ 內容 Claude 內嵌；節奏/計數/倒數/換段全程式控；語音 speak + STT 混合判定（你最後一票）
+ 主題級遺忘曲線（localStorage）；練完一輪提醒；收工 weak JSON → 貼回 Claude 存 Drive+單字卡
+ 出題引擎參考 YT FSI：4 種都有固定答案 → 都能自動判
+===================================== */
+
+const THEMES = [
+{ id:"airport", emoji:"✈️", label:"機場", desc:"報到、登機、行李、轉機",
+  echo:[
+    {en:"I'd like to check in, please.", zh:"我要辦理登機手續，謝謝。"},
+    {en:"Where is the boarding gate?", zh:"登機門在哪裡？"},
+    {en:"Is my flight on time?", zh:"我的班機準時嗎？"},
+  ],
+  sub:{ base:"I'd like a window seat.", baseZh:"我想要靠窗的位子。", slot:"a window seat", slotZh:"靠窗的位子",
+    cues:[
+      {w:"an aisle seat",zh:"走道的位子"},{w:"to check in",zh:"辦理登機"},{w:"to check this bag",zh:"託運這件行李"},
+      {w:"a vegetarian meal",zh:"素食餐"},{w:"some water",zh:"一些水"},{w:"to change my seat",zh:"換位子"},
+      {w:"a receipt",zh:"一張收據"},{w:"to upgrade my seat",zh:"升等座位"},{w:"a boarding pass",zh:"一張登機證"},
+      {w:"to sit with my family",zh:"跟家人坐一起"},{w:"an earlier flight",zh:"早一點的班機"},{w:"help with my luggage",zh:"行李方面的幫忙"},
+      {w:"a refund",zh:"退款"},{w:"to declare this",zh:"申報這個"},{w:"a blanket",zh:"一條毯子"},
+    ]},
+  trans:[
+    {base:"My flight is delayed.",instr:"改疑問句",expected:"Is my flight delayed?",zh:"我的班機延誤了嗎？"},
+    {base:"I have checked in.",instr:"改否定句",expected:"I haven't checked in.",zh:"我還沒辦登機。"},
+    {base:"The gate has changed.",instr:"改疑問句",expected:"Has the gate changed?",zh:"登機門換了嗎？"},
+    {base:"I can carry this on.",instr:"改否定句",expected:"I can't carry this on.",zh:"我不能帶這個上機。"},
+    {base:"The flight is boarding.",instr:"改疑問句",expected:"Is the flight boarding?",zh:"班機在登機了嗎？"},
+    {base:"I have a connecting flight.",instr:"改否定句",expected:"I don't have a connecting flight.",zh:"我沒有要轉機。"},
+    {base:"My bag is overweight.",instr:"改疑問句",expected:"Is my bag overweight?",zh:"我的行李超重了嗎？"},
+    {base:"I need a visa.",instr:"改否定句",expected:"I don't need a visa.",zh:"我不需要簽證。"},
+    {base:"The lounge is open.",instr:"改疑問句",expected:"Is the lounge open?",zh:"貴賓室開著嗎？"},
+    {base:"I checked two bags.",instr:"改否定句",expected:"I didn't check two bags.",zh:"我沒有託運兩件行李。"},
+    {base:"We will land on time.",instr:"改疑問句",expected:"Will we land on time?",zh:"我們會準時降落嗎？"},
+    {base:"The flight was canceled.",instr:"改疑問句",expected:"Was the flight canceled?",zh:"班機取消了嗎？"},
+    {base:"I have my passport.",instr:"改否定句",expected:"I don't have my passport.",zh:"我沒帶護照。"},
+    {base:"Boarding has started.",instr:"改疑問句",expected:"Has boarding started?",zh:"開始登機了嗎？"},
+    {base:"This seat is taken.",instr:"改疑問句",expected:"Is this seat taken?",zh:"這位子有人坐嗎？"},
+  ],
+  resp:[
+    {zh:"（跟櫃檯）我要辦登機。",expected:"I'd like to check in."},
+    {zh:"請問登機門在哪裡？",expected:"Where is the boarding gate?"},
+    {zh:"我的班機幾點登機？",expected:"What time does my flight board?"},
+    {zh:"我可以託運這件行李嗎？",expected:"Can I check this bag?"},
+    {zh:"我快趕不上轉機了。",expected:"I'm going to miss my connecting flight."},
+    {zh:"我的行李沒有出來。",expected:"My luggage didn't come out."},
+    {zh:"這班飛機要飛多久？",expected:"How long is the flight?"},
+    {zh:"我想換到走道的位子。",expected:"I'd like to change to an aisle seat."},
+    {zh:"登機門有改嗎？",expected:"Has the gate changed?"},
+    {zh:"請問哪裡可以換錢？",expected:"Where can I exchange money?"},
+    {zh:"我需要填入境卡嗎？",expected:"Do I need to fill out an arrival card?"},
+    {zh:"免稅店在哪裡？",expected:"Where is the duty-free shop?"},
+    {zh:"我可以帶這個上飛機嗎？",expected:"Can I bring this on board?"},
+    {zh:"請問廁所在哪裡？",expected:"Where is the restroom?"},
+    {zh:"我的班機延誤了，下一班幾點？",expected:"My flight is delayed. When is the next one?"},
+  ],
+  exp:[
+    {base:"I need help.",baseZh:"我需要幫忙。",adds:[
+      {cue:"with my bags",full:"I need help with my bags.",zh:"我需要行李的幫忙。"},
+      {cue:"right now",full:"I need help with my bags right now.",zh:"我現在需要行李的幫忙。"},
+      {cue:"at gate 5",full:"I need help with my bags right now at gate 5.",zh:"我現在在 5 號登機門需要行李的幫忙。"}]},
+    {base:"Is there a flight?",baseZh:"有班機嗎？",adds:[
+      {cue:"to Tokyo",full:"Is there a flight to Tokyo?",zh:"有到東京的班機嗎？"},
+      {cue:"this evening",full:"Is there a flight to Tokyo this evening?",zh:"今晚有到東京的班機嗎？"},
+      {cue:"with seats left",full:"Is there a flight to Tokyo this evening with seats left?",zh:"今晚有到東京、還有空位的班機嗎？"}]},
+    {base:"I'd like to change my seat.",baseZh:"我想換位子。",adds:[
+      {cue:"to an aisle",full:"I'd like to change my seat to an aisle.",zh:"我想換到走道位。"},
+      {cue:"near the front",full:"I'd like to change my seat to an aisle near the front.",zh:"我想換到前面的走道位。"},
+      {cue:"if possible",full:"I'd like to change my seat to an aisle near the front, if possible.",zh:"如果可以的話，我想換到前面的走道位。"}]},
+    {base:"My flight was canceled.",baseZh:"我的班機取消了。",adds:[
+      {cue:"this morning",full:"My flight was canceled this morning.",zh:"我的班機今天早上取消了。"},
+      {cue:"because of the weather",full:"My flight was canceled this morning because of the weather.",zh:"我的班機今天早上因為天氣取消了。"},
+      {cue:"so I need a new one",full:"My flight was canceled this morning because of the weather, so I need a new one.",zh:"我的班機今早因天氣取消，所以我需要改一班。"}]},
+    {base:"Can I bring this?",baseZh:"我可以帶這個嗎？",adds:[
+      {cue:"on the plane",full:"Can I bring this on the plane?",zh:"我可以帶這個上飛機嗎？"},
+      {cue:"in my carry-on",full:"Can I bring this on the plane in my carry-on?",zh:"我可以把這個放隨身行李帶上飛機嗎？"},
+      {cue:"or should I check it",full:"Can I bring this on the plane in my carry-on, or should I check it?",zh:"我可以放隨身帶上機，還是要託運？"}]},
+  ]
+},
+{ id:"restaurant", emoji:"🍽️", label:"點餐", desc:"看菜單、點餐、結帳、過敏",
+  echo:[
+    {en:"Could I see the menu, please?", zh:"可以給我看菜單嗎？"},
+    {en:"I'll have the chicken.", zh:"我要點雞肉。"},
+    {en:"Can I get the check, please?", zh:"可以結帳嗎？"},
+  ],
+  sub:{ base:"I'd like the beef, please.", baseZh:"我要牛肉，謝謝。", slot:"the beef", slotZh:"牛肉",
+    cues:[
+      {w:"the chicken",zh:"雞肉"},{w:"the fish",zh:"魚"},{w:"a salad",zh:"沙拉"},{w:"some soup",zh:"湯"},
+      {w:"the special",zh:"招牌菜"},{w:"a glass of water",zh:"一杯水"},{w:"the same",zh:"一樣的"},{w:"a coffee",zh:"咖啡"},
+      {w:"the dessert menu",zh:"甜點單"},{w:"it less spicy",zh:"不要那麼辣"},{w:"no onions",zh:"不要洋蔥"},{w:"a fork",zh:"一支叉子"},
+      {w:"a kids' meal",zh:"兒童餐"},{w:"a to-go box",zh:"外帶盒"},{w:"the bill",zh:"帳單"},
+    ]},
+  trans:[
+    {base:"The soup is hot.",instr:"改疑問句",expected:"Is the soup hot?",zh:"湯是熱的嗎？"},
+    {base:"They have vegetarian food.",instr:"改疑問句",expected:"Do they have vegetarian food?",zh:"他們有素食嗎？"},
+    {base:"I ordered the fish.",instr:"改否定句",expected:"I didn't order the fish.",zh:"我沒有點魚。"},
+    {base:"This dish has nuts.",instr:"改疑問句",expected:"Does this dish have nuts?",zh:"這道菜有堅果嗎？"},
+    {base:"The restaurant is open.",instr:"改疑問句",expected:"Is the restaurant open?",zh:"餐廳開著嗎？"},
+    {base:"I can pay by card.",instr:"改否定句",expected:"I can't pay by card.",zh:"我不能刷卡。"},
+    {base:"We have a reservation.",instr:"改否定句",expected:"We don't have a reservation.",zh:"我們沒有訂位。"},
+    {base:"The food is ready.",instr:"改疑問句",expected:"Is the food ready?",zh:"餐點好了嗎？"},
+    {base:"You take credit cards.",instr:"改疑問句",expected:"Do you take credit cards?",zh:"你們收信用卡嗎？"},
+    {base:"I want some ice.",instr:"改否定句",expected:"I don't want any ice.",zh:"我不要冰塊。"},
+    {base:"The bill includes the tip.",instr:"改疑問句",expected:"Does the bill include the tip?",zh:"帳單含小費嗎？"},
+    {base:"They serve breakfast.",instr:"改疑問句",expected:"Do they serve breakfast?",zh:"他們有供應早餐嗎？"},
+    {base:"I finished my meal.",instr:"改否定句",expected:"I didn't finish my meal.",zh:"我沒吃完。"},
+    {base:"This is spicy.",instr:"改疑問句",expected:"Is this spicy?",zh:"這個辣嗎？"},
+    {base:"We need more napkins.",instr:"改否定句",expected:"We don't need more napkins.",zh:"我們不需要更多餐巾。"},
+  ],
+  resp:[
+    {zh:"可以給我菜單嗎？",expected:"Can I see the menu, please?"},
+    {zh:"我要點這個。",expected:"I'll have this one."},
+    {zh:"這道菜會辣嗎？",expected:"Is this dish spicy?"},
+    {zh:"我可以刷卡嗎？",expected:"Can I pay by card?"},
+    {zh:"請給我帳單。",expected:"Can I have the check, please?"},
+    {zh:"你們有英文菜單嗎？",expected:"Do you have an English menu?"},
+    {zh:"我對花生過敏。",expected:"I'm allergic to peanuts."},
+    {zh:"我要外帶。",expected:"I'd like it to go."},
+    {zh:"可以再給我一杯水嗎？",expected:"Can I have some more water, please?"},
+    {zh:"廁所在哪裡？",expected:"Where is the restroom?"},
+    {zh:"你們的招牌菜是什麼？",expected:"What's your specialty?"},
+    {zh:"這個多少錢？",expected:"How much is this?"},
+    {zh:"我們有四個人。",expected:"We have four people."},
+    {zh:"不要太辣，謝謝。",expected:"Not too spicy, please."},
+    {zh:"可以給我打包盒嗎？",expected:"Can I get a to-go box?"},
+  ],
+  exp:[
+    {base:"I'd like a table.",baseZh:"我想要一張桌子。",adds:[
+      {cue:"for two",full:"I'd like a table for two.",zh:"我想要兩個人的桌子。"},
+      {cue:"by the window",full:"I'd like a table for two by the window.",zh:"我想要兩個人、靠窗的桌子。"},
+      {cue:"for tonight",full:"I'd like a table for two by the window for tonight.",zh:"我想要今晚兩個人、靠窗的桌子。"}]},
+    {base:"I'm allergic.",baseZh:"我會過敏。",adds:[
+      {cue:"to nuts",full:"I'm allergic to nuts.",zh:"我對堅果過敏。"},
+      {cue:"and seafood",full:"I'm allergic to nuts and seafood.",zh:"我對堅果和海鮮過敏。"},
+      {cue:"so please be careful",full:"I'm allergic to nuts and seafood, so please be careful.",zh:"我對堅果和海鮮過敏，所以請小心。"}]},
+    {base:"Could I have some water?",baseZh:"可以給我一些水嗎？",adds:[
+      {cue:"with no ice",full:"Could I have some water with no ice?",zh:"可以給我不加冰的水嗎？"},
+      {cue:"please",full:"Could I have some water with no ice, please?",zh:"麻煩給我不加冰的水。"},
+      {cue:"and a menu",full:"Could I have some water with no ice, please, and a menu?",zh:"麻煩給我不加冰的水，還有菜單。"}]},
+    {base:"The food is great.",baseZh:"餐點很棒。",adds:[
+      {cue:"but it's too salty",full:"The food is great, but it's too salty.",zh:"餐點很棒，但太鹹了。"},
+      {cue:"for me",full:"The food is great, but it's too salty for me.",zh:"餐點很棒，但對我來說太鹹了。"},
+      {cue:"could you fix it",full:"The food is great, but it's too salty for me. Could you fix it?",zh:"餐點很棒，但對我來說太鹹了，可以處理一下嗎？"}]},
+    {base:"We'd like to order.",baseZh:"我們要點餐。",adds:[
+      {cue:"two coffees",full:"We'd like to order two coffees.",zh:"我們要點兩杯咖啡。"},
+      {cue:"and a cake",full:"We'd like to order two coffees and a cake.",zh:"我們要點兩杯咖啡和一個蛋糕。"},
+      {cue:"to share",full:"We'd like to order two coffees and a cake to share.",zh:"我們要點兩杯咖啡和一個一起分的蛋糕。"}]},
+  ]
+},
+{ id:"directions", emoji:"🧭", label:"問路", desc:"問方向、搭車、找地點",
+  echo:[
+    {en:"Excuse me, where is the station?", zh:"不好意思，車站在哪裡？"},
+    {en:"How do I get to the museum?", zh:"我要怎麼去博物館？"},
+    {en:"Is it far from here?", zh:"離這裡遠嗎？"},
+  ],
+  sub:{ base:"Where is the station?", baseZh:"車站在哪裡？", slot:"the station", slotZh:"車站",
+    cues:[
+      {w:"the bathroom",zh:"廁所"},{w:"the exit",zh:"出口"},{w:"the bus stop",zh:"公車站"},{w:"the subway",zh:"地鐵"},
+      {w:"the hotel",zh:"飯店"},{w:"the ATM",zh:"提款機"},{w:"the pharmacy",zh:"藥局"},{w:"the supermarket",zh:"超市"},
+      {w:"the airport",zh:"機場"},{w:"the ticket office",zh:"售票處"},{w:"the elevator",zh:"電梯"},{w:"the taxi stand",zh:"計程車招呼站"},
+      {w:"the information desk",zh:"服務台"},{w:"the nearest café",zh:"最近的咖啡店"},{w:"gate 12",zh:"12 號門"},
+    ]},
+  trans:[
+    {base:"The station is close.",instr:"改疑問句",expected:"Is the station close?",zh:"車站近嗎？"},
+    {base:"I can walk there.",instr:"改疑問句",expected:"Can I walk there?",zh:"我可以走過去嗎？"},
+    {base:"This bus goes downtown.",instr:"改疑問句",expected:"Does this bus go downtown?",zh:"這班公車到市區嗎？"},
+    {base:"I should turn left.",instr:"改疑問句",expected:"Should I turn left?",zh:"我應該左轉嗎？"},
+    {base:"It's on this street.",instr:"改否定句",expected:"It's not on this street.",zh:"不在這條街。"},
+    {base:"The map is correct.",instr:"改疑問句",expected:"Is the map correct?",zh:"地圖對嗎？"},
+    {base:"I need to transfer.",instr:"改疑問句",expected:"Do I need to transfer?",zh:"我需要轉車嗎？"},
+    {base:"The exit is that way.",instr:"改疑問句",expected:"Is the exit that way?",zh:"出口在那邊嗎？"},
+    {base:"We are lost.",instr:"改疑問句",expected:"Are we lost?",zh:"我們迷路了嗎？"},
+    {base:"This road leads to the park.",instr:"改疑問句",expected:"Does this road lead to the park?",zh:"這條路通到公園嗎？"},
+    {base:"I have a map.",instr:"改否定句",expected:"I don't have a map.",zh:"我沒有地圖。"},
+    {base:"It takes ten minutes.",instr:"改疑問句",expected:"Does it take ten minutes?",zh:"要十分鐘嗎？"},
+    {base:"The museum is open today.",instr:"改疑問句",expected:"Is the museum open today?",zh:"博物館今天開嗎？"},
+    {base:"I can take the subway.",instr:"改否定句",expected:"I can't take the subway.",zh:"我不能搭地鐵。"},
+    {base:"We missed the stop.",instr:"改疑問句",expected:"Did we miss the stop?",zh:"我們坐過站了嗎？"},
+  ],
+  resp:[
+    {zh:"不好意思，車站怎麼走？",expected:"Excuse me, how do I get to the station?"},
+    {zh:"這附近有便利商店嗎？",expected:"Is there a convenience store nearby?"},
+    {zh:"走路要多久？",expected:"How long does it take to walk?"},
+    {zh:"我迷路了。",expected:"I'm lost."},
+    {zh:"可以幫我指路嗎？",expected:"Can you give me directions?"},
+    {zh:"我要左轉還是右轉？",expected:"Should I turn left or right?"},
+    {zh:"最近的地鐵站在哪？",expected:"Where is the nearest subway station?"},
+    {zh:"這是去機場的路嗎？",expected:"Is this the way to the airport?"},
+    {zh:"可以在地圖上指給我看嗎？",expected:"Can you show me on the map?"},
+    {zh:"我該搭哪一班公車？",expected:"Which bus should I take?"},
+    {zh:"要坐幾站？",expected:"How many stops is it?"},
+    {zh:"計程車招呼站在哪？",expected:"Where is the taxi stand?"},
+    {zh:"這附近有好吃的嗎？",expected:"Is there a good place to eat around here?"},
+    {zh:"直走就對了嗎？",expected:"Do I just go straight?"},
+    {zh:"離這裡很遠嗎？",expected:"Is it very far from here?"},
+  ],
+  exp:[
+    {base:"How do I get there?",baseZh:"我要怎麼去？",adds:[
+      {cue:"to the station",full:"How do I get to the station?",zh:"我要怎麼去車站？"},
+      {cue:"from here",full:"How do I get to the station from here?",zh:"我從這裡要怎麼去車站？"},
+      {cue:"by bus",full:"How do I get to the station from here by bus?",zh:"我從這裡要怎麼搭公車去車站？"}]},
+    {base:"It's nearby.",baseZh:"在附近。",adds:[
+      {cue:"just two blocks",full:"It's nearby, just two blocks.",zh:"在附近，就兩個路口。"},
+      {cue:"on the left",full:"It's nearby, just two blocks, on the left.",zh:"在附近，兩個路口，在左邊。"},
+      {cue:"next to the bank",full:"It's nearby, just two blocks, on the left, next to the bank.",zh:"在附近，兩個路口，在左邊，銀行旁邊。"}]},
+    {base:"Can you help me?",baseZh:"可以幫我嗎？",adds:[
+      {cue:"find the hotel",full:"Can you help me find the hotel?",zh:"可以幫我找飯店嗎？"},
+      {cue:"on this map",full:"Can you help me find the hotel on this map?",zh:"可以在這地圖上幫我找飯店嗎？"},
+      {cue:"please",full:"Can you help me find the hotel on this map, please?",zh:"麻煩在這地圖上幫我找飯店。"}]},
+    {base:"I'm looking for the exit.",baseZh:"我在找出口。",adds:[
+      {cue:"the main one",full:"I'm looking for the main exit.",zh:"我在找主要出口。"},
+      {cue:"to the street",full:"I'm looking for the main exit to the street.",zh:"我在找通往街道的主要出口。"},
+      {cue:"could you point me there",full:"I'm looking for the main exit to the street. Could you point me there?",zh:"我在找通往街道的主要出口，可以指給我看嗎？"}]},
+    {base:"Take this road.",baseZh:"走這條路。",adds:[
+      {cue:"and turn right",full:"Take this road and turn right.",zh:"走這條路然後右轉。"},
+      {cue:"at the corner",full:"Take this road and turn right at the corner.",zh:"走這條路，在轉角右轉。"},
+      {cue:"then go straight",full:"Take this road and turn right at the corner, then go straight.",zh:"走這條路，在轉角右轉，然後直走。"}]},
+  ]
+},
+{ id:"hotel", emoji:"🏨", label:"飯店", desc:"入住、退房、房間問題",
+  echo:[
+    {en:"I have a reservation.", zh:"我有訂房。"},
+    {en:"What time is checkout?", zh:"退房是幾點？"},
+    {en:"Is breakfast included?", zh:"含早餐嗎？"},
+  ],
+  sub:{ base:"I'd like a non-smoking room.", baseZh:"我想要禁菸房。", slot:"a non-smoking room", slotZh:"禁菸房",
+    cues:[
+      {w:"a double room",zh:"雙人房"},{w:"a room with a view",zh:"有景觀的房間"},{w:"an extra bed",zh:"加床"},{w:"a late checkout",zh:"延後退房"},
+      {w:"a wake-up call",zh:"晨喚服務"},{w:"more towels",zh:"更多毛巾"},{w:"a quiet room",zh:"安靜的房間"},{w:"an extra key",zh:"多一張房卡"},
+      {w:"a room upgrade",zh:"房間升等"},{w:"a higher floor",zh:"高樓層"},{w:"a baby crib",zh:"嬰兒床"},{w:"to extend my stay",zh:"延長住宿"},
+      {w:"a receipt",zh:"收據"},{w:"some help with my bags",zh:"行李的幫忙"},{w:"a map of the area",zh:"周邊地圖"},
+    ]},
+  trans:[
+    {base:"Breakfast is included.",instr:"改疑問句",expected:"Is breakfast included?",zh:"含早餐嗎？"},
+    {base:"The room has wifi.",instr:"改疑問句",expected:"Does the room have wifi?",zh:"房間有 wifi 嗎？"},
+    {base:"I can check in early.",instr:"改疑問句",expected:"Can I check in early?",zh:"我可以提早入住嗎？"},
+    {base:"The hotel has a pool.",instr:"改疑問句",expected:"Does the hotel have a pool?",zh:"飯店有泳池嗎？"},
+    {base:"My room is ready.",instr:"改疑問句",expected:"Is my room ready?",zh:"我的房間好了嗎？"},
+    {base:"I have paid already.",instr:"改否定句",expected:"I haven't paid yet.",zh:"我還沒付款。"},
+    {base:"You offer airport pickup.",instr:"改疑問句",expected:"Do you offer airport pickup?",zh:"你們有機場接送嗎？"},
+    {base:"The key works.",instr:"改否定句",expected:"The key doesn't work.",zh:"房卡刷不開。"},
+    {base:"There is a safe in the room.",instr:"改疑問句",expected:"Is there a safe in the room?",zh:"房間有保險箱嗎？"},
+    {base:"I need a receipt.",instr:"改否定句",expected:"I don't need a receipt.",zh:"我不需要收據。"},
+    {base:"Checkout is at noon.",instr:"改疑問句",expected:"Is checkout at noon?",zh:"退房是中午嗎？"},
+    {base:"The air conditioning works.",instr:"改否定句",expected:"The air conditioning doesn't work.",zh:"冷氣壞了。"},
+    {base:"You have a room available.",instr:"改疑問句",expected:"Do you have a room available?",zh:"你們有空房嗎？"},
+    {base:"I booked two nights.",instr:"改否定句",expected:"I didn't book two nights.",zh:"我沒有訂兩晚。"},
+    {base:"The elevator is working.",instr:"改疑問句",expected:"Is the elevator working?",zh:"電梯能用嗎？"},
+  ],
+  resp:[
+    {zh:"我有訂房，我姓 Lin。",expected:"I have a reservation under Lin."},
+    {zh:"可以提早入住嗎？",expected:"Can I check in early?"},
+    {zh:"退房時間是幾點？",expected:"What time is checkout?"},
+    {zh:"wifi 密碼是多少？",expected:"What's the wifi password?"},
+    {zh:"房間可以升等嗎？",expected:"Can I upgrade my room?"},
+    {zh:"冷氣壞了。",expected:"The air conditioning isn't working."},
+    {zh:"可以多給我一條毛巾嗎？",expected:"Can I get an extra towel?"},
+    {zh:"早餐在哪裡吃？",expected:"Where is breakfast served?"},
+    {zh:"可以幫我叫計程車嗎？",expected:"Can you call a taxi for me?"},
+    {zh:"我的房卡刷不開。",expected:"My key card isn't working."},
+    {zh:"可以幫我保管行李嗎？",expected:"Can you keep my luggage?"},
+    {zh:"健身房在幾樓？",expected:"What floor is the gym on?"},
+    {zh:"可以延後退房嗎？",expected:"Can I have a late checkout?"},
+    {zh:"附近有推薦的餐廳嗎？",expected:"Can you recommend a restaurant nearby?"},
+    {zh:"我想多住一晚。",expected:"I'd like to stay one more night."},
+  ],
+  exp:[
+    {base:"I have a reservation.",baseZh:"我有訂房。",adds:[
+      {cue:"for two nights",full:"I have a reservation for two nights.",zh:"我訂了兩晚。"},
+      {cue:"under my name",full:"I have a reservation for two nights under my name.",zh:"我用我的名字訂了兩晚。"},
+      {cue:"starting today",full:"I have a reservation for two nights under my name starting today.",zh:"我用我的名字訂了從今天起兩晚。"}]},
+    {base:"Could I have a room?",baseZh:"可以給我房間嗎？",adds:[
+      {cue:"on a high floor",full:"Could I have a room on a high floor?",zh:"可以給我高樓層的房間嗎？"},
+      {cue:"with a view",full:"Could I have a room on a high floor with a view?",zh:"可以給我高樓層、有景觀的房間嗎？"},
+      {cue:"away from the elevator",full:"Could I have a room on a high floor with a view, away from the elevator?",zh:"可以給我高樓層、有景觀、離電梯遠的房間嗎？"}]},
+    {base:"The room is nice.",baseZh:"房間很好。",adds:[
+      {cue:"but it's noisy",full:"The room is nice, but it's noisy.",zh:"房間很好，但很吵。"},
+      {cue:"at night",full:"The room is nice, but it's noisy at night.",zh:"房間很好，但晚上很吵。"},
+      {cue:"can I change it",full:"The room is nice, but it's noisy at night. Can I change it?",zh:"房間很好，但晚上很吵，可以換房嗎？"}]},
+    {base:"I'd like to check out.",baseZh:"我要退房。",adds:[
+      {cue:"at noon",full:"I'd like to check out at noon.",zh:"我要中午退房。"},
+      {cue:"and pay by card",full:"I'd like to check out at noon and pay by card.",zh:"我要中午退房並刷卡付款。"},
+      {cue:"can I get a receipt",full:"I'd like to check out at noon and pay by card. Can I get a receipt?",zh:"我要中午退房並刷卡，可以給收據嗎？"}]},
+    {base:"Is there a place?",baseZh:"有地方嗎？",adds:[
+      {cue:"to leave my bags",full:"Is there a place to leave my bags?",zh:"有地方可以寄放行李嗎？"},
+      {cue:"after checkout",full:"Is there a place to leave my bags after checkout?",zh:"退房後有地方可以寄放行李嗎？"},
+      {cue:"until evening",full:"Is there a place to leave my bags after checkout until evening?",zh:"退房後到傍晚有地方可以寄放行李嗎？"}]},
+  ]
+},
+{ id:"shopping", emoji:"🛍️", label:"購物", desc:"問價、試穿、退換、折扣",
+  echo:[
+    {en:"How much is this?", zh:"這個多少錢？"},
+    {en:"Can I try this on?", zh:"我可以試穿嗎？"},
+    {en:"Do you take credit cards?", zh:"你們收信用卡嗎？"},
+  ],
+  sub:{ base:"Do you have this in a smaller size?", baseZh:"這個有小一點的尺寸嗎？", slot:"a smaller size", slotZh:"小一點的尺寸",
+    cues:[
+      {w:"a larger size",zh:"大一點的尺寸"},{w:"black",zh:"黑色"},{w:"blue",zh:"藍色"},{w:"red",zh:"紅色"},
+      {w:"a medium",zh:"中號"},{w:"a small",zh:"小號"},{w:"another color",zh:"別的顏色"},{w:"leather",zh:"皮的"},
+      {w:"cotton",zh:"棉的"},{w:"a different style",zh:"別的款式"},{w:"white",zh:"白色"},{w:"green",zh:"綠色"},
+      {w:"a bigger size",zh:"更大的尺寸"},{w:"size 8",zh:"8 號"},{w:"stock",zh:"現貨"},
+    ]},
+  trans:[
+    {base:"This is on sale.",instr:"改疑問句",expected:"Is this on sale?",zh:"這個有特價嗎？"},
+    {base:"They accept returns.",instr:"改疑問句",expected:"Do they accept returns?",zh:"他們接受退貨嗎？"},
+    {base:"I have the receipt.",instr:"改否定句",expected:"I don't have the receipt.",zh:"我沒有收據。"},
+    {base:"This fits me.",instr:"改否定句",expected:"This doesn't fit me.",zh:"這個我穿不下。"},
+    {base:"The store is open.",instr:"改疑問句",expected:"Is the store open?",zh:"店開著嗎？"},
+    {base:"I can return this.",instr:"改疑問句",expected:"Can I return this?",zh:"我可以退這個嗎？"},
+    {base:"You offer a discount.",instr:"改疑問句",expected:"Do you offer a discount?",zh:"你們有折扣嗎？"},
+    {base:"It comes in blue.",instr:"改疑問句",expected:"Does it come in blue?",zh:"有藍色的嗎？"},
+    {base:"I want the receipt.",instr:"改否定句",expected:"I don't want the receipt.",zh:"我不要收據。"},
+    {base:"The price includes tax.",instr:"改疑問句",expected:"Does the price include tax?",zh:"價格含稅嗎？"},
+    {base:"This is the final price.",instr:"改疑問句",expected:"Is this the final price?",zh:"這是最後價格嗎？"},
+    {base:"They have it in stock.",instr:"改否定句",expected:"They don't have it in stock.",zh:"他們沒有現貨。"},
+    {base:"I can pay cash.",instr:"改疑問句",expected:"Can I pay cash?",zh:"我可以付現嗎？"},
+    {base:"It's too expensive.",instr:"改疑問句",expected:"Is it too expensive?",zh:"太貴了嗎？"},
+    {base:"You ship overseas.",instr:"改疑問句",expected:"Do you ship overseas?",zh:"你們寄海外嗎？"},
+  ],
+  resp:[
+    {zh:"這個多少錢？",expected:"How much is this?"},
+    {zh:"我可以試穿嗎？",expected:"Can I try this on?"},
+    {zh:"有別的顏色嗎？",expected:"Do you have other colors?"},
+    {zh:"可以便宜一點嗎？",expected:"Can you give me a discount?"},
+    {zh:"我可以刷卡嗎？",expected:"Can I pay by card?"},
+    {zh:"試衣間在哪裡？",expected:"Where is the fitting room?"},
+    {zh:"這個可以退嗎？",expected:"Can I return this?"},
+    {zh:"我只是看看，謝謝。",expected:"I'm just looking, thanks."},
+    {zh:"可以幫我包成禮物嗎？",expected:"Can you gift-wrap this?"},
+    {zh:"有現貨嗎？",expected:"Is this in stock?"},
+    {zh:"我要這個。",expected:"I'll take this one."},
+    {zh:"可以退稅嗎？",expected:"Can I get a tax refund?"},
+    {zh:"太貴了。",expected:"That's too expensive."},
+    {zh:"可以給我袋子嗎？",expected:"Can I have a bag, please?"},
+    {zh:"收據可以給我嗎？",expected:"Can I have the receipt?"},
+  ],
+  exp:[
+    {base:"I'm looking for a gift.",baseZh:"我在找禮物。",adds:[
+      {cue:"for my mom",full:"I'm looking for a gift for my mom.",zh:"我在找送我媽的禮物。"},
+      {cue:"under fifty dollars",full:"I'm looking for a gift for my mom under fifty dollars.",zh:"我在找送我媽、五十元以下的禮物。"},
+      {cue:"any ideas",full:"I'm looking for a gift for my mom under fifty dollars. Any ideas?",zh:"我在找送我媽、五十元以下的禮物，有推薦嗎？"}]},
+    {base:"This is too expensive.",baseZh:"這個太貴了。",adds:[
+      {cue:"for me",full:"This is too expensive for me.",zh:"這個對我來說太貴了。"},
+      {cue:"can you lower it",full:"This is too expensive for me. Can you lower it?",zh:"這個對我來說太貴了，可以便宜一點嗎？"},
+      {cue:"a little",full:"This is too expensive for me. Can you lower it a little?",zh:"這個對我來說太貴了，可以便宜一點點嗎？"}]},
+    {base:"I'd like to return this.",baseZh:"我想退這個。",adds:[
+      {cue:"it doesn't fit",full:"I'd like to return this. It doesn't fit.",zh:"我想退這個，不合身。"},
+      {cue:"here's the receipt",full:"I'd like to return this. It doesn't fit. Here's the receipt.",zh:"我想退這個，不合身，收據在這。"},
+      {cue:"can I get a refund",full:"I'd like to return this. It doesn't fit. Here's the receipt. Can I get a refund?",zh:"我想退這個，不合身，收據在這，可以退款嗎？"}]},
+    {base:"Do you have this?",baseZh:"你們有這個嗎？",adds:[
+      {cue:"in black",full:"Do you have this in black?",zh:"你們有黑色的嗎？"},
+      {cue:"in a larger size",full:"Do you have this in black in a larger size?",zh:"你們有黑色、大一號的嗎？"},
+      {cue:"in stock",full:"Do you have this in black in a larger size in stock?",zh:"你們有黑色、大一號的現貨嗎？"}]},
+    {base:"Can I try this on?",baseZh:"我可以試穿嗎？",adds:[
+      {cue:"in a medium",full:"Can I try this on in a medium?",zh:"我可以試穿中號嗎？"},
+      {cue:"please",full:"Can I try this on in a medium, please?",zh:"麻煩，我可以試穿中號嗎？"},
+      {cue:"where's the fitting room",full:"Can I try this on in a medium, please? Where's the fitting room?",zh:"麻煩，我可以試穿中號嗎？試衣間在哪？"}]},
+  ]
+},
+{ id:"taxi", emoji:"🚕", label:"叫車", desc:"叫車、報地點、付費",
+  echo:[
+    {en:"Can you call me a taxi?", zh:"可以幫我叫計程車嗎？"},
+    {en:"How much is it to the airport?", zh:"到機場多少錢？"},
+    {en:"Please stop here.", zh:"請在這裡停。"},
+  ],
+  sub:{ base:"Please take me to the airport.", baseZh:"請帶我去機場。", slot:"the airport", slotZh:"機場",
+    cues:[
+      {w:"this address",zh:"這個地址"},{w:"the train station",zh:"火車站"},{w:"downtown",zh:"市區"},{w:"this hotel",zh:"這間飯店"},
+      {w:"the city center",zh:"市中心"},{w:"the nearest hospital",zh:"最近的醫院"},{w:"the shopping mall",zh:"購物中心"},{w:"the bus terminal",zh:"客運站"},
+      {w:"this restaurant",zh:"這間餐廳"},{w:"the old town",zh:"老城區"},{w:"the harbor",zh:"港口"},{w:"the museum",zh:"博物館"},
+      {w:"the night market",zh:"夜市"},{w:"this location",zh:"這個地點"},{w:"gate 3",zh:"3 號門"},
+    ]},
+  trans:[
+    {base:"The meter is on.",instr:"改疑問句",expected:"Is the meter on?",zh:"跳表了嗎？"},
+    {base:"You take cash.",instr:"改疑問句",expected:"Do you take cash?",zh:"你收現金嗎？"},
+    {base:"We are almost there.",instr:"改疑問句",expected:"Are we almost there?",zh:"快到了嗎？"},
+    {base:"I can pay by app.",instr:"改疑問句",expected:"Can I pay by app?",zh:"我可以用 app 付嗎？"},
+    {base:"It's far from here.",instr:"改疑問句",expected:"Is it far from here?",zh:"離這裡遠嗎？"},
+    {base:"You know this address.",instr:"改疑問句",expected:"Do you know this address?",zh:"你知道這個地址嗎？"},
+    {base:"I need a receipt.",instr:"改否定句",expected:"I don't need a receipt.",zh:"我不需要收據。"},
+    {base:"We can go faster.",instr:"改疑問句",expected:"Can we go faster?",zh:"可以開快一點嗎？"},
+    {base:"The traffic is bad.",instr:"改疑問句",expected:"Is the traffic bad?",zh:"路況很糟嗎？"},
+    {base:"You can wait here.",instr:"改疑問句",expected:"Can you wait here?",zh:"你可以在這等嗎？"},
+    {base:"I have luggage.",instr:"改否定句",expected:"I don't have luggage.",zh:"我沒有行李。"},
+    {base:"This is the right way.",instr:"改疑問句",expected:"Is this the right way?",zh:"這是對的路嗎？"},
+    {base:"It takes twenty minutes.",instr:"改疑問句",expected:"Does it take twenty minutes?",zh:"要二十分鐘嗎？"},
+    {base:"I can sit in front.",instr:"改疑問句",expected:"Can I sit in front?",zh:"我可以坐前面嗎？"},
+    {base:"You go to the airport.",instr:"改疑問句",expected:"Do you go to the airport?",zh:"你到機場嗎？"},
+  ],
+  resp:[
+    {zh:"可以幫我叫車嗎？",expected:"Can you call me a taxi?"},
+    {zh:"到這個地址多少錢？",expected:"How much is it to this address?"},
+    {zh:"請帶我去機場。",expected:"Please take me to the airport."},
+    {zh:"我趕時間。",expected:"I'm in a hurry."},
+    {zh:"請在這裡停。",expected:"Please stop here."},
+    {zh:"可以開後車廂嗎？",expected:"Can you open the trunk?"},
+    {zh:"我要付現。",expected:"I'll pay cash."},
+    {zh:"請給我收據。",expected:"Can I have a receipt, please?"},
+    {zh:"還要多久？",expected:"How much longer?"},
+    {zh:"可以開快一點嗎？",expected:"Can you go a little faster?"},
+    {zh:"請等我五分鐘。",expected:"Please wait five minutes for me."},
+    {zh:"你有零錢嗎？",expected:"Do you have change?"},
+    {zh:"可以開冷氣嗎？",expected:"Can you turn on the AC?"},
+    {zh:"請靠邊停。",expected:"Please pull over."},
+    {zh:"不用找了。",expected:"Keep the change."},
+  ],
+  exp:[
+    {base:"Please take me to the airport.",baseZh:"請帶我去機場。",adds:[
+      {cue:"terminal two",full:"Please take me to the airport, terminal two.",zh:"請帶我去機場第二航廈。"},
+      {cue:"as fast as you can",full:"Please take me to the airport, terminal two, as fast as you can.",zh:"請盡快帶我去機場第二航廈。"},
+      {cue:"I'm running late",full:"Please take me to the airport, terminal two, as fast as you can. I'm running late.",zh:"請盡快帶我去機場第二航廈，我快遲到了。"}]},
+    {base:"How much is it?",baseZh:"多少錢？",adds:[
+      {cue:"to downtown",full:"How much is it to downtown?",zh:"到市區多少錢？"},
+      {cue:"by meter",full:"How much is it to downtown by meter?",zh:"到市區跳表多少錢？"},
+      {cue:"with luggage",full:"How much is it to downtown by meter, with luggage?",zh:"到市區跳表、含行李多少錢？"}]},
+    {base:"Can you stop?",baseZh:"可以停嗎？",adds:[
+      {cue:"here",full:"Can you stop here?",zh:"可以在這裡停嗎？"},
+      {cue:"for a moment",full:"Can you stop here for a moment?",zh:"可以在這裡停一下嗎？"},
+      {cue:"I'll be quick",full:"Can you stop here for a moment? I'll be quick.",zh:"可以在這裡停一下嗎？我很快。"}]},
+    {base:"I need a taxi.",baseZh:"我需要計程車。",adds:[
+      {cue:"for four people",full:"I need a taxi for four people.",zh:"我需要四人座的計程車。"},
+      {cue:"with luggage space",full:"I need a taxi for four people with luggage space.",zh:"我需要四人座、有行李空間的計程車。"},
+      {cue:"right now",full:"I need a taxi for four people with luggage space right now.",zh:"我現在需要四人座、有行李空間的計程車。"}]},
+    {base:"Could you wait?",baseZh:"可以等嗎？",adds:[
+      {cue:"a few minutes",full:"Could you wait a few minutes?",zh:"可以等幾分鐘嗎？"},
+      {cue:"I'll be back",full:"Could you wait a few minutes? I'll be back.",zh:"可以等幾分鐘嗎？我會回來。"},
+      {cue:"keep the meter running",full:"Could you wait a few minutes? I'll be back. Keep the meter running.",zh:"可以等幾分鐘嗎？我會回來，表繼續跳沒關係。"}]},
+  ]
+},
+{ id:"money", emoji:"💱", label:"換錢", desc:"換匯、提款、付費",
+  echo:[
+    {en:"Where can I exchange money?", zh:"哪裡可以換錢？"},
+    {en:"What's the exchange rate?", zh:"匯率是多少？"},
+    {en:"Can I pay in cash?", zh:"我可以付現嗎？"},
+  ],
+  sub:{ base:"I'd like to exchange some money.", baseZh:"我想換一些錢。", slot:"exchange some money", slotZh:"換一些錢",
+    cues:[
+      {w:"exchange US dollars",zh:"換美金"},{w:"withdraw some cash",zh:"領一些現金"},{w:"get smaller bills",zh:"換小鈔"},{w:"break this bill",zh:"換開這張鈔票"},
+      {w:"check the rate",zh:"看匯率"},{w:"see the fee",zh:"看手續費"},{w:"use the ATM",zh:"用提款機"},{w:"get some coins",zh:"換一些硬幣"},
+      {w:"deposit this",zh:"存這個"},{w:"transfer money",zh:"轉帳"},{w:"get a receipt",zh:"拿收據"},{w:"change 100 dollars",zh:"換 100 元"},
+      {w:"pay by card",zh:"刷卡"},{w:"get bigger bills",zh:"換大鈔"},{w:"cancel this",zh:"取消這筆"},
+    ]},
+  trans:[
+    {base:"The rate is good.",instr:"改疑問句",expected:"Is the rate good?",zh:"匯率好嗎？"},
+    {base:"There is a fee.",instr:"改疑問句",expected:"Is there a fee?",zh:"有手續費嗎？"},
+    {base:"I have small bills.",instr:"改否定句",expected:"I don't have small bills.",zh:"我沒有小鈔。"},
+    {base:"The ATM accepts my card.",instr:"改疑問句",expected:"Does the ATM accept my card?",zh:"提款機收我的卡嗎？"},
+    {base:"The bank is open.",instr:"改疑問句",expected:"Is the bank open?",zh:"銀行開著嗎？"},
+    {base:"I can exchange here.",instr:"改疑問句",expected:"Can I exchange here?",zh:"我可以在這換嗎？"},
+    {base:"You charge a commission.",instr:"改疑問句",expected:"Do you charge a commission?",zh:"你們收手續費嗎？"},
+    {base:"This is enough cash.",instr:"改否定句",expected:"This isn't enough cash.",zh:"這些現金不夠。"},
+    {base:"They accept dollars.",instr:"改疑問句",expected:"Do they accept dollars?",zh:"他們收美金嗎？"},
+    {base:"The machine gave a receipt.",instr:"改否定句",expected:"The machine didn't give a receipt.",zh:"機器沒給收據。"},
+    {base:"I need bigger bills.",instr:"改否定句",expected:"I don't need bigger bills.",zh:"我不需要大鈔。"},
+    {base:"The exchange rate changed.",instr:"改疑問句",expected:"Did the exchange rate change?",zh:"匯率變了嗎？"},
+    {base:"I can use this card.",instr:"改疑問句",expected:"Can I use this card?",zh:"我可以用這張卡嗎？"},
+    {base:"There is an ATM nearby.",instr:"改疑問句",expected:"Is there an ATM nearby?",zh:"附近有提款機嗎？"},
+    {base:"You give a better rate.",instr:"改疑問句",expected:"Do you give a better rate?",zh:"你們匯率比較好嗎？"},
+  ],
+  resp:[
+    {zh:"哪裡可以換錢？",expected:"Where can I exchange money?"},
+    {zh:"今天匯率多少？",expected:"What's the exchange rate today?"},
+    {zh:"有手續費嗎？",expected:"Is there a fee?"},
+    {zh:"我想換成台幣。",expected:"I'd like to change this into Taiwan dollars."},
+    {zh:"可以換小鈔嗎？",expected:"Can I get smaller bills?"},
+    {zh:"最近的提款機在哪？",expected:"Where is the nearest ATM?"},
+    {zh:"我可以付現嗎？",expected:"Can I pay in cash?"},
+    {zh:"這台機器吃我的卡。",expected:"The machine took my card."},
+    {zh:"可以給我收據嗎？",expected:"Can I have a receipt?"},
+    {zh:"我要領錢。",expected:"I'd like to withdraw some cash."},
+    {zh:"你們收美金嗎？",expected:"Do you accept US dollars?"},
+    {zh:"可以幫我換開這張嗎？",expected:"Can you break this bill for me?"},
+    {zh:"最低換多少？",expected:"What's the minimum amount?"},
+    {zh:"我的卡刷不過。",expected:"My card was declined."},
+    {zh:"可以刷卡嗎？",expected:"Can I pay by card?"},
+  ],
+  exp:[
+    {base:"I'd like to exchange money.",baseZh:"我想換錢。",adds:[
+      {cue:"US dollars",full:"I'd like to exchange US dollars.",zh:"我想換美金。"},
+      {cue:"to local currency",full:"I'd like to exchange US dollars to local currency.",zh:"我想把美金換成當地貨幣。"},
+      {cue:"what's the rate",full:"I'd like to exchange US dollars to local currency. What's the rate?",zh:"我想把美金換成當地貨幣，匯率多少？"}]},
+    {base:"Where is an ATM?",baseZh:"提款機在哪？",adds:[
+      {cue:"nearby",full:"Where is an ATM nearby?",zh:"附近的提款機在哪？"},
+      {cue:"that takes Visa",full:"Where is an ATM nearby that takes Visa?",zh:"附近收 Visa 的提款機在哪？"},
+      {cue:"with no fee",full:"Where is an ATM nearby that takes Visa with no fee?",zh:"附近收 Visa、免手續費的提款機在哪？"}]},
+    {base:"Can you break this?",baseZh:"可以換開這張嗎？",adds:[
+      {cue:"this bill",full:"Can you break this bill?",zh:"可以換開這張鈔票嗎？"},
+      {cue:"into smaller ones",full:"Can you break this bill into smaller ones?",zh:"可以把這張鈔票換成小鈔嗎？"},
+      {cue:"please",full:"Can you break this bill into smaller ones, please?",zh:"麻煩把這張鈔票換成小鈔。"}]},
+    {base:"Is there a fee?",baseZh:"有手續費嗎？",adds:[
+      {cue:"for this",full:"Is there a fee for this?",zh:"這個有手續費嗎？"},
+      {cue:"to exchange money",full:"Is there a fee for this, to exchange money?",zh:"換錢有手續費嗎？"},
+      {cue:"how much",full:"Is there a fee for this, to exchange money? How much?",zh:"換錢有手續費嗎？多少？"}]},
+    {base:"I need cash.",baseZh:"我需要現金。",adds:[
+      {cue:"about 100 dollars",full:"I need cash, about 100 dollars.",zh:"我需要大約 100 元現金。"},
+      {cue:"in small bills",full:"I need cash, about 100 dollars, in small bills.",zh:"我需要大約 100 元小鈔現金。"},
+      {cue:"as soon as possible",full:"I need cash, about 100 dollars, in small bills, as soon as possible.",zh:"我盡快需要大約 100 元小鈔現金。"}]},
+  ]
+},
+{ id:"help", emoji:"🆘", label:"求助", desc:"求助、聽不懂、找東西",
+  echo:[
+    {en:"Can you help me?", zh:"你可以幫我嗎？"},
+    {en:"I lost my passport.", zh:"我護照掉了。"},
+    {en:"I don't understand.", zh:"我聽不懂。"},
+  ],
+  sub:{ base:"Can you help me find my hotel?", baseZh:"你可以幫我找我的飯店嗎？", slot:"find my hotel", slotZh:"找我的飯店",
+    cues:[
+      {w:"call the police",zh:"報警"},{w:"call a doctor",zh:"叫醫生"},{w:"find a hospital",zh:"找醫院"},{w:"carry this",zh:"提這個"},
+      {w:"translate this",zh:"翻譯這個"},{w:"call this number",zh:"打這個號碼"},{w:"find the embassy",zh:"找大使館"},{w:"find a restroom",zh:"找廁所"},
+      {w:"reach my hotel",zh:"聯絡我的飯店"},{w:"charge my phone",zh:"幫手機充電"},{w:"find my gate",zh:"找我的登機門"},{w:"get a taxi",zh:"叫計程車"},
+      {w:"read this sign",zh:"看這個標示"},{w:"find the way back",zh:"找回去的路"},{w:"call my family",zh:"打給我家人"},
+    ]},
+  trans:[
+    {base:"You can help me.",instr:"改疑問句",expected:"Can you help me?",zh:"你可以幫我嗎？"},
+    {base:"There is a hospital nearby.",instr:"改疑問句",expected:"Is there a hospital nearby?",zh:"附近有醫院嗎？"},
+    {base:"I have my passport.",instr:"改否定句",expected:"I don't have my passport.",zh:"我沒有護照。"},
+    {base:"You speak English.",instr:"改疑問句",expected:"Do you speak English?",zh:"你會說英文嗎？"},
+    {base:"This phone works.",instr:"改否定句",expected:"This phone doesn't work.",zh:"這支手機壞了。"},
+    {base:"I can find it.",instr:"改否定句",expected:"I can't find it.",zh:"我找不到。"},
+    {base:"You know the way.",instr:"改疑問句",expected:"Do you know the way?",zh:"你知道路嗎？"},
+    {base:"You have a charger.",instr:"改疑問句",expected:"Do you have a charger?",zh:"你有充電器嗎？"},
+    {base:"The police can help.",instr:"改疑問句",expected:"Can the police help?",zh:"警察能幫忙嗎？"},
+    {base:"I understand you.",instr:"改否定句",expected:"I don't understand you.",zh:"我聽不懂你說的。"},
+    {base:"There is wifi here.",instr:"改疑問句",expected:"Is there wifi here?",zh:"這裡有 wifi 嗎？"},
+    {base:"I feel well.",instr:"改否定句",expected:"I don't feel well.",zh:"我不太舒服。"},
+    {base:"This is an emergency.",instr:"改疑問句",expected:"Is this an emergency?",zh:"這是緊急狀況嗎？"},
+    {base:"I can call them.",instr:"改疑問句",expected:"Can I call them?",zh:"我可以打給他們嗎？"},
+    {base:"You can show me.",instr:"改疑問句",expected:"Can you show me?",zh:"你可以指給我看嗎？"},
+  ],
+  resp:[
+    {zh:"你可以幫我嗎？",expected:"Can you help me?"},
+    {zh:"我護照掉了。",expected:"I lost my passport."},
+    {zh:"我迷路了。",expected:"I'm lost."},
+    {zh:"我手機沒電了。",expected:"My phone is dead."},
+    {zh:"這附近有醫院嗎？",expected:"Is there a hospital nearby?"},
+    {zh:"你會說英文嗎？",expected:"Do you speak English?"},
+    {zh:"可以借我電話嗎？",expected:"Can I use your phone?"},
+    {zh:"我聽不懂。",expected:"I don't understand."},
+    {zh:"可以再說一次嗎？",expected:"Can you say that again?"},
+    {zh:"我的包包被偷了。",expected:"My bag was stolen."},
+    {zh:"可以慢一點說嗎？",expected:"Can you speak more slowly?"},
+    {zh:"我需要幫忙。",expected:"I need help."},
+    {zh:"廁所在哪裡？",expected:"Where is the restroom?"},
+    {zh:"可以幫我翻譯嗎？",expected:"Can you translate this for me?"},
+    {zh:"我不太舒服。",expected:"I don't feel well."},
+  ],
+  exp:[
+    {base:"I need help.",baseZh:"我需要幫忙。",adds:[
+      {cue:"please",full:"I need help, please.",zh:"拜託，我需要幫忙。"},
+      {cue:"I lost my passport",full:"I need help, please. I lost my passport.",zh:"拜託幫我，我護照掉了。"},
+      {cue:"where's the embassy",full:"I need help, please. I lost my passport. Where's the embassy?",zh:"拜託幫我，我護照掉了，大使館在哪？"}]},
+    {base:"Can you help me?",baseZh:"可以幫我嗎？",adds:[
+      {cue:"I'm lost",full:"Can you help me? I'm lost.",zh:"可以幫我嗎？我迷路了。"},
+      {cue:"I'm looking for this hotel",full:"Can you help me? I'm lost. I'm looking for this hotel.",zh:"可以幫我嗎？我迷路了，在找這間飯店。"},
+      {cue:"can you show me",full:"Can you help me? I'm lost. I'm looking for this hotel. Can you show me?",zh:"可以幫我嗎？我迷路了，在找這間飯店，可以指給我看嗎？"}]},
+    {base:"I don't feel well.",baseZh:"我不舒服。",adds:[
+      {cue:"I have a headache",full:"I don't feel well. I have a headache.",zh:"我不舒服，頭痛。"},
+      {cue:"and a fever",full:"I don't feel well. I have a headache and a fever.",zh:"我不舒服，頭痛還發燒。"},
+      {cue:"is there a pharmacy",full:"I don't feel well. I have a headache and a fever. Is there a pharmacy?",zh:"我不舒服，頭痛還發燒，附近有藥局嗎？"}]},
+    {base:"Someone stole my bag.",baseZh:"有人偷了我的包。",adds:[
+      {cue:"with my passport",full:"Someone stole my bag with my passport.",zh:"有人偷了我的包，裡面有護照。"},
+      {cue:"and my wallet",full:"Someone stole my bag with my passport and my wallet.",zh:"有人偷了我的包，裡面有護照和錢包。"},
+      {cue:"call the police",full:"Someone stole my bag with my passport and my wallet. Call the police!",zh:"有人偷了我的包，裡面有護照和錢包，快報警！"}]},
+    {base:"I don't understand.",baseZh:"我聽不懂。",adds:[
+      {cue:"could you repeat that",full:"I don't understand. Could you repeat that?",zh:"我聽不懂，可以再說一次嗎？"},
+      {cue:"more slowly",full:"I don't understand. Could you repeat that more slowly?",zh:"我聽不懂，可以慢一點再說一次嗎？"},
+      {cue:"or write it down",full:"I don't understand. Could you repeat that more slowly, or write it down?",zh:"我聽不懂，可以慢一點再說一次，或寫下來嗎？"}]},
+  ]
+},
+{ id:"smalltalk", emoji:"💬", label:"寒暄", desc:"自我介紹、聊天、道別",
+  echo:[
+    {en:"Nice to meet you.", zh:"很高興認識你。"},
+    {en:"Where are you from?", zh:"你從哪裡來？"},
+    {en:"Have a great day!", zh:"祝你有美好的一天！"},
+  ],
+  sub:{ base:"I'm from Taiwan.", baseZh:"我來自台灣。", slot:"Taiwan", slotZh:"台灣",
+    cues:[
+      {w:"Taipei",zh:"台北"},{w:"Japan",zh:"日本"},{w:"a small town",zh:"一個小鎮"},{w:"the north",zh:"北部"},
+      {w:"near the city",zh:"城市附近"},{w:"Asia",zh:"亞洲"},{w:"a place called Kaohsiung",zh:"一個叫高雄的地方"},{w:"the countryside",zh:"鄉下"},
+      {w:"abroad",zh:"國外"},{w:"the south",zh:"南部"},{w:"a coastal city",zh:"一個海邊城市"},{w:"the capital",zh:"首都"},
+      {w:"a big family",zh:"一個大家庭"},{w:"a tropical island",zh:"一個熱帶島嶼"},{w:"the same place as you",zh:"跟你同一個地方"},
+    ]},
+  trans:[
+    {base:"You are here on business.",instr:"改疑問句",expected:"Are you here on business?",zh:"你是來出差的嗎？"},
+    {base:"You like the food.",instr:"改疑問句",expected:"Do you like the food?",zh:"你喜歡這裡的食物嗎？"},
+    {base:"You have been here before.",instr:"改疑問句",expected:"Have you been here before?",zh:"你以前來過嗎？"},
+    {base:"It is your first time.",instr:"改疑問句",expected:"Is it your first time?",zh:"這是你第一次嗎？"},
+    {base:"You speak English.",instr:"改疑問句",expected:"Do you speak English?",zh:"你會說英文嗎？"},
+    {base:"I understand.",instr:"改否定句",expected:"I don't understand.",zh:"我不懂。"},
+    {base:"You are staying long.",instr:"改疑問句",expected:"Are you staying long?",zh:"你會待很久嗎？"},
+    {base:"The weather is nice.",instr:"改疑問句",expected:"Is the weather nice?",zh:"天氣好嗎？"},
+    {base:"You enjoy traveling.",instr:"改疑問句",expected:"Do you enjoy traveling?",zh:"你喜歡旅行嗎？"},
+    {base:"I am from here.",instr:"改否定句",expected:"I'm not from here.",zh:"我不是這裡人。"},
+    {base:"You know this place.",instr:"改疑問句",expected:"Do you know this place?",zh:"你熟這個地方嗎？"},
+    {base:"We have met before.",instr:"改疑問句",expected:"Have we met before?",zh:"我們以前見過嗎？"},
+    {base:"You have plans tonight.",instr:"改疑問句",expected:"Do you have plans tonight?",zh:"你今晚有計畫嗎？"},
+    {base:"I can join you.",instr:"改疑問句",expected:"Can I join you?",zh:"我可以加入你們嗎？"},
+    {base:"You recommend this place.",instr:"改疑問句",expected:"Do you recommend this place?",zh:"你推薦這個地方嗎？"},
+  ],
+  resp:[
+    {zh:"很高興認識你。",expected:"Nice to meet you."},
+    {zh:"你從哪裡來？",expected:"Where are you from?"},
+    {zh:"我來自台灣。",expected:"I'm from Taiwan."},
+    {zh:"你來這裡多久了？",expected:"How long have you been here?"},
+    {zh:"你喜歡這裡嗎？",expected:"Do you like it here?"},
+    {zh:"你會說英文嗎？",expected:"Do you speak English?"},
+    {zh:"我是來旅遊的。",expected:"I'm here on vacation."},
+    {zh:"你做什麼工作？",expected:"What do you do?"},
+    {zh:"天氣真好。",expected:"The weather is lovely."},
+    {zh:"你有什麼推薦的嗎？",expected:"Do you have any recommendations?"},
+    {zh:"謝謝你的幫忙。",expected:"Thanks for your help."},
+    {zh:"祝你有美好的一天。",expected:"Have a nice day."},
+    {zh:"再聯絡。",expected:"Let's keep in touch."},
+    {zh:"很高興跟你聊天。",expected:"It was nice talking to you."},
+    {zh:"保重。",expected:"Take care."},
+  ],
+  exp:[
+    {base:"Nice to meet you.",baseZh:"很高興認識你。",adds:[
+      {cue:"I'm Ken",full:"Nice to meet you. I'm Ken.",zh:"很高興認識你，我是 Ken。"},
+      {cue:"from Taiwan",full:"Nice to meet you. I'm Ken, from Taiwan.",zh:"很高興認識你，我是 Ken，來自台灣。"},
+      {cue:"here on vacation",full:"Nice to meet you. I'm Ken, from Taiwan, here on vacation.",zh:"很高興認識你，我是 Ken，來自台灣，來度假的。"}]},
+    {base:"Where are you from?",baseZh:"你從哪來？",adds:[
+      {cue:"originally",full:"Where are you from originally?",zh:"你本來是哪裡人？"},
+      {cue:"if you don't mind",full:"Where are you from originally, if you don't mind?",zh:"如果你不介意，你本來是哪裡人？"},
+      {cue:"me asking",full:"Where are you from originally, if you don't mind me asking?",zh:"如果你不介意我問，你本來是哪裡人？"}]},
+    {base:"I really like this city.",baseZh:"我很喜歡這個城市。",adds:[
+      {cue:"the food here",full:"I really like this city and the food here.",zh:"我很喜歡這個城市和這裡的食物。"},
+      {cue:"the people too",full:"I really like this city, the food here, and the people too.",zh:"我很喜歡這個城市、這裡的食物，還有這裡的人。"},
+      {cue:"I'd love to come back",full:"I really like this city, the food here, and the people too. I'd love to come back.",zh:"我很喜歡這個城市、這裡的食物，還有這裡的人，我很想再來。"}]},
+    {base:"Could you recommend a place to eat?",baseZh:"可以推薦吃飯的地方嗎？",adds:[
+      {cue:"nearby",full:"Could you recommend a place to eat nearby?",zh:"可以推薦附近吃飯的地方嗎？"},
+      {cue:"not too expensive",full:"Could you recommend a place to eat nearby, not too expensive?",zh:"可以推薦附近、不太貴的吃飯的地方嗎？"},
+      {cue:"with local food",full:"Could you recommend a place to eat nearby, not too expensive, with local food?",zh:"可以推薦附近、不太貴、有當地菜的吃飯的地方嗎？"}]},
+    {base:"It was nice talking to you.",baseZh:"很高興跟你聊天。",adds:[
+      {cue:"let's keep in touch",full:"It was nice talking to you. Let's keep in touch.",zh:"很高興跟你聊天，再聯絡。"},
+      {cue:"here's my number",full:"It was nice talking to you. Let's keep in touch. Here's my number.",zh:"很高興跟你聊天，再聯絡，這是我的電話。"},
+      {cue:"take care",full:"It was nice talking to you. Let's keep in touch. Here's my number. Take care!",zh:"很高興跟你聊天，再聯絡，這是我的電話，保重！"}]},
+  ]
+},
+{ id:"emergency", emoji:"🚨", label:"緊急", desc:"生病、受傷、報案、求救",
+  echo:[
+    {en:"Help! It's an emergency.", zh:"救命！這是緊急狀況。"},
+    {en:"Call an ambulance!", zh:"叫救護車！"},
+    {en:"I need a doctor.", zh:"我需要醫生。"},
+  ],
+  sub:{ base:"I need a doctor.", baseZh:"我需要醫生。", slot:"a doctor", slotZh:"醫生",
+    cues:[
+      {w:"an ambulance",zh:"救護車"},{w:"the police",zh:"警察"},{w:"help",zh:"幫助"},{w:"a hospital",zh:"醫院"},
+      {w:"some medicine",zh:"一些藥"},{w:"my medication",zh:"我的藥"},{w:"a pharmacy",zh:"藥局"},{w:"to call my family",zh:"打給我家人"},
+      {w:"the embassy",zh:"大使館"},{w:"first aid",zh:"急救"},{w:"to lie down",zh:"躺下"},{w:"some water",zh:"一些水"},
+      {w:"to sit down",zh:"坐下"},{w:"a translator",zh:"翻譯"},{w:"to make a call",zh:"打個電話"},
+    ]},
+  trans:[
+    {base:"This is an emergency.",instr:"改疑問句",expected:"Is this an emergency?",zh:"這是緊急狀況嗎？"},
+    {base:"You can call an ambulance.",instr:"改疑問句",expected:"Can you call an ambulance?",zh:"你可以叫救護車嗎？"},
+    {base:"I feel okay.",instr:"改否定句",expected:"I don't feel okay.",zh:"我覺得不太對勁。"},
+    {base:"There is a hospital nearby.",instr:"改疑問句",expected:"Is there a hospital nearby?",zh:"附近有醫院嗎？"},
+    {base:"He is breathing.",instr:"改否定句",expected:"He isn't breathing.",zh:"他沒有呼吸。"},
+    {base:"I can move.",instr:"改否定句",expected:"I can't move.",zh:"我不能動。"},
+    {base:"You have a first-aid kit.",instr:"改疑問句",expected:"Do you have a first-aid kit?",zh:"你有急救箱嗎？"},
+    {base:"Someone is hurt.",instr:"改疑問句",expected:"Is someone hurt?",zh:"有人受傷嗎？"},
+    {base:"The pain is bad.",instr:"改疑問句",expected:"Is the pain bad?",zh:"很痛嗎？"},
+    {base:"I took my medicine.",instr:"改否定句",expected:"I didn't take my medicine.",zh:"我沒吃藥。"},
+    {base:"You can help him.",instr:"改疑問句",expected:"Can you help him?",zh:"你可以幫他嗎？"},
+    {base:"It hurts here.",instr:"改疑問句",expected:"Does it hurt here?",zh:"這裡會痛嗎？"},
+    {base:"The ambulance is coming.",instr:"改疑問句",expected:"Is the ambulance coming?",zh:"救護車來了嗎？"},
+    {base:"I can stand up.",instr:"改否定句",expected:"I can't stand up.",zh:"我站不起來。"},
+    {base:"You can call this number.",instr:"改疑問句",expected:"Can you call this number?",zh:"你可以打這個號碼嗎？"},
+  ],
+  resp:[
+    {zh:"救命！",expected:"Help!"},
+    {zh:"叫救護車！",expected:"Call an ambulance!"},
+    {zh:"我需要醫生。",expected:"I need a doctor."},
+    {zh:"有人受傷了。",expected:"Someone is hurt."},
+    {zh:"報警！",expected:"Call the police!"},
+    {zh:"我快不能呼吸了。",expected:"I can't breathe well."},
+    {zh:"我胸口痛。",expected:"I have chest pain."},
+    {zh:"我對這個過敏。",expected:"I'm allergic to this."},
+    {zh:"最近的醫院在哪？",expected:"Where is the nearest hospital?"},
+    {zh:"我受傷了。",expected:"I'm injured."},
+    {zh:"請快一點！",expected:"Please hurry!"},
+    {zh:"我頭很暈。",expected:"I feel dizzy."},
+    {zh:"我需要我的藥。",expected:"I need my medication."},
+    {zh:"這裡很痛。",expected:"It hurts here."},
+    {zh:"請幫我打這個號碼。",expected:"Please call this number for me."},
+  ],
+  exp:[
+    {base:"Call an ambulance!",baseZh:"叫救護車！",adds:[
+      {cue:"quickly",full:"Call an ambulance, quickly!",zh:"快叫救護車！"},
+      {cue:"someone is hurt",full:"Call an ambulance, quickly! Someone is hurt.",zh:"快叫救護車！有人受傷。"},
+      {cue:"he can't breathe",full:"Call an ambulance, quickly! Someone is hurt. He can't breathe.",zh:"快叫救護車！有人受傷，他不能呼吸。"}]},
+    {base:"I need a doctor.",baseZh:"我需要醫生。",adds:[
+      {cue:"right now",full:"I need a doctor right now.",zh:"我現在就需要醫生。"},
+      {cue:"I'm in pain",full:"I need a doctor right now. I'm in pain.",zh:"我現在就需要醫生，我很痛。"},
+      {cue:"it's my chest",full:"I need a doctor right now. I'm in pain. It's my chest.",zh:"我現在就需要醫生，我很痛，是胸口。"}]},
+    {base:"There's been an accident.",baseZh:"發生意外了。",adds:[
+      {cue:"on this street",full:"There's been an accident on this street.",zh:"這條街發生意外了。"},
+      {cue:"someone is injured",full:"There's been an accident on this street. Someone is injured.",zh:"這條街發生意外了，有人受傷。"},
+      {cue:"please send help",full:"There's been an accident on this street. Someone is injured. Please send help.",zh:"這條街發生意外了，有人受傷，請派人來。"}]},
+    {base:"I lost my passport.",baseZh:"我護照掉了。",adds:[
+      {cue:"and my wallet",full:"I lost my passport and my wallet.",zh:"我護照和錢包掉了。"},
+      {cue:"I think they were stolen",full:"I lost my passport and my wallet. I think they were stolen.",zh:"我護照和錢包掉了，我想是被偷了。"},
+      {cue:"where's the police station",full:"I lost my passport and my wallet. I think they were stolen. Where's the police station?",zh:"我護照和錢包掉了，我想是被偷了，警察局在哪？"}]},
+    {base:"I'm allergic.",baseZh:"我會過敏。",adds:[
+      {cue:"to penicillin",full:"I'm allergic to penicillin.",zh:"我對盤尼西林過敏。"},
+      {cue:"please tell the doctor",full:"I'm allergic to penicillin. Please tell the doctor.",zh:"我對盤尼西林過敏，請告訴醫生。"},
+      {cue:"it's serious",full:"I'm allergic to penicillin. Please tell the doctor. It's serious.",zh:"我對盤尼西林過敏，請告訴醫生，很嚴重。"}]},
+  ]
+},
+];
+// 出國 10 主題全到齊（機場/點餐/問路/飯店/購物/叫車/換錢/求助/寒暄/緊急）
+
+const RATE={slow:0.7,mid:0.85,fast:1.0};   // 教練念的速度
+const curSpeed=()=>localStorage.getItem("pd_speed")||"slow";
+const getRate=()=>RATE[curSpeed()];
+function setSpeed(s){localStorage.setItem("pd_speed",s);home();}
+const CD=3;   // 倒數秒數（固定 3 秒）
+const el=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const norm=s=>(s||"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const prog=JSON.parse(localStorage.getItem("pd_prog")||"{}");  // {themeId:{next,score}}
+function saveProg(){ localStorage.setItem("pd_prog",JSON.stringify(prog)); }
+
+let theme=null, flat=[], idx=0, weak=[], heardText="", timer=null, recog=null, recording=false, cdStarted=false;
+
+// ---- 把一個主題攤平成 63 題 ----
+function buildFlat(t){
+  const f=[];
+  t.echo.forEach((e,k)=>f.push({seg:"暖身",type:"echo",n:k+1,total:t.echo.length,speak:e.en,expected:e.en,zh:e.zh}));
+  const sb=t.sub;
+  sb.cues.forEach((c,k)=>f.push({seg:"替換",type:"sub",n:k+1,total:sb.cues.length,speak:c.w,
+    base:sb.base,expected:sb.base.replace(sb.slot,c.w),zh:sb.baseZh.replace(sb.slotZh,c.zh),announce:(k===0?sb.base:null)}));
+  t.trans.forEach((it,k)=>f.push({seg:"轉換",type:"trans",n:k+1,total:t.trans.length,speak:it.base,
+    base:it.base,instr:it.instr,expected:it.expected,zh:it.zh}));
+  t.resp.forEach((it,k)=>f.push({seg:"回應",type:"resp",n:k+1,total:t.resp.length,speak:null,
+    show:it.zh,expected:it.expected,zh:it.zh}));
+  let en=0; const etot=t.exp.reduce((s,c)=>s+c.adds.length,0);
+  t.exp.forEach(chain=>{ let prev=chain.base;
+    chain.adds.forEach((a,ai)=>{ en++; f.push({seg:"擴展",type:"exp",n:en,total:etot,speak:a.cue,
+      prev:prev,expected:a.full,zh:a.zh,announce:(ai===0?chain.base:null),chainZh:(ai===0?chain.baseZh:null)}); prev=a.full; });
+  });
+  return f;
+}
+
+// ---- 語音 ----
+function bestVoice(){const all=speechSynthesis.getVoices();const en=all.filter(v=>/^en[-_]US/i.test(v.lang));const pool=en.length?en:all.filter(v=>/^en/i.test(v.lang));for(const p of["Natural","Google US English","Samantha","Aria","Jenny","Google"]){const m=pool.find(v=>v.name.includes(p));if(m)return m;}return pool[0]||null;}
+function say(text,rate,cb){try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||.95;const v=bestVoice();if(v)u.voice=v;if(cb)u.onend=cb;speechSynthesis.speak(u);}catch(e){if(cb)setTimeout(cb,300);}}
+function fallbackCD(cb,ms){setTimeout(cb,ms);}
+
+// ---- 首頁：選主題 ----
+function home(){
+  const sttOK=('webkitSpeechRecognition'in window)||('SpeechRecognition'in window);
+  const allDone=THEMES.every(t=>prog[t.id]);
+  el("app").innerHTML=
+    '<div class="pdtop"><span class="back" onclick="homeScreen()">← 單字卡首頁</span></div>'+'<h1>🎯 Pattern Drill 口說訓練</h1>'+
+    '<p class="sub">出國主題 · 一個主題 63 題（替換/轉換/回應/擴展 各15 + 暖身3）<br>聽提示 → 開口講 → App 聽你說、比對正解</p>'+
+    (allDone?'<div class="warnbox">🎉 這批主題你都練過一輪了！弱的會靠遺忘曲線回來；想要更多主題（點餐／問路／飯店…）跟 Claude 說一聲。</div>':'')+
+    '<div class="lbl">教練念句子的速度</div>'+
+    '<div class="spd">'+["slow","mid","fast"].map(s=>'<button class="'+(curSpeed()===s?"on":"")+'" onclick="PD.setSpeed(\''+s+'\')">'+({slow:"🐢 慢",mid:"中",fast:"🐇 快"}[s])+'</button>').join("")+'</div>'+
+    '<div class="lbl">選一個主題開始（🚧 出國 10 主題陸續加入）</div>'+
+    THEMES.map((t,k)=>{
+      const p=prog[t.id]; let tag='<span class="tag new">新</span>';
+      if(p){ tag = (p.next<=today())?'<span class="tag due">該複習</span>':'<span class="tag ok">已練 '+(p.score||0)+'%</span>'; }
+      return '<button class="theme" onclick="PD.start('+k+')"><span class="emo">'+t.emoji+'</span>'+
+        '<span class="nm"><b>'+t.label+'</b><small>'+t.desc+'</small></span>'+tag+'</button>';
+    }).join('')+
+    '<button class="theme" disabled><span class="emo">➕</span><span class="nm"><b>更多出國主題</b><small>點餐 / 問路 / 飯店 / 購物 / 叫車 / 換錢 / 求助 / 寒暄 / 緊急</small></span><span class="tag new">即將</span></button>'+
+    (sttOK?'<p class="sub">🎤 用 Chrome 開、允許麥克風最準。</p>':'<div class="warnbox">⚠️ 這瀏覽器沒有語音辨識（建議電腦版 Chrome）。仍可練：講完按「看正解」自評。</div>');
+}
+function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; drill(); }
+
+// ---- 每一題 ----
+function drill(){
+  if(idx>=flat.length) return themeDone();
+  const q=flat[idx]; heardText="";
+  let body='';
+  if(q.type==="echo")
+    body='<div class="cuelab">跟我念一次（暖身）</div><div class="cue sent">'+q.expected+'</div><div class="answerzh">'+q.zh+'</div>';
+  else if(q.type==="sub")
+    body='<div class="base">基礎句：<b>'+q.base+'</b></div><div class="cuelab">替換 → 講出整句</div><div class="cue">'+q.speak+'</div><div class="timer" id="timer"></div>';
+  else if(q.type==="trans")
+    body='<div class="cue sent">'+q.base+'</div><div class="cuelab">指令：<b>'+q.instr+'</b> → 講出來</div><div class="timer" id="timer"></div>';
+  else if(q.type==="resp")
+    body='<div class="cuelab">情境（用英文說出來）</div><div class="cue pdzh">'+q.show+'</div><div class="timer" id="timer"></div>';
+  else if(q.type==="exp")
+    body='<div class="base" style="font-size:18px;color:var(--ink)">'+q.prev+'</div><div class="cuelab">加上 → 講出整句</div><div class="cue">'+q.speak+'</div><div class="timer" id="timer"></div>';
+
+  el("app").innerHTML=
+    '<div class="pdtop"><span class="back" onclick="PD.open()">← 結束</span>'+
+      '<span class="stage">'+theme.emoji+' '+q.seg+' '+q.n+'/'+q.total+'</span></div>'+
+    '<div class="pdbar"><i id="prog"></i></div>'+
+    '<div class="seglab">主題：<b>'+theme.label+'</b></div>'+
+    '<div class="panel" id="panel">'+body+'</div>'+
+    (q.type==="echo"
+      ? '<button class="mic" onclick="PD.nextItem()">✓ 念好了，下一個</button>'
+      : '<button class="mic" id="mic" onclick="PD.toggleRec()">🎤 點一下開始講</button>'+
+        '<div class="row"><button onclick="PD.replay()">🔊 再聽提示</button><button onclick="PD.showAnswer()">看正解／自評</button></div>'+
+        '<div class="pdhint">講完它會比對；聽錯也沒關係，最後一票你按。</div>');
+  el("prog").style.width=(idx/flat.length*100)+"%";
+
+  // 唸提示 + 倒數（echo 只唸、不倒數）
+  cdStarted=false;
+  const startCD=()=>{ if(cdStarted)return; cdStarted=true; if(el("timer")) countdown(); };
+  speechSynthesis.cancel();
+  setTimeout(()=>{
+    if(q.type==="echo"){ say(q.expected,getRate()); return; }
+    if(q.type==="resp"){ startCD(); return; }            // 中文情境不唸，直接倒數
+    if(q.announce){ say(q.announce,getRate(),()=>say(q.speak,getRate(),startCD)); fallbackCD(startCD,7000); }
+    else { say(q.speak,getRate(),startCD); fallbackCD(startCD, q.type==="trans"?5000:3000); }
+  },150);
+}
+function countdown(){let t=CD;const e=el("timer");if(!e)return;e.className="timer";e.textContent="⏱ "+t;clearInterval(timer);
+  timer=setInterval(()=>{t--;if(t>0){e.textContent="⏱ "+t;}else{clearInterval(timer);e.className="timer out";e.textContent="⏱ time out！趕快講～";}},1000);}
+function replay(){const q=flat[idx];if(!q)return;speechSynthesis.cancel();
+  if(q.type==="sub"||q.type==="exp"){say(q.announce||q.base||q.prev,getRate(),()=>say(q.speak,getRate()));}
+  else if(q.type==="trans")say(q.base,getRate());
+  else if(q.type==="echo")say(q.expected,getRate());}
+function nextItem(){ idx++; drill(); }
+
+// ---- 語音辨識 ----
+function toggleRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ showAnswer(); return; }
+  if(recording){ try{recog.stop();}catch(e){} return; }
+  try{
+    recog=new SR(); recog.lang="en-US"; recog.interimResults=false; recog.maxAlternatives=1;
+    recording=true; el("mic").classList.add("rec"); el("mic").textContent="🔴 聽你說…（再點停止）";
+    recog.onresult=e=>{ heardText=e.results[0][0].transcript; };
+    recog.onerror=()=>{};
+    recog.onend=()=>{ recording=false; const m=el("mic"); if(m){m.classList.remove("rec");m.textContent="🎤 點一下開始講";} showAnswer(); };
+    recog.start();
+  }catch(e){ recording=false; showAnswer(); }
+}
+// ---- 比對 + 正解 + 自評 ----
+function showAnswer(){
+  clearInterval(timer);
+  const q=flat[idx]; const exp=norm(q.expected), got=norm(heardText);
+  let verdict, suggest;
+  if(!heardText){ verdict='<span class="diff-bad">（沒聽到 / 你自評）</span>'; suggest="w"; }
+  else if(got===exp){ verdict='<span class="diff-ok">✓ 跟正解一致</span>'; suggest="o"; }
+  else { const d=wordDiff(got,exp); verdict='差異：'+d.html; suggest=d.close?"w":"x"; }
+  el("panel").innerHTML=
+    (heardText?'<div class="heard"><span class="lab">你說的：</span>'+heardText+'</div>':'<div class="heard"><span class="lab">（沒收到語音）</span></div>')+
+    '<div class="answer">'+q.expected+'</div>'+(q.zh?'<div class="answerzh">'+q.zh+'</div>':'')+
+    '<div class="verdict">'+verdict+'</div>';
+  say(q.expected,getRate());
+  document.querySelectorAll(".mic,.row,.pdhint").forEach(e=>e.remove());
+  const g=document.createElement("div"); g.className="grade";
+  g.innerHTML='<button class="b-x" onclick="PD.grade(\'x\')">❌<small>不會</small></button>'+
+    '<button class="b-w" onclick="PD.grade(\'w\')">⚠️<small>差一點</small></button>'+
+    '<button class="b-o" onclick="PD.grade(\'o\')">✓<small>講對了</small></button>'+
+    '<button class="b-s" onclick="PD.grade(\'s\')">⭐<small>很順</small></button>';
+  el("panel").after(g);
+  const tip=document.createElement("div"); tip.className="pdhint";
+  tip.innerHTML="建議："+({x:"❌不會",w:"⚠️差一點",o:"✓講對了",s:"⭐很順"}[suggest])+" — 但<b>你按了算</b>。";
+  g.after(tip);
+}
+function wordDiff(got,exp){const g=got.split(" "),e=exp.split(" ");
+  const html=e.map(w=>g.includes(w)?'<span class="diff-ok">'+w+'</span>':'<span class="diff-bad">'+w+'</span>').join(" ");
+  const hit=e.filter(w=>g.includes(w)).length; return {html,close:hit>=e.length-1};}
+function grade(gr){
+  const q=flat[idx];
+  if(gr==="x"||gr==="w") weak.push({id:norm(q.expected).replace(/ /g,"").slice(0,24)||("pd"+idx),role:"self",
+    zh:q.zh||"",en:q.expected,source:"pattern-drill_"+today(),vocab:[theme.label+"／"+q.seg],weak:true});
+  idx++; drill();
+}
+
+// ---- 主題練完：算分 + 遺忘曲線 + weak JSON ----
+function themeDone(){
+  speechSynthesis.cancel();
+  const graded=flat.filter(q=>q.type!=="echo").length, w=weak.length, right=graded-w;
+  const pct=Math.round(right/graded*100);
+  const days=pct>=90?7:pct>=70?3:1; const d=new Date(); d.setDate(d.getDate()+days);
+  prog[theme.id]={next:d.toISOString().slice(0,10),score:pct}; saveProg();
+  const allDone=THEMES.every(t=>prog[t.id]);
+  const json=JSON.stringify(weak,null,1);
+  el("app").innerHTML='<div class="done"><h2>🎉 '+theme.label+' 練完了</h2>'+
+    '<div class="stat">共 <b>'+graded+'</b> 題（不含暖身）· 順 <b style="color:var(--ok)">'+right+'</b> · 要加強 <b style="color:var(--x)">'+w+'</b><br>得分 <b>'+pct+'%</b> → '+days+' 天後再排這主題複習</div>'+
+    (allDone?'<div class="warnbox">🎉🎉 你把目前所有出國主題都練過一輪了！想加新主題跟 Claude 說。</div>':'')+
+    (w?'<div class="lbl">要加強的句子（複製貼給 Claude → 存 Drive＋進單字卡 Pattern Drill 複習）</div><textarea id="out" readonly>'+json+'</textarea><button class="btn" onclick="PD.copyOut()">📋 複製 JSON</button>':'<p class="sub">全部都順，今天沒有要加強的 👏</p>')+
+    '<button class="btn alt" onclick="PD.open()">← 回主題選單</button></div>';
+}
+function copyOut(){const t=el("out");t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand("copy");}event.target.textContent="✓ 已複製";setTimeout(()=>event.target.textContent="📋 複製 JSON",1500);}
+
+if(speechSynthesis.getVoices().length===0) speechSynthesis.onvoiceschanged=()=>{};
+
+window.PD={open:home,start:start,drill:drill,toggleRec:toggleRec,replay:replay,showAnswer:showAnswer,grade:grade,nextItem:nextItem,copyOut:copyOut,setSpeed:setSpeed};
+})();
 </script>
 </body>
 </html>
