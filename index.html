@@ -150,6 +150,51 @@
 <body>
 <div class="app" id="app"></div>
 
+<!-- FSRS 排程引擎（ts-fsrs，權威實作；掛 window.FSRS 供下方非-module script 呼叫）-->
+<script type="module">
+  import { createEmptyCard, fsrs, generatorParameters, Rating } from 'https://esm.sh/ts-fsrs@4';
+  const f = fsrs(generatorParameters({ request_retention: 0.9, enable_fuzz: true, maximum_interval: 36500 }));
+  const RMAP = { x: Rating.Again, w: Rating.Hard, o: Rating.Good, s: Rating.Easy };
+  function rebuild(p){
+    const now = new Date();
+    if (p && p.stability != null) {
+      return {
+        due: p.nextReview ? new Date(p.nextReview) : now,
+        stability: p.stability, difficulty: p.difficulty,
+        elapsed_days: 0, scheduled_days: 0,
+        reps: p.reps || 0, lapses: p.lapses || 0, state: p.state || 0,
+        last_review: p.last_review ? new Date(p.last_review) : undefined,
+      };
+    }
+    return createEmptyCard(now); // 沒有 FSRS 狀態（舊卡/新卡）→ 當新卡初始化
+  }
+  function fmt(due, now){
+    const d = Math.round((due - now) / 86400000);
+    return d <= 0 ? "<1天" : d < 30 ? d + "天" : d < 365 ? Math.round(d/30) + "個月" : (d/365).toFixed(1) + "年";
+  }
+  window.FSRS = {
+    ready: true,
+    schedule(p, gradeChar){
+      const now = new Date();
+      const c = f.repeat(rebuild(p), now)[RMAP[gradeChar]].card;
+      return {
+        stability: c.stability, difficulty: c.difficulty, state: c.state,
+        reps: c.reps, lapses: c.lapses,
+        last_review: now.toISOString(),
+        next_review: c.due.toISOString().slice(0,10),
+      };
+    },
+    preview(p){
+      const now = new Date();
+      const rec = f.repeat(rebuild(p), now);
+      return {
+        x: fmt(rec[Rating.Again].card.due, now), w: fmt(rec[Rating.Hard].card.due, now),
+        o: fmt(rec[Rating.Good].card.due, now),  s: fmt(rec[Rating.Easy].card.due, now),
+      };
+    }
+  };
+</script>
+
 <script>
 const SUPA_URL = "https://uxxystijyqtxicrpggff.supabase.co";
 const SUPA_KEY = "sb_publishable_8vZn7IpyhAY27Y3s-jy9oQ_GneRz0jd";
@@ -185,7 +230,7 @@ async function login(){
   try{
     cards = await fetchJSON(SUPA_URL+"/rest/v1/cards?select=*", {headers:H});
     const rows = await fetchJSON(SUPA_URL+"/rest/v1/progress?select=*&passcode=eq."+encodeURIComponent(code), {headers:H});
-    prog={}; rows.forEach(r=> prog[r.card_id]={errorCount:r.error_count, nextReview:r.next_review});
+    prog={}; rows.forEach(r=> prog[r.card_id]={errorCount:r.error_count, nextReview:r.next_review, stability:r.stability, difficulty:r.difficulty, state:r.state, reps:r.reps, lapses:r.lapses, last_review:r.last_review});
     homeScreen();
   }catch(e){ gateScreen("連線失敗，請再試一次"); }
 }
@@ -198,8 +243,7 @@ function buildDeck(){
   const due = pool.filter(c=>{
     const p = prog[c.id];
     if(!p || !p.nextReview) return true;            // 從未複習 → 必出現
-    if(p.nextReview > t) return false;               // 還沒到複習日 → 跳過（遺忘曲線）
-    return Math.random() < appearProb(p.errorCount||0); // 到期 → 依答錯機率出現
+    return p.nextReview <= t;                         // 到期才出（FSRS 已精確排程，不再用隨機機率）
   });
   for(let k=due.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[due[k],due[j]]=[due[j],due[k]];}
   return due;
@@ -268,10 +312,10 @@ function reviewScreen(){
         '<ul class="vocab" id="vocab"></ul></div>'+
     '</div></div>'+
     '<div id="rate" class="rate hidden">'+
-      '<button class="b-x" onclick="rate(event,\'x\')">❌<small>不會 +1天</small></button>'+
-      '<button class="b-warn" onclick="rate(event,\'w\')">⚠️<small>印象 +3天</small></button>'+
-      '<button class="b-ok" onclick="rate(event,\'o\')">✓<small>記得 +7天</small></button>'+
-      '<button class="b-star" onclick="rate(event,\'s\')">⭐<small>很熟 +14天</small></button>'+
+      '<button class="b-x" onclick="rate(event,\'x\')">❌<small id="iv-x">不會</small></button>'+
+      '<button class="b-warn" onclick="rate(event,\'w\')">⚠️<small id="iv-w">印象</small></button>'+
+      '<button class="b-ok" onclick="rate(event,\'o\')">✓<small id="iv-o">記得</small></button>'+
+      '<button class="b-star" onclick="rate(event,\'s\')">⭐<small id="iv-s">很熟</small></button>'+
     '</div>';
   fillChips(()=>{ deck=buildDeck(); i=0; reviewScreen(); }); render();
 }
@@ -288,6 +332,11 @@ function render(){
   el("card").classList.remove("flipped"); el("rate").classList.add("hidden");
   requestAnimationFrame(fitCard); setTimeout(fitCard,80); setTimeout(fitCard,300);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitCard); // 字體載入後字會變高，要重量
+  if(window.FSRS && window.FSRS.ready){                 // 4 個評分鈕顯示 FSRS 算出的下次間隔（像 Anki）
+    const pv=window.FSRS.preview(prog[c.id]);
+    const setIv=(id,lbl,d)=>{const e2=el(id); if(e2) e2.textContent=lbl+" "+d;};
+    setIv("iv-x","不會",pv.x); setIv("iv-w","印象",pv.w); setIv("iv-o","記得",pv.o); setIv("iv-s","很熟",pv.s);
+  }
 }
 function fitCard(){
   const card=el("card"); if(!card) return;
@@ -337,15 +386,22 @@ async function delCard(e){
 }
 function rate(e,grade){
   e.stopPropagation();
-  const add={x:1,w:3,o:7,s:14}[grade], errAdd={x:1.0,w:0.5,o:0,s:0}[grade];
-  const c=deck[i], p=prog[c.id]||{errorCount:0};
-  p.errorCount=(p.errorCount||0)+errAdd;
-  const d=new Date(); d.setDate(d.getDate()+add); p.nextReview=d.toISOString().slice(0,10);
+  const c=deck[i]; let p=prog[c.id]||{};
+  let body;
+  if(window.FSRS && window.FSRS.ready){
+    const r=window.FSRS.schedule(p, grade);   // FSRS：依記憶穩定度/難度動態算下次複習日
+    p={...p, stability:r.stability, difficulty:r.difficulty, state:r.state, reps:r.reps, lapses:r.lapses, last_review:r.last_review, nextReview:r.next_review};
+    body={passcode, card_id:c.id, stability:r.stability, difficulty:r.difficulty, state:r.state, reps:r.reps, lapses:r.lapses, last_review:r.last_review, next_review:r.next_review, updated_at:new Date().toISOString()};
+  } else {
+    const add={x:1,w:3,o:7,s:14}[grade], errAdd={x:1.0,w:0.5,o:0,s:0}[grade];   // fallback：FSRS 未載入時用舊固定間隔
+    p.errorCount=(p.errorCount||0)+errAdd;
+    const d=new Date(); d.setDate(d.getDate()+add); p.nextReview=d.toISOString().slice(0,10);
+    body={passcode, card_id:c.id, error_count:p.errorCount, next_review:p.nextReview, updated_at:new Date().toISOString()};
+  }
   prog[c.id]=p;
-  // 同步到雲端（不擋畫面）
-  fetch(SUPA_URL+"/rest/v1/progress?on_conflict=passcode,card_id",{
+  fetch(SUPA_URL+"/rest/v1/progress?on_conflict=passcode,card_id",{   // 同步到雲端（不擋畫面）
     method:"POST", headers:{...HJ, Prefer:"resolution=merge-duplicates"},
-    body:JSON.stringify({passcode, card_id:c.id, error_count:p.errorCount, next_review:p.nextReview, updated_at:new Date().toISOString()})
+    body:JSON.stringify(body)
   }).catch(()=>{});
   i++; reviewScreen();
 }
