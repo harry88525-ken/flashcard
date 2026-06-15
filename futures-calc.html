@@ -243,7 +243,7 @@
     <div class="fcols">
     <div class="fcard">
       <div class="fcard-h"><span>📈 板塊熱度</span><button id="f-refresh" class="fbtn">↻ 手動更新</button></div>
-      <div class="tfseg" id="f-tf"><button class="on" data-tf="24h">24h</button><button data-tf="7d">7天</button><button data-tf="30d">30天</button></div>
+      <div class="tfseg" id="f-tf"><button class="on" data-tf="7d">7天</button><button data-tf="30d">30天</button><button data-tf="200d">200天</button><button data-tf="1y">1年</button></div>
       <div id="f-status" class="fstatus">載入中…</div>
       <div id="f-heat"></div>
       <div class="fnote" id="f-time"></div>
@@ -328,7 +328,7 @@
     'Wallets':'錢包','Analytics':'數據分析','Masternodes':'主節點','Bitcoin Fork':'比特幣分叉','Rollup ':'Rollup'
   };
   function zh(n){ return NAMES[n]||n; }
-  var SYM=null, MK=null, RAW=null, TF='24h', timer=null;
+  var SYM=null, MK=null, RAW=null, TF='7d', timer=null;
   function loadSym(){
     if(SYM) return Promise.resolve();
     try{ var c=JSON.parse(localStorage.getItem('cg_sym')||'null');
@@ -345,7 +345,6 @@
     return a.length? '<small class="htk">'+esc(a.join(' · '))+'</small>' : '';
   }
   function pctOf(c){
-    if(TF==='24h') return c.market_cap_change_24h;
     if(!MK) return null;
     var ids=c.top_3_coins_id||[], s=0,n=0;
     ids.forEach(function(id){ var m=MK[id]; if(m && typeof m[TF]==='number'){ s+=m[TF]; n++; } });
@@ -355,14 +354,13 @@
     if(!RAW) return;
     var rows=RAW.map(function(c){return {c:c,p:pctOf(c)};}).filter(function(o){return typeof o.p==='number'&&isFinite(o.p);});
     rows.sort(function(a,b){return b.p-a.p;});
-    var lbl=TF==='24h'?'24h':(TF==='7d'?'7天':'30天');
-    if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料（CoinGecko 可能限流），先看 24h 或稍後更新。</div>'; $('f-time').textContent=''; return; }
+    var LBL={'7d':'7天','30d':'30天','200d':'200天','1y':'1年'}, lbl=LBL[TF]||TF;
+    if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料（CoinGecko 可能限流），稍後按「↻ 手動更新」重試。</div>'; $('f-time').textContent=''; return; }
     $('f-heat').innerHTML=rows.slice(0,14).map(function(o){
       var c=o.c,p=o.p,cls=p>=0?'pos':'neg';
       return '<div class="hrow"><span class="hn">'+esc(zh(c.name))+tickers(c.top_3_coins_id)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
     }).join('');
-    var approx=TF==='24h'?'板塊整體市值變化':'板塊龍頭均值近似';
-    $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B · 依 '+lbl+' 排序（'+approx+'）';
+    $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B · 依 '+lbl+' 排序（板塊龍頭均值近似）';
   }
   function loadHeat(){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
@@ -371,14 +369,14 @@
     })
       .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(d){
-        RAW=d.filter(function(c){return c.market_cap>1e9 && typeof c.market_cap_change_24h==='number';});
+        RAW=d.filter(function(c){return c.market_cap>1e9;});
         var ids={}; RAW.forEach(function(c){ (c.top_3_coins_id||[]).forEach(function(id){ if(id) ids[id]=1; }); });
         var idList=Object.keys(ids).slice(0,250).join(',');
-        return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d');
+        return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y');
       })
       .then(function(r){ return r.ok? r.json() : []; })
       .then(function(mk){
-        MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency }; });
+        MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency, '200d':c.price_change_percentage_200d_in_currency, '1y':c.price_change_percentage_1y_in_currency }; });
         st.style.display='none';
         render();
       })
