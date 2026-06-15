@@ -95,6 +95,9 @@
   .fcols>.fcard{flex:1;min-width:0;}
   .htk{display:block;font-size:11px;color:var(--blue);margin-top:2px;font-weight:400;}
   @media(max-width:760px){ .fcols{flex-direction:column;} }
+  .tfseg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 10px;}
+  .tfseg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:7px;font-size:12px;font-weight:600;cursor:pointer;}
+  .tfseg button.on{background:var(--card2);color:#7eb6ff;}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -239,7 +242,8 @@
 
     <div class="fcols">
     <div class="fcard">
-      <div class="fcard-h"><span>📈 板塊熱度 24h</span><button id="f-refresh" class="fbtn">↻ 更新</button></div>
+      <div class="fcard-h"><span>📈 板塊熱度</span><button id="f-refresh" class="fbtn">↻ 手動更新</button></div>
+      <div class="tfseg" id="f-tf"><button class="on" data-tf="24h">24h</button><button data-tf="7d">7天</button><button data-tf="30d">30天</button></div>
       <div id="f-status" class="fstatus">載入中…</div>
       <div id="f-heat"></div>
       <div class="fnote" id="f-time"></div>
@@ -297,7 +301,34 @@
   }
   function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
   function fmtCap(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x);}
-  var SYM=null;
+  /* 板塊名中文對照（沒對到就顯示原文） */
+  var NAMES={
+    'Zero Knowledge (ZK)':'零知識證明 (ZK)','Quantum-Resistant':'抗量子','Privacy':'隱私','Privacy Coins':'隱私幣',
+    'Privacy Blockchain':'隱私公鏈','Privacy Infrastructure':'隱私基建','Decentralized Identifier (DID)':'去中心化身份 (DID)',
+    'Data Availability':'資料可用性 (DA)','Derivatives':'衍生品','Perpetuals':'永續合約','Options':'選擇權',
+    'Governance':'治理','Decentralized Exchange (DEX)':'去中心化交易所 (DEX)','Centralized Exchange (CEX) Token':'中心化交易所幣',
+    'Exchange-based Tokens':'交易所平台幣','Optimism Superchain Ecosystem':'Optimism 超級鏈生態','Chain Abstraction':'鏈抽象',
+    'Smart Contract Platform':'智能合約公鏈','Layer 0 (L0)':'Layer 0','Layer 1 (L1)':'Layer 1','Layer 2 (L2)':'Layer 2',
+    'Rollup':'Rollup','Proof of Stake (PoS)':'權益證明 (PoS)','Proof of Work (PoW)':'工作量證明 (PoW)',
+    'Liquid Staking':'流動性質押','Real World Assets (RWA)':'真實世界資產 (RWA)','RWA Protocol':'RWA 協議',
+    'Tokenized Assets':'代幣化資產','Tokenized Treasuries':'代幣化美債','Tokenized Gold':'代幣化黃金',
+    'Tokenized Commodities':'代幣化大宗商品','Tokenized Stock':'代幣化股票','Tokenized Private Credit':'代幣化私募信貸',
+    'Yield-Bearing Tokens':'生息代幣','Artificial Intelligence (AI)':'人工智慧 (AI)','AI Agents':'AI 代理',
+    'AI Agent Launchpad':'AI 代理發射台','AI Framework':'AI 框架','AI Applications':'AI 應用','Bittensor Subnets':'Bittensor 子網',
+    'DePIN':'去中心實體基建 (DePIN)','Storage':'去中心儲存','Oracle':'預言機','Infrastructure':'基礎設施',
+    'Cross-chain Communication':'跨鏈通訊','Internet of Things (IOT)':'物聯網 (IoT)','Directed Acyclic Graph (DAG)':'有向無環圖 (DAG)',
+    'Decentralized Finance (DeFi)':'去中心化金融 (DeFi)','Lending/Borrowing Protocols':'借貸協議','Yield Farming':'流動性挖礦',
+    'Automated Market Maker (AMM)':'自動造市 (AMM)','Index Coop Defi Index':'DeFi 指數','Stablecoins':'穩定幣',
+    'USD Stablecoin':'美元穩定幣','Fiat-backed Stablecoin':'法幣抵押穩定幣','Crypto-backed Stablecoin':'加密抵押穩定幣',
+    'Algorithmic Stablecoin':'演算法穩定幣','Yield-Bearing Stablecoin':'生息穩定幣','Synthetic Dollar':'合成美元',
+    'Stablecoin Issuer':'穩定幣發行商','Payment Solutions':'支付','Crypto Card Issuer':'加密卡發行商','Neobank':'加密新銀行',
+    'Prediction Markets':'預測市場','Gambling (GambleFi)':'博弈 (GambleFi)','Meme':'迷因幣','Solana Meme':'Solana 迷因',
+    'Dog-Themed':'狗狗主題','Frog-Themed':'青蛙主題','Metaverse':'元宇宙','Gaming (GameFi)':'鏈遊 (GameFi)',
+    'Play To Earn':'邊玩邊賺 (P2E)','NFT':'NFT','SocialFi':'社交金融','Launchpad':'發射台','Telegram Apps':'Telegram 應用',
+    'Wallets':'錢包','Analytics':'數據分析','Masternodes':'主節點','Bitcoin Fork':'比特幣分叉','Rollup ':'Rollup'
+  };
+  function zh(n){ return NAMES[n]||n; }
+  var SYM=null, MK=null, RAW=null, TF='24h', timer=null;
   function loadSym(){
     if(SYM) return Promise.resolve();
     try{ var c=JSON.parse(localStorage.getItem('cg_sym')||'null');
@@ -313,6 +344,26 @@
     var a=ids.map(function(id){return SYM[id];}).filter(Boolean).slice(0,3);
     return a.length? '<small class="htk">'+esc(a.join(' · '))+'</small>' : '';
   }
+  function pctOf(c){
+    if(TF==='24h') return c.market_cap_change_24h;
+    if(!MK) return null;
+    var ids=c.top_3_coins_id||[], s=0,n=0;
+    ids.forEach(function(id){ var m=MK[id]; if(m && typeof m[TF]==='number'){ s+=m[TF]; n++; } });
+    return n? s/n : null;
+  }
+  function render(){
+    if(!RAW) return;
+    var rows=RAW.map(function(c){return {c:c,p:pctOf(c)};}).filter(function(o){return typeof o.p==='number'&&isFinite(o.p);});
+    rows.sort(function(a,b){return b.p-a.p;});
+    var lbl=TF==='24h'?'24h':(TF==='7d'?'7天':'30天');
+    if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料（CoinGecko 可能限流），先看 24h 或稍後更新。</div>'; $('f-time').textContent=''; return; }
+    $('f-heat').innerHTML=rows.slice(0,14).map(function(o){
+      var c=o.c,p=o.p,cls=p>=0?'pos':'neg';
+      return '<div class="hrow"><span class="hn">'+esc(zh(c.name))+tickers(c.top_3_coins_id)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
+    }).join('');
+    var approx=TF==='24h'?'板塊整體市值變化':'板塊龍頭均值近似';
+    $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B · 依 '+lbl+' 排序（'+approx+'）';
+  }
   function loadHeat(){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
     loadSym().then(function(){
@@ -320,20 +371,31 @@
     })
       .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(d){
-        var big=d.filter(function(c){return c.market_cap>1e9 && typeof c.market_cap_change_24h==='number';});
-        big.sort(function(a,b){return b.market_cap_change_24h-a.market_cap_change_24h;});
-        $('f-heat').innerHTML=big.slice(0,14).map(function(c){
-          var p=c.market_cap_change_24h, cls=p>=0?'pos':'neg';
-          return '<div class="hrow"><span class="hn">'+esc(c.name)+tickers(c.top_3_coins_id)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
-        }).join('');
-        st.style.display='none';
-        $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B 板塊依 24h 漲跌排序';
+        RAW=d.filter(function(c){return c.market_cap>1e9 && typeof c.market_cap_change_24h==='number';});
+        var ids={}; RAW.forEach(function(c){ (c.top_3_coins_id||[]).forEach(function(id){ if(id) ids[id]=1; }); });
+        var idList=Object.keys(ids).slice(0,250).join(',');
+        return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d');
       })
-      .catch(function(e){ st.style.display='block'; st.textContent='⚠ 即時熱度載入失敗（'+e.message+'）—— CoinGecko 可能限流，按「↻ 更新」重試；下方圖鑑不受影響。'; });
+      .then(function(r){ return r.ok? r.json() : []; })
+      .then(function(mk){
+        MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency }; });
+        st.style.display='none';
+        render();
+      })
+      .catch(function(e){ st.style.display='block'; st.textContent='⚠ 即時熱度載入失敗（'+e.message+'）—— CoinGecko 可能限流，按「↻ 手動更新」重試；下方圖鑑不受影響。'; });
   }
   renderGuide();
   var rb=$('f-refresh'); if(rb) rb.addEventListener('click',loadHeat);
+  var tf=$('f-tf'); if(tf) tf.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
+    tf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); TF=b.dataset.tf; render();
+  });});
   loadHeat();
+  /* 自動更新：每 5 分鐘，僅在基本面分頁開著且頁面可見時 */
+  timer=setInterval(function(){
+    if(document.hidden) return;
+    var sf=document.getElementById('sec-fund');
+    if(sf && sf.classList.contains('on')) loadHeat();
+  },300000);
 })();
 </script>
 
