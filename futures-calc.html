@@ -98,6 +98,21 @@
   .tfseg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 10px;}
   .tfseg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:7px;font-size:12px;font-weight:600;cursor:pointer;}
   .tfseg button.on{background:var(--card2);color:#7eb6ff;}
+  .gitem{cursor:pointer;transition:border-color .12s;}
+  .gitem:hover{border-color:var(--blue);}
+  .garrow{color:var(--dim);font-weight:700;}
+  .fmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50;padding:20px;overflow-y:auto;}
+  .fmodal.on{display:flex;align-items:flex-start;justify-content:center;}
+  .fmbox{background:var(--card);border:1px solid var(--line);border-radius:12px;max-width:480px;width:100%;margin:auto;padding:18px;position:relative;}
+  .fmx{position:absolute;top:12px;right:12px;background:var(--card2);border:1px solid var(--line);color:var(--mut);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;}
+  .mhd{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:700;margin:0 34px 10px 0;}
+  .mdesc{font-size:13px;color:var(--mut);line-height:1.7;margin-bottom:14px;}
+  .mlbl{font-size:12px;color:var(--dim);margin-bottom:8px;font-weight:600;}
+  .mcoin{border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:8px;background:var(--card2);}
+  .mctop{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+  .mcs{font-size:14px;font-weight:700;color:#7eb6ff;}
+  .mcn{font-size:12px;color:var(--mut);}
+  .mcw{font-size:12px;color:var(--txt);line-height:1.6;}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -263,6 +278,13 @@
       <p><b>判斷輪到誰</b>：資金流入 + 龍頭創新高 + 英文 KOL 開始反覆講（中文圈通常末段才講）。</p>
     </details>
     <p class="foot">資料 CoinGecko · 熱度／圖鑑為研究參考，非投資建議</p>
+
+    <div class="fmodal" id="f-modal">
+      <div class="fmbox">
+        <button class="fmx" id="f-mx">✕</button>
+        <div id="f-mbody"></div>
+      </div>
+    </div>
   </div><!-- /sec-fund -->
 </div>
 
@@ -280,25 +302,87 @@
 (function(){
   function $(id){return document.getElementById(id);}
   var GUIDE=[
-    {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · Centrifuge · Maple',h:'🔥🔥',c:'hot'},
-    {n:'AI / AI Agent',w:'去中心算力·AI 代理經濟·推理市場',t:'TAO · RENDER · FET · VIRTUAL',h:'🔥🔥',c:'hot'},
-    {n:'隱私 / ZK',w:'零知識證明，機構合規必需',t:'ZEC · XMR · Aleo',h:'🔥🔥',c:'hot'},
-    {n:'穩定幣 / PayFi',w:'鏈上美元·無 gas 轉帳·24h 結算',t:'ENA · Plasma · USDC 生態',h:'🔥🔥',c:'hot'},
-    {n:'永續合約 DEX',w:'鏈上開合約，秒級成交',t:'HYPE · Aster · dYdX',h:'🔥',c:'warm'},
-    {n:'預測市場',w:'鏈上下注事件，兼情緒數據',t:'Polymarket 生態',h:'🌤',c:'warm'},
-    {n:'DePIN',w:'代幣激勵真實硬體（算力/網路/儲存）',t:'RENDER · HNT · FIL · AKT',h:'🌤',c:'warm'},
-    {n:'DeFi（老錢）',w:'借貸·交易·流動性',t:'UNI · AAVE · PENDLE · LDO',h:'🌤',c:'warm'},
-    {n:'Meme / 發射台',w:'純情緒博弈，賭性最高',t:'DOGE · PEPE · WIF · Pump.fun',h:'🎲',c:'meme'},
-    {n:'元宇宙 / GameFi',w:'虛擬世界 / 鏈遊（2021 那波）',t:'MANA · SAND · AXS · IMX',h:'❄️',c:'cold'},
-    {n:'基礎公鏈（地基）',w:'L1/L2，長期核心持倉非輪動',t:'BTC · ETH · SOL',h:'🪨',c:'base'}
+    {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · Centrifuge · Maple',h:'🔥🔥',c:'hot',
+     d:'把傳統金融資產（美國國債、私募信貸、房地產）做成鏈上代幣，讓鏈上資金拿得到「真實世界的利息」。2025 最賺的敘事、機構大舉進場，特性是漲得穩、跌得少。',
+     k:[{s:'ONDO',n:'Ondo Finance',w:'代幣化美債與美元生息產品(USDY、OUSG)，機構級龍頭，與貝萊德等合作'},
+        {s:'CFG',n:'Centrifuge',w:'老牌真實資產協議，把私募信貸、發票、房貸打包上鏈借貸'},
+        {s:'SYRUP',n:'Maple Finance',w:'機構級鏈上信用市場，專做給機構的私募借貸'},
+        {s:'POLYX',n:'Polymesh',w:'為證券型代幣(STO)打造的合規公鏈'}]},
+    {n:'AI / AI Agent',w:'去中心算力·AI 代理經濟·推理市場',t:'TAO · RENDER · FET · VIRTUAL',h:'🔥🔥',c:'hot',
+     d:'用區塊鏈做 AI 的算力、模型與「自動代理(agent)」經濟。題材性最強、波動大，各家年度展望都點名。',
+     k:[{s:'TAO',n:'Bittensor',w:'去中心化機器學習網路，子網互相競爭算力與模型，像 AI 版的挖礦市場'},
+        {s:'RENDER',n:'Render',w:'去中心化 GPU 算力，原本做 3D 渲染，現在也供給 AI 運算'},
+        {s:'FET',n:'Fetch.ai (ASI)',w:'AI 代理框架，讓自動代理替你執行任務；已併入 ASI 聯盟'},
+        {s:'VIRTUAL',n:'Virtuals Protocol',w:'Base 鏈上的 AI 代理發射台，做可被擁有、會賺錢的 AI 角色'}]},
+    {n:'隱私 / ZK',w:'零知識證明，機構合規必需',t:'ZEC · XMR · Aleo',h:'🔥🔥',c:'hot',
+     d:'用密碼學（零知識證明 ZK、環簽名）隱藏交易內容。既是「匿名幣」也是機構合規（證明身分卻不洩資料）的基礎，2025 底大噴。',
+     k:[{s:'XMR',n:'Monero',w:'預設「全匿名」的隱私幣（環簽名），匿名最徹底的老牌龍頭'},
+        {s:'ZEC',n:'Zcash',w:'用 zk-SNARK，可「選擇性」遮蔽交易；近期暴漲的主角'},
+        {s:'ALEO',n:'Aleo',w:'ZK 的 L1 公鏈，讓開發者寫「隱私智能合約」'}]},
+    {n:'穩定幣 / PayFi',w:'鏈上美元·無 gas 轉帳·24h 結算',t:'ENA · Plasma · USDC 生態',h:'🔥🔥',c:'hot',
+     d:'鏈上美元與支付基建——把「美元」搬上鏈做 24 小時即時結算。資金流量最大的賽道。',
+     k:[{s:'ENA',n:'Ethena',w:'合成美元 USDe，靠對沖永續資金費率生息；報酬高但有對手方/費率風險'},
+        {s:'XPL',n:'Plasma',w:'穩定幣專用 L1，主打零手續費的 USDT 轉帳'},
+        {s:'USDC',n:'Circle (USDC)',w:'最合規的法幣抵押穩定幣，1:1 美元儲備，機構首選'}]},
+    {n:'永續合約 DEX',w:'鏈上開合約，秒級成交',t:'HYPE · Aster · dYdX',h:'🔥',c:'warm',
+     d:'把合約交易所搬到鏈上，自己掌握資產又能開槓桿。Hyperliquid 帶動整個賽道起飛。',
+     k:[{s:'HYPE',n:'Hyperliquid',w:'自建高性能 L1 的鏈上永續龍頭，體驗接近中心化交易所，目前王者'},
+        {s:'ASTER',n:'Aster',w:'多鏈永續 DEX，主打跨鏈與高槓桿的新銳'},
+        {s:'DYDX',n:'dYdX',w:'老牌永續 DEX，已遷到自有 appchain'}]},
+    {n:'預測市場',w:'鏈上下注事件，兼情緒數據',t:'Polymarket · UMA',h:'🌤',c:'warm',
+     d:'讓人對「未來事件結果」下注（選舉、財報、天氣），賠率本身就是群眾情緒/機率數據，很適合當市場參考。',
+     k:[{s:'—',n:'Polymarket',w:'最大的預測市場，目前無原生代幣（用 USDC 下注、UMA 當預言機裁決）'},
+        {s:'UMA',n:'UMA',w:'樂觀預言機，負責裁決預測市場的事件結果'}]},
+    {n:'DePIN',w:'代幣激勵真實硬體（算力/網路/儲存）',t:'RENDER · HNT · FIL · AKT',h:'🌤',c:'warm',
+     d:'去中心化實體基礎建設——用代幣獎勵大家貢獻真實硬體（GPU、無線基地台、硬碟、雲端），把 AWS 那種中心化資源去中心化。',
+     k:[{s:'RENDER',n:'Render',w:'去中心 GPU 渲染與算力'},
+        {s:'HNT',n:'Helium',w:'去中心無線網路，眾人架 WiFi/5G 熱點賺幣'},
+        {s:'FIL',n:'Filecoin',w:'去中心化檔案儲存'},
+        {s:'AKT',n:'Akash',w:'去中心化雲端運算市場'}]},
+    {n:'DeFi（老錢）',w:'借貸·交易·流動性',t:'UNI · AAVE · PENDLE · LDO',h:'🌤',c:'warm',
+     d:'去中心化金融的基本盤：交易、借貸、收益、質押。上一輪主角，現在穩定但不暴衝，當配置壓艙石。',
+     k:[{s:'UNI',n:'Uniswap',w:'最大的去中心化交易所(AMM)，鏈上現貨交易龍頭'},
+        {s:'AAVE',n:'Aave',w:'最大的去中心化借貸協議'},
+        {s:'PENDLE',n:'Pendle',w:'把未來收益代幣化來交易，玩利率/收益'},
+        {s:'LDO',n:'Lido',w:'最大的流動性質押(把質押的 ETH 變成可流通的 stETH)'}]},
+    {n:'Meme / 發射台',w:'純情緒博弈，賭性最高',t:'DOGE · PEPE · WIF · PUMP',h:'🎲',c:'meme',
+     d:'沒有基本面，純靠情緒、社群與注意力。漲最兇也歸零最快，是市場的「最後一棒」；發射台則是讓人一鍵發幣的基建。',
+     k:[{s:'DOGE',n:'Dogecoin',w:'元祖迷因幣，市值最大、最有共識'},
+        {s:'PEPE',n:'Pepe',w:'青蛙迷因龍頭，這輪 meme 的代表'},
+        {s:'WIF',n:'dogwifhat',w:'Solana 上的迷因代表'},
+        {s:'PUMP',n:'Pump.fun',w:'最大的迷因發射台，一鍵發幣平台的平台幣'}]},
+    {n:'元宇宙 / GameFi',w:'虛擬世界 / 鏈遊（2021 那波）',t:'MANA · SAND · AXS · IMX',h:'❄️',c:'cold',
+     d:'虛擬世界、鏈遊、邊玩邊賺——2021 那波熱點，你舉的 MANA/SAND 就在這。目前已輪出、偏冷，留意「冷板塊回補」的機會。',
+     k:[{s:'MANA',n:'Decentraland',w:'虛擬世界與虛擬地產，元宇宙代表'},
+        {s:'SAND',n:'The Sandbox',w:'UGC 虛擬世界，玩家自建內容'},
+        {s:'AXS',n:'Axie Infinity',w:'邊玩邊賺(P2E)鏈遊元祖'},
+        {s:'IMX',n:'Immutable',w:'遊戲專用 L2，做鏈遊的基礎設施'}]},
+    {n:'基礎公鏈（地基）',w:'L1/L2，長期核心持倉非輪動',t:'BTC · ETH · SOL',h:'🪨',c:'base',
+     d:'整個市場的地基，不參與板塊輪動，是長期核心底倉。其他幣大多建在它們之上。',
+     k:[{s:'BTC',n:'Bitcoin',w:'數位黃金，價值儲存，全市場的定海神針'},
+        {s:'ETH',n:'Ethereum',w:'智能合約之王，最大的應用與結算層'},
+        {s:'SOL',n:'Solana',w:'高性能高速公鏈，應用與 meme 的熱門地'}]}
   ];
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
   function renderGuide(){
-    $('f-guide').innerHTML=GUIDE.map(function(g){
-      return '<div class="gitem g-'+g.c+'"><div class="gtop"><span class="gn">'+esc(g.n)+'</span><span class="gh">'+g.h+'</span></div>'+
+    $('f-guide').innerHTML=GUIDE.map(function(g,i){
+      return '<div class="gitem g-'+g.c+'" data-i="'+i+'"><div class="gtop"><span class="gn">'+esc(g.n)+'</span><span class="gh">'+g.h+' <span class="garrow">›</span></span></div>'+
         '<div class="gw">'+esc(g.w)+'</div><div class="gt">'+esc(g.t)+'</div></div>';
     }).join('');
+    $('f-guide').querySelectorAll('.gitem').forEach(function(el){
+      el.addEventListener('click',function(){ openSector(GUIDE[+el.dataset.i]); });
+    });
   }
+  function openSector(g){
+    var coins=(g.k||[]).map(function(x){
+      return '<div class="mcoin"><div class="mctop"><span class="mcs">'+esc(x.s)+'</span><span class="mcn">'+esc(x.n)+'</span></div><div class="mcw">'+esc(x.w)+'</div></div>';
+    }).join('');
+    $('f-mbody').innerHTML='<div class="mhd"><span>'+esc(g.n)+'</span><span>'+g.h+'</span></div>'+
+      '<div class="mdesc">'+esc(g.d||g.w)+'</div>'+
+      '<div class="mlbl">代表幣種 · 各自在做什麼</div>'+(coins||'<div class="mcw" style="color:var(--mut)">（待補）</div>');
+    $('f-modal').classList.add('on');
+  }
+  function closeModal(){ $('f-modal').classList.remove('on'); }
   function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
   function fmtCap(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x);}
   /* 板塊名中文對照（沒對到就顯示原文） */
@@ -383,6 +467,9 @@
       .catch(function(e){ st.style.display='block'; st.textContent='⚠ 即時熱度載入失敗（'+e.message+'）—— CoinGecko 可能限流，按「↻ 手動更新」重試；下方圖鑑不受影響。'; });
   }
   renderGuide();
+  var mx=$('f-mx'); if(mx) mx.addEventListener('click',closeModal);
+  var md=$('f-modal'); if(md) md.addEventListener('click',function(e){ if(e.target===md) closeModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
   var rb=$('f-refresh'); if(rb) rb.addEventListener('click',loadHeat);
   var tf=$('f-tf'); if(tf) tf.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
     tf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); TF=b.dataset.tf; render();
