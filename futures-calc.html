@@ -260,7 +260,7 @@
     <div class="fcols">
     <div class="fcard">
       <div class="fcard-h"><span>📈 板塊熱度</span><button id="f-refresh" class="fbtn">↻ 手動更新</button></div>
-      <div class="tfseg" id="f-tf"><button class="on" data-tf="7d">7天</button><button data-tf="30d">30天</button><button data-tf="200d">200天</button><button data-tf="1y">1年</button></div>
+      <div class="tfseg" id="f-tf"><button class="on" data-tf="7d">7天</button><button data-tf="30d">30天</button><button data-tf="200d">半年</button><button data-tf="1y">1年</button></div>
       <div id="f-status" class="fstatus">載入中…</div>
       <div id="f-heat"></div>
       <div class="fnote" id="f-time"></div>
@@ -472,7 +472,7 @@
     if(!RAW) return;
     var rows=RAW.map(function(c){return {c:c,p:pctOf(c)};}).filter(function(o){return typeof o.p==='number'&&isFinite(o.p);});
     rows.sort(function(a,b){return b.p-a.p;});
-    var LBL={'7d':'7天','30d':'30天','200d':'200天','1y':'1年'}, lbl=LBL[TF]||TF;
+    var LBL={'7d':'7天','30d':'30天','200d':'半年(≈200天)','1y':'1年'}, lbl=LBL[TF]||TF;
     if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料（CoinGecko 可能限流），稍後按「↻ 手動更新」重試。</div>'; $('f-time').textContent=''; return; }
     $('f-heat').innerHTML=rows.slice(0,14).map(function(o){
       var c=o.c,p=o.p,cls=p>=0?'pos':'neg';
