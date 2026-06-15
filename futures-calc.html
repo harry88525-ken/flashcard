@@ -320,12 +320,13 @@
     </div>
     <div class="fcard">
       <div class="fcard-h"><span>🎯 候選清單 · 依相對強度排序</span></div>
+      <div class="tfseg" id="s-tf"><button data-tf="7d">7天</button><button class="on" data-tf="30d">30天</button><button data-tf="200d">半年</button><button data-tf="1y">1年</button></div>
       <div class="sfilters">
         <label><input type="checkbox" id="s-clean" checked> 只看籌碼乾淨(防稀釋)</label>
         <label><input type="checkbox" id="s-hot"> 只看熱板塊</label>
       </div>
       <div id="s-status" class="fstatus">載入中…</div>
-      <div class="shead"><span>幣</span><span>板塊</span><span>30天</span><span>RS</span><span>籌碼</span></div>
+      <div class="shead"><span>幣</span><span>板塊</span><span id="s-thp">30天</span><span>RS</span><span>籌碼</span></div>
       <div id="s-table"></div>
       <div class="fnote">RS＝相對 BTC 強度(百分點，脫鉤向上=強) · 籌碼＝流通/全稀釋市值%，越高越不會被解鎖砸盤(防 ONDO) · 軟 gate：僅崩盤建議縮手 · 進場時機自行看圖</div>
     </div>
@@ -600,7 +601,7 @@
   /* ===== 選幣篩子（共用 GUIDE 當宇宙；相對強度 + 反稀釋） ===== */
   var UNI=[], seenU={};
   GUIDE.forEach(function(g){ (g.k||[]).forEach(function(x){ if(x.sl && !seenU[x.sl]){ seenU[x.sl]=1; UNI.push({sym:x.s,name:x.n,sl:x.sl,sec:g.n}); } }); });
-  var SROWS=null, SECAVG={};
+  var SROWS=null, BTCW={}, STF='30d';
   function dil(r){ if(r.mcfdv>=0.7) return ['✅','pos']; if(r.mcfdv>=0.4) return ['⚠️','']; return ['❌','neg']; }
   function renderEnv(g,btc7,btc30){
     var btcd=(g&&g.data&&g.data.market_cap_percentage)?g.data.market_cap_percentage.btc:null, regime,cls;
@@ -615,16 +616,21 @@
   }
   function renderScreener(){
     if(!SROWS) return;
-    var clean=$('s-clean').checked, hot=$('s-hot').checked, rows=SROWS.slice();
+    var clean=$('s-clean').checked, hot=$('s-hot').checked, bw=BTCW[STF]||0;
+    var LBL2={'7d':'7天','30d':'30天','200d':'半年','1y':'1年'}, thp=$('s-thp'); if(thp) thp.textContent=LBL2[STF]||STF;
+    var ss={},sc2={};
+    SROWS.forEach(function(r){ var ch=r.ch[STF], rs=(typeof ch==='number'?ch:0)-bw; ss[r.sec]=(ss[r.sec]||0)+rs; sc2[r.sec]=(sc2[r.sec]||0)+1; });
+    var SAVG={}; Object.keys(ss).forEach(function(k){SAVG[k]=ss[k]/sc2[k];});
+    var rows=SROWS.map(function(r){ var ch=r.ch[STF]; return {sym:r.sym,sec:r.sec,mcfdv:r.mcfdv,ch:ch,rs:(typeof ch==='number'?ch:0)-bw}; });
     if(clean) rows=rows.filter(function(r){return r.mcfdv>=0.4;});
-    if(hot) rows=rows.filter(function(r){return (SECAVG[r.sec]||0)>0;});
+    if(hot) rows=rows.filter(function(r){return (SAVG[r.sec]||0)>0;});
     rows.sort(function(a,b){return b.rs-a.rs;});
     rows=rows.slice(0,20);
     if(!rows.length){ $('s-table').innerHTML='<div class="fstatus">無符合條件，放寬篩選試試。</div>'; return; }
     $('s-table').innerHTML=rows.map(function(r){
       var d=dil(r);
       return '<div class="srow"><span class="ssym">'+esc(r.sym)+'</span><span class="ssec">'+esc(r.sec)+'</span>'
-        +'<span class="sp '+((r.p30||0)>=0?'pos':'neg')+'">'+(r.p30!=null?fmtPct(r.p30):'—')+'</span>'
+        +'<span class="sp '+((r.ch||0)>=0?'pos':'neg')+'">'+(r.ch!=null?fmtPct(r.ch):'—')+'</span>'
         +'<span class="sp '+(r.rs>=0?'pos':'neg')+'">'+(r.rs>=0?'+':'')+r.rs.toFixed(0)+'</span>'
         +'<span class="sp sd '+d[1]+'">'+d[0]+Math.round(r.mcfdv*100)+'</span></div>';
     }).join('');
@@ -652,23 +658,19 @@
     var ids=UNI.map(function(u){return u.sl;}); if(ids.indexOf('bitcoin')<0) ids.push('bitcoin');
     Promise.all([
       fetch('https://api.coingecko.com/api/v3/global').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d').then(function(r){return r.ok?r.json():[];}),
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d,200d,1y').then(function(r){return r.ok?r.json():[];}),
       fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=50&price_change_percentage=24h').then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
     ]).then(function(res){
       var g=res[0], mk=Array.isArray(res[1])?res[1]:[], by={}; mk.forEach(function(c){by[c.id]=c;});
       renderVol(res[2]);
-      var btc=by['bitcoin']||{}, btc7=btc.price_change_percentage_7d_in_currency||0, btc30=btc.price_change_percentage_30d_in_currency||0;
-      renderEnv(g,btc7,btc30);
-      var secsum={},seccnt={};
+      var btc=by['bitcoin']||{};
+      BTCW={'7d':btc.price_change_percentage_7d_in_currency||0,'30d':btc.price_change_percentage_30d_in_currency||0,'200d':btc.price_change_percentage_200d_in_currency||0,'1y':btc.price_change_percentage_1y_in_currency||0};
+      renderEnv(g,BTCW['7d'],BTCW['30d']);
       SROWS=UNI.map(function(u){
         var c=by[u.sl]; if(!c) return null;
-        var p30=c.price_change_percentage_30d_in_currency, p7=c.price_change_percentage_7d_in_currency;
-        var rs=(typeof p30==='number'?p30:0)-btc30;
         var mcfdv=(c.fully_diluted_valuation&&c.market_cap)?c.market_cap/c.fully_diluted_valuation:1;
-        secsum[u.sec]=(secsum[u.sec]||0)+rs; seccnt[u.sec]=(seccnt[u.sec]||0)+1;
-        return {sym:u.sym,sec:u.sec,p30:p30,p7:p7,rs:rs,mcfdv:mcfdv};
+        return {sym:u.sym,sec:u.sec,mcfdv:mcfdv,ch:{'7d':c.price_change_percentage_7d_in_currency,'30d':c.price_change_percentage_30d_in_currency,'200d':c.price_change_percentage_200d_in_currency,'1y':c.price_change_percentage_1y_in_currency}};
       }).filter(Boolean);
-      SECAVG={}; Object.keys(secsum).forEach(function(k){ SECAVG[k]=secsum[k]/seccnt[k]; });
       st.style.display='none';
       renderScreener();
     }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 載入失敗（'+e.message+'）—— CoinGecko 可能限流，按更新重試。'; });
@@ -678,6 +680,7 @@
   if(sc) sc.addEventListener('change',renderScreener);
   if(sh) sh.addEventListener('change',renderScreener);
   if(srf) srf.addEventListener('click',loadScreener);
+  var stf=$('s-tf'); if(stf) stf.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ stf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); STF=b.dataset.tf; renderScreener(); }); });
 })();
 </script>
 
