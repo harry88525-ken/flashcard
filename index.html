@@ -284,6 +284,7 @@ function homeScreen(){
     '<div class="home"><h1 class="home-title">📖 英文單字卡</h1>'+
       '<button class="home-btn" onclick="startReview()">🃏 單字卡複習<small>翻卡 + 遺忘曲線，幫你記住</small></button>'+
       '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+'<button class="home-btn" style="color:var(--star)" onclick="PD.open()">🎯 Pattern Drill 口說<small>出國 10 主題，聽提示開口講</small></button>'+
+      '<button class="home-btn" style="color:var(--star)" onclick="PD.reviewHome()">📖 Pattern Drill 複習<small>整組中英對照，用看的滑著複習</small></button>'+
       '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
 }
 function startReview(){ deck=buildDeck(); i=0; history=[]; reviewScreen(); }
@@ -1213,7 +1214,6 @@ function home(){
   el("app").innerHTML=
     '<div class="pdtop"><span class="back" onclick="homeScreen()">← 單字卡首頁</span></div>'+'<h1>🎯 Pattern Drill 口說訓練</h1>'+
     '<p class="sub">出國主題 · 一個主題 63 題（替換/轉換/回應/擴展 各15 + 暖身3）<br>聽提示 → 開口講 → App 聽你說、比對正解</p>'+
-    '<button class="btn alt" style="margin-bottom:18px" onclick="PD.reviewHome()">📖 看的複習<small style="display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:3px">中英對照整組滑著看 · 不用開口、不計分</small></button>'+
     (allDone?'<div class="warnbox">🎉 這批主題你都練過一輪了！弱的會靠遺忘曲線回來；想要更多主題（點餐／問路／飯店…）跟 Claude 說一聲。</div>':'')+
     '<div class="lbl">教練念句子的速度</div>'+
     '<div class="spd">'+["slow","mid","fast"].map(s=>'<button class="'+(curSpeed()===s?"on":"")+'" onclick="PD.setSpeed(\''+s+'\')">'+({slow:"🐢 慢",mid:"中",fast:"🐇 快"}[s])+'</button>').join("")+'</div>'+
@@ -1232,7 +1232,7 @@ function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; pdHis
 // ---- 看的複習：選主題 ----
 function reviewHome(){
   el("app").innerHTML=
-    '<div class="pdtop"><span class="back" onclick="PD.open()">← Pattern Drill 首頁</span></div>'+
+    '<div class="pdtop"><span class="back" onclick="homeScreen()">← 單字卡首頁</span></div>'+
     '<h1>📖 看的複習</h1>'+
     '<p class="sub">選一個主題，把整組句子（中文 → 英文正解）滑著看複習。<br>不用開口、不計分，點 🔊 可聽發音。</p>'+
     THEMES.map((t,k)=>
