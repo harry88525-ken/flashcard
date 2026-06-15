@@ -115,6 +115,16 @@
   .mcw{font-size:12px;color:var(--txt);line-height:1.6;}
   .mcp{font-size:11px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;color:var(--mut);}
   .mcp .pos,.mcp .neg{font-weight:600;}
+  .senv{font-size:13px;line-height:1.7;}
+  .senv .regime{display:inline-block;padding:2px 10px;border-radius:6px;font-weight:700;margin-top:4px;}
+  .sfilters{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-bottom:10px;}
+  .sfilters label{display:flex;align-items:center;gap:5px;cursor:pointer;}
+  .shead,.srow{display:grid;grid-template-columns:60px 1fr 56px 46px 56px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px;}
+  .shead{color:var(--dim);font-weight:600;}
+  .shead span:nth-child(n+3),.srow .sp{text-align:right;}
+  .srow .ssym{font-weight:700;color:var(--txt);}
+  .srow .ssec{color:var(--mut);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .srow .sd{text-align:right;font-size:11px;}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -124,8 +134,9 @@
   <p class="sub">合約開倉風控 + 現貨基本面 / 板塊輪動</p>
 
   <div class="topnav">
-    <button class="topbtn on" data-s="calc">📊 合約開倉計算器</button>
-    <button class="topbtn" data-s="fund">🔍 基本面分析</button>
+    <button class="topbtn on" data-s="calc">📊 開倉計算</button>
+    <button class="topbtn" data-s="fund">🔍 基本面</button>
+    <button class="topbtn" data-s="screen">🎯 選幣篩子</button>
   </div>
 
   <!-- ===================== 合約開倉計算器（原樣，未更動） ===================== -->
@@ -288,16 +299,38 @@
       </div>
     </div>
   </div><!-- /sec-fund -->
+
+  <!-- ===================== 選幣篩子 ===================== -->
+  <div class="section" id="sec-screen">
+    <h2 class="sechd">選幣篩子 · 現貨</h2>
+    <p class="sub">熱板塊 × 最強龍頭 × 籌碼乾淨（進場時機請自行看圖）</p>
+    <div class="fcard">
+      <div class="fcard-h"><span>🌡 市場環境（參考）</span><button id="s-refresh" class="fbtn">↻ 更新</button></div>
+      <div id="s-env" class="senv">點此分頁載入…</div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-h"><span>🎯 候選清單 · 依相對強度排序</span></div>
+      <div class="sfilters">
+        <label><input type="checkbox" id="s-clean" checked> 只看籌碼乾淨(防稀釋)</label>
+        <label><input type="checkbox" id="s-hot"> 只看熱板塊</label>
+      </div>
+      <div id="s-status" class="fstatus">載入中…</div>
+      <div class="shead"><span>幣</span><span>板塊</span><span>30天</span><span>RS</span><span>籌碼</span></div>
+      <div id="s-table"></div>
+      <div class="fnote">RS＝相對 BTC 強度(百分點，脫鉤向上=強) · 籌碼＝流通/全稀釋市值%，越高越不會被解鎖砸盤(防 ONDO) · 軟 gate：僅崩盤建議縮手 · 進場時機自行看圖</div>
+    </div>
+  </div><!-- /sec-screen -->
 </div>
 
 <script>
 /* 頂層分頁切換（IIFE 隔離，不動計算器） */
 (function(){
   var btns=document.querySelectorAll('.topbtn'); if(!btns.length)return;
+  var secs={calc:'sec-calc',fund:'sec-fund',screen:'sec-screen'};
   btns.forEach(function(b){ b.addEventListener('click',function(){
     btns.forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
-    document.getElementById('sec-calc').classList.toggle('on', b.dataset.s==='calc');
-    document.getElementById('sec-fund').classList.toggle('on', b.dataset.s==='fund');
+    Object.keys(secs).forEach(function(k){ var el=document.getElementById(secs[k]); if(el) el.classList.toggle('on', b.dataset.s===k); });
+    if(b.dataset.s==='screen' && window.__loadScreener) window.__loadScreener();
   });});
 })();
 /* 基本面分析：CoinGecko 板塊熱度 + 精選圖鑑（IIFE 隔離） */
@@ -553,6 +586,68 @@
     var sf=document.getElementById('sec-fund');
     if(sf && sf.classList.contains('on')) loadHeat();
   },300000);
+
+  /* ===== 選幣篩子（共用 GUIDE 當宇宙；相對強度 + 反稀釋） ===== */
+  var UNI=[], seenU={};
+  GUIDE.forEach(function(g){ (g.k||[]).forEach(function(x){ if(x.sl && !seenU[x.sl]){ seenU[x.sl]=1; UNI.push({sym:x.s,name:x.n,sl:x.sl,sec:g.n}); } }); });
+  var SROWS=null, SECAVG={};
+  function dil(r){ if(r.mcfdv>=0.7) return ['✅','pos']; if(r.mcfdv>=0.4) return ['⚠️','']; return ['❌','neg']; }
+  function renderEnv(g,btc7,btc30){
+    var btcd=(g&&g.data&&g.data.market_cap_percentage)?g.data.market_cap_percentage.btc:null, regime,cls;
+    if(btc30<=-15){ regime='偏崩盤 · 建議縮手'; cls='neg'; }
+    else if(btc30>=10){ regime='多頭'; cls='pos'; }
+    else { regime='輪動盤整 · 看相對強度'; cls='warm'; }
+    var bg=cls==='pos'?'rgba(22,199,132,.16)':cls==='neg'?'rgba(234,57,67,.16)':'rgba(240,185,11,.14)';
+    var co=cls==='pos'?'var(--green)':cls==='neg'?'var(--red)':'var(--amber)';
+    $('s-env').innerHTML='BTC 30天 <span class="'+(btc30>=0?'pos':'neg')+'">'+fmtPct(btc30)+'</span> · 7天 <span class="'+(btc7>=0?'pos':'neg')+'">'+fmtPct(btc7)+'</span>'+(btcd!=null?' · BTC 市佔 '+btcd.toFixed(1)+'%':'')
+      +'<br><span class="regime" style="background:'+bg+';color:'+co+';">'+regime+'</span>'
+      +'<div class="fnote" style="margin-top:6px;">軟判斷僅供參考：只有偏崩盤才建議縮手；BTC 橫盤時能逆勢走強的幣反而最強。</div>';
+  }
+  function renderScreener(){
+    if(!SROWS) return;
+    var clean=$('s-clean').checked, hot=$('s-hot').checked, rows=SROWS.slice();
+    if(clean) rows=rows.filter(function(r){return r.mcfdv>=0.4;});
+    if(hot) rows=rows.filter(function(r){return (SECAVG[r.sec]||0)>0;});
+    rows.sort(function(a,b){return b.rs-a.rs;});
+    rows=rows.slice(0,20);
+    if(!rows.length){ $('s-table').innerHTML='<div class="fstatus">無符合條件，放寬篩選試試。</div>'; return; }
+    $('s-table').innerHTML=rows.map(function(r){
+      var d=dil(r);
+      return '<div class="srow"><span class="ssym">'+esc(r.sym)+'</span><span class="ssec">'+esc(r.sec)+'</span>'
+        +'<span class="sp '+((r.p30||0)>=0?'pos':'neg')+'">'+(r.p30!=null?fmtPct(r.p30):'—')+'</span>'
+        +'<span class="sp '+(r.rs>=0?'pos':'neg')+'">'+(r.rs>=0?'+':'')+r.rs.toFixed(0)+'</span>'
+        +'<span class="sp sd '+d[1]+'">'+d[0]+Math.round(r.mcfdv*100)+'</span></div>';
+    }).join('');
+  }
+  function loadScreener(){
+    var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中…';
+    var ids=UNI.map(function(u){return u.sl;}); if(ids.indexOf('bitcoin')<0) ids.push('bitcoin');
+    Promise.all([
+      fetch('https://api.coingecko.com/api/v3/global').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d').then(function(r){return r.ok?r.json():[];})
+    ]).then(function(res){
+      var g=res[0], mk=res[1]||[], by={}; mk.forEach(function(c){by[c.id]=c;});
+      var btc=by['bitcoin']||{}, btc7=btc.price_change_percentage_7d_in_currency||0, btc30=btc.price_change_percentage_30d_in_currency||0;
+      renderEnv(g,btc7,btc30);
+      var secsum={},seccnt={};
+      SROWS=UNI.map(function(u){
+        var c=by[u.sl]; if(!c) return null;
+        var p30=c.price_change_percentage_30d_in_currency, p7=c.price_change_percentage_7d_in_currency;
+        var rs=(typeof p30==='number'?p30:0)-btc30;
+        var mcfdv=(c.fully_diluted_valuation&&c.market_cap)?c.market_cap/c.fully_diluted_valuation:1;
+        secsum[u.sec]=(secsum[u.sec]||0)+rs; seccnt[u.sec]=(seccnt[u.sec]||0)+1;
+        return {sym:u.sym,sec:u.sec,p30:p30,p7:p7,rs:rs,mcfdv:mcfdv};
+      }).filter(Boolean);
+      SECAVG={}; Object.keys(secsum).forEach(function(k){ SECAVG[k]=secsum[k]/seccnt[k]; });
+      st.style.display='none';
+      renderScreener();
+    }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 載入失敗（'+e.message+'）—— CoinGecko 可能限流，按更新重試。'; });
+  }
+  window.__loadScreener=loadScreener;
+  var sc=$('s-clean'), sh=$('s-hot'), srf=$('s-refresh');
+  if(sc) sc.addEventListener('change',renderScreener);
+  if(sh) sh.addEventListener('change',renderScreener);
+  if(srf) srf.addEventListener('click',loadScreener);
 })();
 </script>
 
