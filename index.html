@@ -72,6 +72,7 @@
   .home-btn.alt{color:var(--self)}
   .home-foot{margin-top:20px}
   .top .back{cursor:pointer;text-decoration:underline;color:var(--navy)}
+  .top .undo{cursor:pointer;color:var(--navy);margin-right:16px}
   .ovcount{font-size:13px;color:var(--muted);margin-bottom:6px}
   .ovlist{display:flex;flex-direction:column;gap:14px}
   .ovcard{position:relative;background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:14px;padding:18px;box-shadow:0 4px 14px rgba(44,77,122,.07)}
@@ -210,6 +211,7 @@ async function fetchJSON(url, opts, tries=4){
 }
 let passcode = localStorage.getItem("fc_passcode") || "";
 let cards=[], prog={}, deck=[], i=0, flipped=false, selectedSources=new Set(); // 空集合=全部；可複選多週
+let history=[];   // 評分前狀態堆疊，供「↩ 上一張」還原（含覆寫回雲端，根治按錯評分）
 const el = id => document.getElementById(id);
 const todayStr = () => new Date().toISOString().slice(0,10);
 const roleName = {other:"對方",self:"我",both:"兩人"};
@@ -276,7 +278,7 @@ function homeScreen(){
       '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+'<button class="home-btn" style="color:var(--star)" onclick="PD.open()">🎯 Pattern Drill 口說<small>出國 10 主題，聽提示開口講</small></button>'+
       '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
 }
-function startReview(){ deck=buildDeck(); i=0; reviewScreen(); }
+function startReview(){ deck=buildDeck(); i=0; history=[]; reviewScreen(); }
 function overviewScreen(){
   el("app").innerHTML=
     '<div class="top"><span class="back" onclick="homeScreen()">← 返回</span><span class="logout" onclick="logout()">換 passcode</span></div>'+
@@ -300,7 +302,7 @@ function renderOverview(){
 function reviewScreen(){
   if(i>=deck.length){ return finishScreen(); }
   el("app").innerHTML =
-    '<div class="top"><span><span class="back" onclick="homeScreen()">← 返回</span> <span id="counter"></span></span><span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
+    '<div class="top"><span><span class="back" onclick="homeScreen()">← 返回</span> <span id="counter"></span></span><span><span class="undo" id="undoBtn" onclick="undoRate(event)" style="display:none">↩ 上一張</span><span class="del" onclick="delCard(event)">🗑 刪除</span><span class="logout" onclick="logout()">換 passcode</span></span></div>'+
     '<div class="srcrow">範圍：<div class="chips" id="srcChips"></div></div>'+
     '<div class="bar"><i id="prog"></i></div>'+
     '<div id="card" class="card" onclick="flip()"><div class="inner">'+
@@ -317,7 +319,7 @@ function reviewScreen(){
       '<button class="b-ok" onclick="rate(event,\'o\')">✓<small id="iv-o">記得</small></button>'+
       '<button class="b-star" onclick="rate(event,\'s\')">⭐<small id="iv-s">很熟</small></button>'+
     '</div>';
-  fillChips(()=>{ deck=buildDeck(); i=0; reviewScreen(); }); render();
+  fillChips(()=>{ deck=buildDeck(); i=0; history=[]; reviewScreen(); }); render();
 }
 function render(){
   const c = deck[i]; flipped=false;
@@ -330,6 +332,7 @@ function render(){
   el("vocab").querySelectorAll("button[data-vk]").forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); speak((c.vocab[+b.dataset.vk]||"").split(/／|\//)[0].trim()); }; });
   for(const b of [el("b1"),el("b2")]){ b.className="badge role-"+c.role; b.textContent=roleName[c.role]; }
   el("card").classList.remove("flipped"); el("rate").classList.add("hidden");
+  const ub=el("undoBtn"); if(ub) ub.style.display = history.length ? "" : "none";   // 有可還原的評分才顯示「↩ 上一張」
   requestAnimationFrame(fitCard); setTimeout(fitCard,80); setTimeout(fitCard,300);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitCard); // 字體載入後字會變高，要重量
   if(window.FSRS && window.FSRS.ready){                 // 4 個評分鈕顯示 FSRS 算出的下次間隔（像 Anki）
@@ -381,12 +384,15 @@ async function delCard(e){
     if(!r.ok) throw 0;
     cards=cards.filter(x=>x.id!==c.id);
     deck.splice(i,1);
+    history=[];          // 刪卡後 deck 索引位移，清掉還原堆疊避免錯亂
     reviewScreen();
   }catch(err){ alert("刪除失敗，請再試一次"); }
 }
 function rate(e,grade){
   e.stopPropagation();
-  const c=deck[i]; let p=prog[c.id]||{};
+  const c=deck[i];
+  history.push({index:i, cardId:c.id, before: prog[c.id]?{...prog[c.id]}:null});  // 記住評分前進度，供「↩ 上一張」還原
+  let p=prog[c.id]||{};
   let body;
   if(window.FSRS && window.FSRS.ready){
     const r=window.FSRS.schedule(p, grade);   // FSRS：依記憶穩定度/難度動態算下次複習日
@@ -399,21 +405,42 @@ function rate(e,grade){
     body={passcode, card_id:c.id, error_count:p.errorCount, next_review:p.nextReview, updated_at:new Date().toISOString()};
   }
   prog[c.id]=p;
-  fetch(SUPA_URL+"/rest/v1/progress?on_conflict=passcode,card_id",{   // 同步到雲端（不擋畫面）
-    method:"POST", headers:{...HJ, Prefer:"resolution=merge-duplicates"},
-    body:JSON.stringify(body)
-  }).catch(()=>{});
+  saveProgToCloud(body);   // 同步到雲端（不擋畫面）
   i++; reviewScreen();
+}
+function progBody(cardId,p){   // 進度物件 → Supabase 寫入 body（FSRS 版 / 舊固定間隔版都支援）
+  const base={passcode, card_id:cardId, updated_at:new Date().toISOString()};
+  return p.stability!=null
+    ? {...base, stability:p.stability, difficulty:p.difficulty, state:p.state, reps:p.reps, lapses:p.lapses, last_review:p.last_review, next_review:p.nextReview}
+    : {...base, error_count:p.errorCount, next_review:p.nextReview};
+}
+function saveProgToCloud(body){
+  fetch(SUPA_URL+"/rest/v1/progress?on_conflict=passcode,card_id",{
+    method:"POST", headers:{...HJ, Prefer:"resolution=merge-duplicates"}, body:JSON.stringify(body)
+  }).catch(()=>{});
+}
+function deleteProgFromCloud(cardId){   // 還原成「從未複習」→ 刪掉雲端進度列
+  fetch(SUPA_URL+"/rest/v1/progress?passcode=eq."+encodeURIComponent(passcode)+"&card_id=eq."+encodeURIComponent(cardId),
+    {method:"DELETE", headers:H}).catch(()=>{});
+}
+function undoRate(e){   // ↩ 上一張：退回上一張卡，把它評分前的進度（含雲端）原封還原
+  if(e) e.stopPropagation();
+  if(!history.length) return;
+  const h=history.pop();
+  if(h.before){ prog[h.cardId]=h.before; saveProgToCloud(progBody(h.cardId,h.before)); }
+  else { delete prog[h.cardId]; deleteProgFromCloud(h.cardId); }
+  i=h.index; reviewScreen();
 }
 function finishScreen(){
   const msg = deck.length===0 ? (selectedSources.size===0?"今天沒有到期的卡 🎉":"這個範圍今天沒到期的卡 🎉") : "🎉 複習完了";
   el("app").innerHTML='<div class="center"><h2>'+msg+'</h2>'+
     '<p>換個範圍繼續（可複選）：</p>'+
     '<div class="srcrow" style="justify-content:center">範圍：<div class="chips" id="srcChips"></div></div>'+
+    (history.length?'<button class="reset" onclick="undoRate()">↩ 回上一張</button> ':'')+
     '<button class="reset" onclick="homeScreen()">← 回首頁</button> '+
     '<button class="reset" onclick="login()">重新整理</button> '+
     '<button class="reset" onclick="logout()">換 passcode</button></div>';
-  fillChips(()=>{ deck=buildDeck(); i=0; reviewScreen(); });
+  fillChips(()=>{ deck=buildDeck(); i=0; history=[]; reviewScreen(); });
 }
 
 if(passcode) login(); else gateScreen();
@@ -1145,6 +1172,7 @@ const prog=JSON.parse(localStorage.getItem("pd_prog")||"{}");  // {themeId:{next
 function saveProg(){ localStorage.setItem("pd_prog",JSON.stringify(prog)); }
 
 let theme=null, flat=[], idx=0, weak=[], heardText="", timer=null, recog=null, recording=false, cdStarted=false;
+let pdHistory=[];   // {idx,weakLen} 堆疊，供「↩ 上一題」退回（並還原誤判時加進的弱句）
 
 // ---- 把一個主題攤平成 63 題 ----
 function buildFlat(t){
@@ -1190,7 +1218,7 @@ function home(){
     '<button class="theme" disabled><span class="emo">➕</span><span class="nm"><b>更多出國主題</b><small>點餐 / 問路 / 飯店 / 購物 / 叫車 / 換錢 / 求助 / 寒暄 / 緊急</small></span><span class="tag new">即將</span></button>'+
     (sttOK?'<p class="sub">🎤 用 Chrome 開、允許麥克風最準。</p>':'<div class="warnbox">⚠️ 這瀏覽器沒有語音辨識（建議電腦版 Chrome）。仍可練：講完按「看正解」自評。</div>');
 }
-function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; drill(); }
+function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; pdHistory=[]; drill(); }
 
 // ---- 每一題 ----
 function drill(){
@@ -1209,7 +1237,7 @@ function drill(){
     body='<div class="base" style="font-size:18px;color:var(--ink)">'+q.prev+'</div><div class="cuelab">加上 → 講出整句</div><div class="cue">'+q.speak+'</div><div class="timer" id="timer"></div>';
 
   el("app").innerHTML=
-    '<div class="pdtop"><span class="back" onclick="PD.open()">← 結束</span>'+
+    '<div class="pdtop"><span><span class="back" onclick="PD.open()">← 結束</span>'+(pdHistory.length?' <span class="back" onclick="PD.prevItem()">↩ 上一題</span>':'')+'</span>'+
       '<span class="stage">'+theme.emoji+' '+q.seg+' '+q.n+'/'+q.total+'</span></div>'+
     '<div class="pdbar"><i id="prog"></i></div>'+
     '<div class="seglab">主題：<b>'+theme.label+'</b></div>'+
@@ -1238,7 +1266,13 @@ function replay(){const q=flat[idx];if(!q)return;speechSynthesis.cancel();
   if(q.type==="sub"||q.type==="exp"){say(q.announce||q.base||q.prev,getRate(),()=>say(q.speak,getRate()));}
   else if(q.type==="trans")say(q.base,getRate());
   else if(q.type==="echo")say(q.expected,getRate());}
-function nextItem(){ idx++; drill(); }
+function nextItem(){ pdHistory.push({idx,weakLen:weak.length}); idx++; drill(); }
+function prevItem(){   // ↩ 上一題：退回上一題，並移除這題誤判時加進的弱句
+  if(!pdHistory.length) return;
+  const h=pdHistory.pop();
+  weak.length=h.weakLen;
+  idx=h.idx; drill();
+}
 
 // ---- 語音辨識 ----
 function toggleRec(){
@@ -1283,6 +1317,7 @@ function wordDiff(got,exp){const g=got.split(" "),e=exp.split(" ");
   const hit=e.filter(w=>g.includes(w)).length; return {html,close:hit>=e.length-1};}
 function grade(gr){
   const q=flat[idx];
+  pdHistory.push({idx,weakLen:weak.length});   // 記住評分前位置與弱句數，供「↩ 上一題」還原
   if(gr==="x"||gr==="w") weak.push({id:norm(q.expected).replace(/ /g,"").slice(0,24)||("pd"+idx),role:"self",
     zh:q.zh||"",en:q.expected,source:"pattern-drill_"+today(),vocab:[theme.label+"／"+q.seg],weak:true});
   idx++; drill();
@@ -1301,13 +1336,14 @@ function themeDone(){
     '<div class="stat">共 <b>'+graded+'</b> 題（不含暖身）· 順 <b style="color:var(--ok)">'+right+'</b> · 要加強 <b style="color:var(--x)">'+w+'</b><br>得分 <b>'+pct+'%</b> → '+days+' 天後再排這主題複習</div>'+
     (allDone?'<div class="warnbox">🎉🎉 你把目前所有出國主題都練過一輪了！想加新主題跟 Claude 說。</div>':'')+
     (w?'<div class="lbl">要加強的句子（複製貼給 Claude → 存 Drive＋進單字卡 Pattern Drill 複習）</div><textarea id="out" readonly>'+json+'</textarea><button class="btn" onclick="PD.copyOut()">📋 複製 JSON</button>':'<p class="sub">全部都順，今天沒有要加強的 👏</p>')+
+    (pdHistory.length?'<button class="btn alt" onclick="PD.prevItem()">↩ 回上一題</button>':'')+
     '<button class="btn alt" onclick="PD.open()">← 回主題選單</button></div>';
 }
 function copyOut(){const t=el("out");t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand("copy");}event.target.textContent="✓ 已複製";setTimeout(()=>event.target.textContent="📋 複製 JSON",1500);}
 
 if(speechSynthesis.getVoices().length===0) speechSynthesis.onvoiceschanged=()=>{};
 
-window.PD={open:home,start:start,drill:drill,toggleRec:toggleRec,replay:replay,showAnswer:showAnswer,grade:grade,nextItem:nextItem,copyOut:copyOut,setSpeed:setSpeed};
+window.PD={open:home,start:start,drill:drill,toggleRec:toggleRec,replay:replay,showAnswer:showAnswer,grade:grade,nextItem:nextItem,prevItem:prevItem,copyOut:copyOut,setSpeed:setSpeed};
 })();
 </script>
 </body>
