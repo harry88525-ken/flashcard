@@ -113,6 +113,8 @@
   .mcs{font-size:14px;font-weight:700;color:#7eb6ff;}
   .mcn{font-size:12px;color:var(--mut);}
   .mcw{font-size:12px;color:var(--txt);line-height:1.6;}
+  .mcp{font-size:11px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;color:var(--mut);}
+  .mcp .pos,.mcp .neg{font-weight:600;}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -302,66 +304,83 @@
 (function(){
   function $(id){return document.getElementById(id);}
   var GUIDE=[
-    {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · Centrifuge · Maple',h:'🔥🔥',c:'hot',
-     d:'把傳統金融資產（美國國債、私募信貸、房地產）做成鏈上代幣，讓鏈上資金拿得到「真實世界的利息」。2025 最賺的敘事、機構大舉進場，特性是漲得穩、跌得少。',
-     k:[{s:'ONDO',n:'Ondo Finance',w:'代幣化美債與美元生息產品(USDY、OUSG)，機構級龍頭，與貝萊德等合作'},
-        {s:'CFG',n:'Centrifuge',w:'老牌真實資產協議，把私募信貸、發票、房貸打包上鏈借貸'},
-        {s:'SYRUP',n:'Maple Finance',w:'機構級鏈上信用市場，專做給機構的私募借貸'},
-        {s:'POLYX',n:'Polymesh',w:'為證券型代幣(STO)打造的合規公鏈'}]},
-    {n:'AI / AI Agent',w:'去中心算力·AI 代理經濟·推理市場',t:'TAO · RENDER · FET · VIRTUAL',h:'🔥🔥',c:'hot',
-     d:'用區塊鏈做 AI 的算力、模型與「自動代理(agent)」經濟。題材性最強、波動大，各家年度展望都點名。',
-     k:[{s:'TAO',n:'Bittensor',w:'去中心化機器學習網路，子網互相競爭算力與模型，像 AI 版的挖礦市場'},
-        {s:'RENDER',n:'Render',w:'去中心化 GPU 算力，原本做 3D 渲染，現在也供給 AI 運算'},
-        {s:'FET',n:'Fetch.ai (ASI)',w:'AI 代理框架，讓自動代理替你執行任務；已併入 ASI 聯盟'},
-        {s:'VIRTUAL',n:'Virtuals Protocol',w:'Base 鏈上的 AI 代理發射台，做可被擁有、會賺錢的 AI 角色'}]},
-    {n:'隱私 / ZK',w:'零知識證明，機構合規必需',t:'ZEC · XMR · Aleo',h:'🔥🔥',c:'hot',
-     d:'用密碼學（零知識證明 ZK、環簽名）隱藏交易內容。既是「匿名幣」也是機構合規（證明身分卻不洩資料）的基礎，2025 底大噴。',
-     k:[{s:'XMR',n:'Monero',w:'預設「全匿名」的隱私幣（環簽名），匿名最徹底的老牌龍頭'},
-        {s:'ZEC',n:'Zcash',w:'用 zk-SNARK，可「選擇性」遮蔽交易；近期暴漲的主角'},
-        {s:'ALEO',n:'Aleo',w:'ZK 的 L1 公鏈，讓開發者寫「隱私智能合約」'}]},
-    {n:'穩定幣 / PayFi',w:'鏈上美元·無 gas 轉帳·24h 結算',t:'ENA · Plasma · USDC 生態',h:'🔥🔥',c:'hot',
-     d:'鏈上美元與支付基建——把「美元」搬上鏈做 24 小時即時結算。資金流量最大的賽道。',
-     k:[{s:'ENA',n:'Ethena',w:'合成美元 USDe，靠對沖永續資金費率生息；報酬高但有對手方/費率風險'},
-        {s:'XPL',n:'Plasma',w:'穩定幣專用 L1，主打零手續費的 USDT 轉帳'},
-        {s:'USDC',n:'Circle (USDC)',w:'最合規的法幣抵押穩定幣，1:1 美元儲備，機構首選'}]},
-    {n:'永續合約 DEX',w:'鏈上開合約，秒級成交',t:'HYPE · Aster · dYdX',h:'🔥',c:'warm',
-     d:'把合約交易所搬到鏈上，自己掌握資產又能開槓桿。Hyperliquid 帶動整個賽道起飛。',
-     k:[{s:'HYPE',n:'Hyperliquid',w:'自建高性能 L1 的鏈上永續龍頭，體驗接近中心化交易所，目前王者'},
-        {s:'ASTER',n:'Aster',w:'多鏈永續 DEX，主打跨鏈與高槓桿的新銳'},
-        {s:'DYDX',n:'dYdX',w:'老牌永續 DEX，已遷到自有 appchain'}]},
-    {n:'預測市場',w:'鏈上下注事件，兼情緒數據',t:'Polymarket · UMA',h:'🌤',c:'warm',
-     d:'讓人對「未來事件結果」下注（選舉、財報、天氣），賠率本身就是群眾情緒/機率數據，很適合當市場參考。',
-     k:[{s:'—',n:'Polymarket',w:'最大的預測市場，目前無原生代幣（用 USDC 下注、UMA 當預言機裁決）'},
-        {s:'UMA',n:'UMA',w:'樂觀預言機，負責裁決預測市場的事件結果'}]},
-    {n:'DePIN',w:'代幣激勵真實硬體（算力/網路/儲存）',t:'RENDER · HNT · FIL · AKT',h:'🌤',c:'warm',
-     d:'去中心化實體基礎建設——用代幣獎勵大家貢獻真實硬體（GPU、無線基地台、硬碟、雲端），把 AWS 那種中心化資源去中心化。',
-     k:[{s:'RENDER',n:'Render',w:'去中心 GPU 渲染與算力'},
-        {s:'HNT',n:'Helium',w:'去中心無線網路，眾人架 WiFi/5G 熱點賺幣'},
-        {s:'FIL',n:'Filecoin',w:'去中心化檔案儲存'},
-        {s:'AKT',n:'Akash',w:'去中心化雲端運算市場'}]},
-    {n:'DeFi（老錢）',w:'借貸·交易·流動性',t:'UNI · AAVE · PENDLE · LDO',h:'🌤',c:'warm',
-     d:'去中心化金融的基本盤：交易、借貸、收益、質押。上一輪主角，現在穩定但不暴衝，當配置壓艙石。',
-     k:[{s:'UNI',n:'Uniswap',w:'最大的去中心化交易所(AMM)，鏈上現貨交易龍頭'},
-        {s:'AAVE',n:'Aave',w:'最大的去中心化借貸協議'},
-        {s:'PENDLE',n:'Pendle',w:'把未來收益代幣化來交易，玩利率/收益'},
-        {s:'LDO',n:'Lido',w:'最大的流動性質押(把質押的 ETH 變成可流通的 stETH)'}]},
-    {n:'Meme / 發射台',w:'純情緒博弈，賭性最高',t:'DOGE · PEPE · WIF · PUMP',h:'🎲',c:'meme',
-     d:'沒有基本面，純靠情緒、社群與注意力。漲最兇也歸零最快，是市場的「最後一棒」；發射台則是讓人一鍵發幣的基建。',
-     k:[{s:'DOGE',n:'Dogecoin',w:'元祖迷因幣，市值最大、最有共識'},
-        {s:'PEPE',n:'Pepe',w:'青蛙迷因龍頭，這輪 meme 的代表'},
-        {s:'WIF',n:'dogwifhat',w:'Solana 上的迷因代表'},
-        {s:'PUMP',n:'Pump.fun',w:'最大的迷因發射台，一鍵發幣平台的平台幣'}]},
-    {n:'元宇宙 / GameFi',w:'虛擬世界 / 鏈遊（2021 那波）',t:'MANA · SAND · AXS · IMX',h:'❄️',c:'cold',
-     d:'虛擬世界、鏈遊、邊玩邊賺——2021 那波熱點，你舉的 MANA/SAND 就在這。目前已輪出、偏冷，留意「冷板塊回補」的機會。',
-     k:[{s:'MANA',n:'Decentraland',w:'虛擬世界與虛擬地產，元宇宙代表'},
-        {s:'SAND',n:'The Sandbox',w:'UGC 虛擬世界，玩家自建內容'},
-        {s:'AXS',n:'Axie Infinity',w:'邊玩邊賺(P2E)鏈遊元祖'},
-        {s:'IMX',n:'Immutable',w:'遊戲專用 L2，做鏈遊的基礎設施'}]},
-    {n:'基礎公鏈（地基）',w:'L1/L2，長期核心持倉非輪動',t:'BTC · ETH · SOL',h:'🪨',c:'base',
-     d:'整個市場的地基，不參與板塊輪動，是長期核心底倉。其他幣大多建在它們之上。',
-     k:[{s:'BTC',n:'Bitcoin',w:'數位黃金，價值儲存，全市場的定海神針'},
-        {s:'ETH',n:'Ethereum',w:'智能合約之王，最大的應用與結算層'},
-        {s:'SOL',n:'Solana',w:'高性能高速公鏈，應用與 meme 的熱門地'}]}
+    {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · CFG · SYRUP · POLYX · PLUME',h:'🔥🔥',c:'hot',
+     d:'把現實世界的金融資產（美國國債、私募信貸、房地產、甚至股票）做成鏈上代幣，讓鏈上資金拿得到「真實世界的利息」，也讓傳統資產能 24 小時交易、被拆碎持有。這是 2025 機構入場的主敘事，貝萊德、富蘭克林坦伯頓都下場。⚠️ 但板塊「規模」主要靠穩定幣與代幣化美債撐起（那些不會噴），治理幣（如 ONDO）常因長期解鎖被稀釋，容易「協議成長、幣價脫鉤」。',
+     k:[{s:'ONDO',n:'Ondo Finance',sl:'ondo-finance',w:'代幣化美債與美元生息產品(USDY、OUSG)，機構級龍頭，與貝萊德等合作'},
+        {s:'CFG',n:'Centrifuge',sl:'centrifuge',w:'老牌真實資產協議，把私募信貸、發票、房貸打包上鏈借貸'},
+        {s:'SYRUP',n:'Maple Finance',sl:'syrup',w:'機構級鏈上信用市場，專做給機構的私募借貸'},
+        {s:'POLYX',n:'Polymesh',sl:'polymesh',w:'為證券型代幣(STO)打造的合規公鏈'},
+        {s:'PLUME',n:'Plume',sl:'plume',w:'專為 RWA 打造的模組化 L1，一站式發行與合規'}]},
+    {n:'AI / AI Agent',w:'去中心算力·AI 代理經濟·推理市場',t:'TAO · RENDER · FET · VIRTUAL · NEAR',h:'🔥🔥',c:'hot',
+     d:'用區塊鏈做 AI 的三件事：①去中心化算力/GPU ②去中心化模型訓練 ③會自己執行任務、甚至自己持有錢包的「AI 代理(agent)」。核心是「用 token 獎勵全世界貢獻算力與模型」，做出不被單一公司壟斷的 AI 基建。題材性最強、跟 NVIDIA/AI 浪潮連動，但波動極大、雜訊幣很多。',
+     k:[{s:'TAO',n:'Bittensor',sl:'bittensor',w:'去中心化機器學習網路，子網互相競爭算力與模型，像 AI 版的挖礦市場'},
+        {s:'RENDER',n:'Render',sl:'render-token',w:'去中心化 GPU 算力，原本做 3D 渲染，現在也供 AI 運算'},
+        {s:'FET',n:'Fetch.ai (ASI)',sl:'fetch-ai',w:'AI 代理框架，讓自動代理替你執行任務；已併入 ASI 聯盟'},
+        {s:'VIRTUAL',n:'Virtuals Protocol',sl:'virtual-protocol',w:'Base 鏈上的 AI 代理發射台，做可被擁有、會賺錢的 AI 角色'},
+        {s:'NEAR',n:'NEAR Protocol',sl:'near',w:'主打「使用者擁有的 AI」的高速公鏈，做 AI 與資料層'}]},
+    {n:'隱私 / ZK',w:'零知識證明，機構合規必需',t:'XMR · ZEC · ALEO · DASH · DCR',h:'🔥🔥',c:'hot',
+     d:'用密碼學（零知識證明 ZK、環簽名）把交易內容藏起來。兩個用途：①純隱私/匿名幣，保護個人金流；②機構合規所需的 ZK——能證明「我合格」卻不洩露底細，是未來監管與機構上鏈的關鍵技術。2025 底因監管與機構需求題材大噴，是這輪少數「敘事與幣價同時兇」的板塊。',
+     k:[{s:'XMR',n:'Monero',sl:'monero',w:'預設「全匿名」的隱私幣（環簽名），匿名最徹底的老牌龍頭'},
+        {s:'ZEC',n:'Zcash',sl:'zcash',w:'用 zk-SNARK，可「選擇性」遮蔽交易；近期暴漲的主角'},
+        {s:'ALEO',n:'Aleo',sl:'aleo',w:'ZK 的 L1 公鏈，讓開發者寫「隱私智能合約」'},
+        {s:'DASH',n:'Dash',sl:'dash',w:'老牌可選匿名的支付幣(CoinJoin 混幣)'},
+        {s:'DCR',n:'Decred',sl:'decred',w:'強調治理與自主的老牌幣，近年加入隱私混幣'}]},
+    {n:'穩定幣 / PayFi',w:'鏈上美元·無 gas 轉帳·24h 結算',t:'ENA · XPL · SKY · FRAX · USUAL',h:'🔥🔥',c:'hot',
+     d:'鏈上美元與支付基建——把美元搬上鏈，做 24 小時、跨國、近乎零成本的即時結算(PayFi)。穩定幣是整個幣圈的「現金與血液」，資金流量最大。⚠️ 穩定幣本身(USDC/USDT)不會漲，能漲的是「相關協議幣」：發行商、生息合成美元、穩定幣專用鏈等。',
+     k:[{s:'ENA',n:'Ethena',sl:'ethena',w:'合成美元 USDe，靠對沖永續資金費率生息；報酬高但有對手方/費率風險'},
+        {s:'XPL',n:'Plasma',sl:'plasma',w:'穩定幣專用 L1，主打零手續費的 USDT 轉帳'},
+        {s:'SKY',n:'Sky (前 Maker)',sl:'sky',w:'發行去中心穩定幣 USDS/DAI 的老牌龍頭協議'},
+        {s:'FRAX',n:'Frax',sl:'frax-share',w:'演算法/混合穩定幣生態，跨足借貸與 L2'},
+        {s:'USUAL',n:'Usual',sl:'usual',w:'用 RWA(美債)做擔保的去中心穩定幣 USD0，發行收益分給社群'}]},
+    {n:'永續合約 DEX',w:'鏈上開合約，秒級成交',t:'HYPE · ASTER · DYDX · GMX · JUP',h:'🔥',c:'warm',
+     d:'把「開合約」從中心化交易所搬到鏈上，你自己掌握資產、不怕交易所跑路，又能開槓桿做多空。Hyperliquid 用自建高速鏈做出接近 CEX 的體驗後整個賽道爆發。這也是少數「協議真的收手續費、且部分回饋給代幣」的板塊，價值捕獲相對健康。',
+     k:[{s:'HYPE',n:'Hyperliquid',sl:'hyperliquid',w:'自建高性能 L1 的鏈上永續龍頭，體驗接近中心化交易所，目前王者'},
+        {s:'ASTER',n:'Aster',sl:'aster-2',w:'多鏈永續 DEX，主打跨鏈與高槓桿的新銳'},
+        {s:'DYDX',n:'dYdX',sl:'dydx-chain',w:'老牌永續 DEX，已遷到自有 appchain'},
+        {s:'GMX',n:'GMX',sl:'gmx',w:'Arbitrum 上的老牌永續/現貨 DEX，獨特的 GLP 流動性池'},
+        {s:'JUP',n:'Jupiter',sl:'jupiter-exchange-solana',w:'Solana 最大的交易聚合器，跨足永續合約'}]},
+    {n:'預測市場',w:'鏈上下注事件，兼情緒數據',t:'Polymarket · UMA · GNO · REP · AZUR',h:'🌤',c:'warm',
+     d:'讓人對「未來事件的結果」下注（選舉、財報、Fed 利率、體育、天氣）。它的賠率本身就是一份即時的「群眾機率/情緒數據」，連主流媒體都引用。⚠️ 賽道很熱但「可投資的代幣很少」——最大的 Polymarket 根本沒發幣，所以這板塊難用買幣參與。',
+     k:[{s:'—',n:'Polymarket',sl:null,w:'最大的預測市場，目前無原生代幣(用 USDC 下注、UMA 當預言機裁決)'},
+        {s:'UMA',n:'UMA',sl:'uma',w:'樂觀預言機，負責裁決預測市場的事件結果'},
+        {s:'GNO',n:'Gnosis',sl:'gnosis',w:'預測市場老祖宗之一，現也做錢包與 L2'},
+        {s:'REP',n:'Augur',sl:'augur',w:'最早的去中心化預測市場協議'},
+        {s:'AZUR',n:'Azuro',sl:'azuro-protocol',w:'去中心化下注/博弈的流動性底層協議'}]},
+    {n:'DePIN',w:'代幣激勵真實硬體（算力/網路/儲存）',t:'RENDER · HNT · FIL · AKT · GRASS',h:'🌤',c:'warm',
+     d:'去中心化實體基礎建設——用 token 獎勵全世界的人貢獻「真實硬體資源」：GPU 算力、無線基地台、硬碟儲存、雲端運算、感測器。等於把 AWS、電信商那種中心化基建用代幣經濟眾包出去，跟 AI 算力需求高度連動。',
+     k:[{s:'RENDER',n:'Render',sl:'render-token',w:'去中心 GPU 渲染與算力'},
+        {s:'HNT',n:'Helium',sl:'helium',w:'去中心無線網路，眾人架 WiFi/5G 熱點賺幣'},
+        {s:'FIL',n:'Filecoin',sl:'filecoin',w:'去中心化檔案儲存'},
+        {s:'AKT',n:'Akash',sl:'akash-network',w:'去中心化雲端運算市場'},
+        {s:'GRASS',n:'Grass',sl:'grass',w:'眾包閒置網路頻寬，供 AI 抓取資料的 DePIN'}]},
+    {n:'DeFi（老錢）',w:'借貸·交易·流動性',t:'UNI · AAVE · PENDLE · LDO · CRV',h:'🌤',c:'warm',
+     d:'去中心化金融的基本盤：不靠銀行/券商，用智能合約做交易(DEX)、借貸、收益、質押。是 2020-21 那輪的主角，協議成熟、現金流真實，但多數代幣已過暴漲期，現在像幣圈的「傳產龍頭」——穩、有用、但不易噴，適合當配置壓艙石。',
+     k:[{s:'UNI',n:'Uniswap',sl:'uniswap',w:'最大的去中心化交易所(AMM)，鏈上現貨交易龍頭'},
+        {s:'AAVE',n:'Aave',sl:'aave',w:'最大的去中心化借貸協議'},
+        {s:'PENDLE',n:'Pendle',sl:'pendle',w:'把未來收益代幣化來交易，玩利率/收益'},
+        {s:'LDO',n:'Lido',sl:'lido-dao',w:'最大的流動性質押(把質押的 ETH 變成可流通的 stETH)'},
+        {s:'CRV',n:'Curve',sl:'curve-dao-token',w:'穩定幣交易的核心 DEX，DeFi 流動性樞紐'}]},
+    {n:'Meme / 發射台',w:'純情緒博弈，賭性最高',t:'DOGE · SHIB · PEPE · WIF · BONK',h:'🎲',c:'meme',
+     d:'沒有基本面、沒有產品，純靠情緒、社群、迷因與注意力驅動。漲最兇、歸零也最快，是市場的「最後一棒」與風險偏好溫度計（meme 狂噴通常代表市場過熱）。發射台（如 Pump.fun）則是讓任何人一鍵發幣的基建，自己反而有真實營收。',
+     k:[{s:'DOGE',n:'Dogecoin',sl:'dogecoin',w:'元祖迷因幣，市值最大、最有共識'},
+        {s:'SHIB',n:'Shiba Inu',sl:'shiba-inu',w:'狗狗幣後最大的迷因生態'},
+        {s:'PEPE',n:'Pepe',sl:'pepe',w:'青蛙迷因龍頭，這輪 meme 的代表'},
+        {s:'WIF',n:'dogwifhat',sl:'dogwifcoin',w:'Solana 上的迷因代表'},
+        {s:'BONK',n:'Bonk',sl:'bonk',w:'Solana 生態的元老迷因幣'}]},
+    {n:'元宇宙 / GameFi',w:'虛擬世界 / 鏈遊（2021 那波）',t:'MANA · SAND · AXS · IMX · GALA',h:'❄️',c:'cold',
+     d:'虛擬世界、鏈上遊戲、邊玩邊賺(P2E)——你舉的 MANA/SAND 就是 2021 那波的主角。當時靠「虛擬地產 + 元宇宙」敘事暴漲，後來熱潮退去、玩法不可持續，整個板塊已輪出、長期偏冷。對現貨投資的意義：留意「冷板塊在新週期被重新炒作回補」的機會。',
+     k:[{s:'MANA',n:'Decentraland',sl:'decentraland',w:'虛擬世界與虛擬地產，元宇宙代表'},
+        {s:'SAND',n:'The Sandbox',sl:'the-sandbox',w:'UGC 虛擬世界，玩家自建內容'},
+        {s:'AXS',n:'Axie Infinity',sl:'axie-infinity',w:'邊玩邊賺(P2E)鏈遊元祖'},
+        {s:'IMX',n:'Immutable',sl:'immutable-x',w:'遊戲專用 L2，做鏈遊的基礎設施'},
+        {s:'GALA',n:'Gala',sl:'gala',w:'鏈遊平台與發行商'}]},
+    {n:'基礎公鏈（地基）',w:'L1/L2，長期核心持倉非輪動',t:'BTC · ETH · SOL · BNB · AVAX',h:'🪨',c:'base',
+     d:'整個市場的地基。L1（BTC/ETH/SOL）是底層公鏈，其他幾乎所有幣都建在它們之上。它們不參與「板塊輪動」，而是長期核心底倉——BTC 是數位黃金/避險錨，ETH/SOL 是應用與資金的結算層。配置上通常「先有底倉，再用小部位玩輪動板塊」。',
+     k:[{s:'BTC',n:'Bitcoin',sl:'bitcoin',w:'數位黃金，價值儲存，全市場的定海神針'},
+        {s:'ETH',n:'Ethereum',sl:'ethereum',w:'智能合約之王，最大的應用與結算層'},
+        {s:'SOL',n:'Solana',sl:'solana',w:'高性能高速公鏈，應用與 meme 的熱門地'},
+        {s:'BNB',n:'BNB',sl:'binancecoin',w:'幣安生態的公鏈與平台幣'},
+        {s:'AVAX',n:'Avalanche',sl:'avalanche-2',w:'高速 L1，主打子網(Subnet)架構'}]}
   ];
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
   function renderGuide(){
@@ -374,13 +393,28 @@
     });
   }
   function openSector(g){
-    var coins=(g.k||[]).map(function(x){
-      return '<div class="mcoin"><div class="mctop"><span class="mcs">'+esc(x.s)+'</span><span class="mcn">'+esc(x.n)+'</span></div><div class="mcw">'+esc(x.w)+'</div></div>';
+    var coins=(g.k||[]).map(function(x,i){
+      var pl = x.sl ? '<div class="mcp" id="mcp-'+i+'">載入價格…</div>' : '<div class="mcp" style="color:var(--dim)">無原生代幣</div>';
+      return '<div class="mcoin"><div class="mctop"><span class="mcs">'+esc(x.s)+'</span><span class="mcn">'+esc(x.n)+'</span></div><div class="mcw">'+esc(x.w)+'</div>'+pl+'</div>';
     }).join('');
     $('f-mbody').innerHTML='<div class="mhd"><span>'+esc(g.n)+'</span><span>'+g.h+'</span></div>'+
       '<div class="mdesc">'+esc(g.d||g.w)+'</div>'+
-      '<div class="mlbl">代表幣種 · 各自在做什麼</div>'+(coins||'<div class="mcw" style="color:var(--mut)">（待補）</div>');
+      '<div class="mlbl">代表幣種 · 各自在做什麼 · 真實漲跌</div>'+(coins||'<div class="mcw" style="color:var(--mut)">（待補）</div>');
     $('f-modal').classList.add('on');
+    var slugs=(g.k||[]).filter(function(x){return x.sl;}).map(function(x){return x.sl;});
+    if(!slugs.length) return;
+    fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y')
+      .then(function(r){ return r.ok? r.json() : []; })
+      .then(function(mk){
+        var by={}; (mk||[]).forEach(function(c){ by[c.id]=c; });
+        (g.k||[]).forEach(function(x,i){
+          var el=document.getElementById('mcp-'+i); if(!el||!x.sl) return;
+          var c=by[x.sl]; if(!c){ el.textContent='—'; return; }
+          function seg(lb,v){ if(v==null) return ''; var cl=v>=0?'pos':'neg'; return '<span class="'+cl+'">'+lb+' '+(v>=0?'+':'')+v.toFixed(0)+'%</span>'; }
+          el.innerHTML=seg('7天',c.price_change_percentage_7d_in_currency)+seg('30天',c.price_change_percentage_30d_in_currency)+seg('1年',c.price_change_percentage_1y_in_currency);
+        });
+      })
+      .catch(function(){ (g.k||[]).forEach(function(x,i){ var el=document.getElementById('mcp-'+i); if(el&&x.sl) el.textContent=''; }); });
   }
   function closeModal(){ $('f-modal').classList.remove('on'); }
   function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
