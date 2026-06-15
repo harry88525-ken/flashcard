@@ -111,6 +111,14 @@
   .pdbar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
   .seglab{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px}
   .seglab b{color:var(--navy2)}
+  /* 看的複習（read-only 總攬） */
+  .pdrev{display:flex;flex-direction:column}
+  .pdrev .grp{font-size:13px;font-weight:700;color:var(--navy2);margin:18px 0 8px}
+  .pdrev .grp:first-child{margin-top:4px}
+  .pdrev-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:12px;padding:13px 15px;margin-bottom:10px;box-shadow:0 3px 12px rgba(44,77,122,.06)}
+  .pdrev-zh{font-size:16px;font-weight:700;color:var(--ink);line-height:1.5;margin-bottom:7px}
+  .pdrev-en{font-size:16px;color:var(--navy);background:#F5F1E8;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .pdrev-en>span{flex:1}
   .panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 24px rgba(44,77,122,.12);padding:24px 20px;min-height:215px;display:flex;flex-direction:column;justify-content:center;text-align:center}
   .base{font-size:17px;color:var(--muted);margin-bottom:12px;line-height:1.5}
   .base b{color:var(--ink);font-size:22px}
@@ -1205,6 +1213,7 @@ function home(){
   el("app").innerHTML=
     '<div class="pdtop"><span class="back" onclick="homeScreen()">← 單字卡首頁</span></div>'+'<h1>🎯 Pattern Drill 口說訓練</h1>'+
     '<p class="sub">出國主題 · 一個主題 63 題（替換/轉換/回應/擴展 各15 + 暖身3）<br>聽提示 → 開口講 → App 聽你說、比對正解</p>'+
+    '<button class="btn alt" style="margin-bottom:18px" onclick="PD.reviewHome()">📖 看的複習<small style="display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:3px">中英對照整組滑著看 · 不用開口、不計分</small></button>'+
     (allDone?'<div class="warnbox">🎉 這批主題你都練過一輪了！弱的會靠遺忘曲線回來；想要更多主題（點餐／問路／飯店…）跟 Claude 說一聲。</div>':'')+
     '<div class="lbl">教練念句子的速度</div>'+
     '<div class="spd">'+["slow","mid","fast"].map(s=>'<button class="'+(curSpeed()===s?"on":"")+'" onclick="PD.setSpeed(\''+s+'\')">'+({slow:"🐢 慢",mid:"中",fast:"🐇 快"}[s])+'</button>').join("")+'</div>'+
@@ -1219,6 +1228,36 @@ function home(){
     (sttOK?'<p class="sub">🎤 用 Chrome 開、允許麥克風最準。</p>':'<div class="warnbox">⚠️ 這瀏覽器沒有語音辨識（建議電腦版 Chrome）。仍可練：講完按「看正解」自評。</div>');
 }
 function start(k){ theme=THEMES[k]; flat=buildFlat(theme); idx=0; weak=[]; pdHistory=[]; drill(); }
+
+// ---- 看的複習：選主題 ----
+function reviewHome(){
+  el("app").innerHTML=
+    '<div class="pdtop"><span class="back" onclick="PD.open()">← Pattern Drill 首頁</span></div>'+
+    '<h1>📖 看的複習</h1>'+
+    '<p class="sub">選一個主題，把整組句子（中文 → 英文正解）滑著看複習。<br>不用開口、不計分，點 🔊 可聽發音。</p>'+
+    THEMES.map((t,k)=>
+      '<button class="theme" onclick="PD.reviewTheme('+k+')"><span class="emo">'+t.emoji+'</span>'+
+      '<span class="nm"><b>'+t.label+'</b><small>'+t.desc+'</small></span><span class="tag new">看</span></button>'
+    ).join('');
+}
+// ---- 看的複習：列出某主題全部句子（依段落分組） ----
+function reviewTheme(k){
+  const t=THEMES[k], list=buildFlat(t), order=["暖身","替換","轉換","回應","擴展"];
+  const groups={}; list.forEach(q=>{ (groups[q.seg]=groups[q.seg]||[]).push(q); });
+  const rows=[]; let body='<div class="pdrev">';
+  order.forEach(seg=>{ const arr=groups[seg]; if(!arr) return;
+    body+='<div class="grp">'+seg+'（'+arr.length+'）</div>';
+    arr.forEach(q=>{ const en=q.expected||q.speak||""; const r=rows.push(en)-1;
+      body+='<div class="pdrev-card"><div class="pdrev-zh">'+(q.zh||q.show||"")+'</div>'+
+        '<div class="pdrev-en"><span>'+en+'</span><button class="spk" data-rev="'+r+'">🔊</button></div></div>'; });
+  });
+  body+='</div>';
+  el("app").innerHTML=
+    '<div class="pdtop"><span class="back" onclick="PD.reviewHome()">← 看的複習</span>'+
+      '<span class="stage">'+t.emoji+' '+t.label+'</span></div>'+
+    '<p class="sub">'+list.length+' 句 · 點 🔊 聽發音</p>'+body;
+  el("app").querySelectorAll("button[data-rev]").forEach(b=>{ b.onclick=()=>say(rows[+b.dataset.rev],getRate()); });
+}
 
 // ---- 每一題 ----
 function drill(){
@@ -1343,7 +1382,7 @@ function copyOut(){const t=el("out");t.select();try{navigator.clipboard.writeTex
 
 if(speechSynthesis.getVoices().length===0) speechSynthesis.onvoiceschanged=()=>{};
 
-window.PD={open:home,start:start,drill:drill,toggleRec:toggleRec,replay:replay,showAnswer:showAnswer,grade:grade,nextItem:nextItem,prevItem:prevItem,copyOut:copyOut,setSpeed:setSpeed};
+window.PD={open:home,start:start,drill:drill,toggleRec:toggleRec,replay:replay,showAnswer:showAnswer,grade:grade,nextItem:nextItem,prevItem:prevItem,copyOut:copyOut,setSpeed:setSpeed,reviewHome:reviewHome,reviewTheme:reviewTheme};
 })();
 </script>
 </body>
