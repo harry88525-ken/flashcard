@@ -602,6 +602,8 @@
   var UNI=[], seenU={};
   GUIDE.forEach(function(g){ (g.k||[]).forEach(function(x){ if(x.sl && !seenU[x.sl]){ seenU[x.sl]=1; UNI.push({sym:x.s,name:x.n,sl:x.sl,sec:g.n}); } }); });
   var SROWS=null, BTCW={}, STF='30d';
+  var SECMAP={}; UNI.forEach(function(u){SECMAP[u.sl]=u.sec;});
+  var WRAP={WBTC:1,WETH:1,STETH:1,WSTETH:1,WEETH:1,WBETH:1,RETH:1,CBBTC:1,SOLVBTC:1,LBTC:1,JITOSOL:1,MSOL:1,BNSOL:1};
   function dil(r){ if(r.mcfdv>=0.7) return ['✅','pos']; if(r.mcfdv>=0.4) return ['⚠️','']; return ['❌','neg']; }
   function renderEnv(g,btc7,btc30){
     var btcd=(g&&g.data&&g.data.market_cap_percentage)?g.data.market_cap_percentage.btc:null, regime,cls;
@@ -623,7 +625,7 @@
     var SAVG={}; Object.keys(ss).forEach(function(k){SAVG[k]=ss[k]/sc2[k];});
     var rows=SROWS.map(function(r){ var ch=r.ch[STF]; return {sym:r.sym,sec:r.sec,mcfdv:r.mcfdv,ch:ch,rs:(typeof ch==='number'?ch:0)-bw}; });
     if(clean) rows=rows.filter(function(r){return r.mcfdv>=0.4;});
-    if(hot) rows=rows.filter(function(r){return (SAVG[r.sec]||0)>0;});
+    if(hot) rows=rows.filter(function(r){return r.sec!=='—' && (SAVG[r.sec]||0)>0;});
     rows.sort(function(a,b){return b.rs-a.rs;});
     rows=rows.slice(0,20);
     if(!rows.length){ $('s-table').innerHTML='<div class="fstatus">無符合條件，放寬篩選試試。</div>'; return; }
@@ -654,23 +656,23 @@
     }).join('');
   }
   function loadScreener(){
-    var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中…';
-    var ids=UNI.map(function(u){return u.sl;}); if(ids.indexOf('bitcoin')<0) ids.push('bitcoin');
+    var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中（前 500 名）…';
+    var pcp='&price_change_percentage=7d,30d,200d,1y', base='https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250';
     Promise.all([
       fetch('https://api.coingecko.com/api/v3/global').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d,200d,1y').then(function(r){return r.ok?r.json():[];}),
+      fetch(base+'&page=1'+pcp).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
+      fetch(base+'&page=2'+pcp).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
       fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=50&price_change_percentage=24h').then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
     ]).then(function(res){
-      var g=res[0], mk=Array.isArray(res[1])?res[1]:[], by={}; mk.forEach(function(c){by[c.id]=c;});
-      renderVol(res[2]);
-      var btc=by['bitcoin']||{};
+      var g=res[0], all=(Array.isArray(res[1])?res[1]:[]).concat(Array.isArray(res[2])?res[2]:[]);
+      renderVol(res[3]);
+      var btc={}; all.forEach(function(c){ if(c&&c.id==='bitcoin') btc=c; });
       BTCW={'7d':btc.price_change_percentage_7d_in_currency||0,'30d':btc.price_change_percentage_30d_in_currency||0,'200d':btc.price_change_percentage_200d_in_currency||0,'1y':btc.price_change_percentage_1y_in_currency||0};
       renderEnv(g,BTCW['7d'],BTCW['30d']);
-      SROWS=UNI.map(function(u){
-        var c=by[u.sl]; if(!c) return null;
+      SROWS=all.filter(function(c){ if(!c) return false; var sym=(c.symbol||'').toUpperCase(); return !STABLE[sym] && !WRAP[sym]; }).map(function(c){
         var mcfdv=(c.fully_diluted_valuation&&c.market_cap)?c.market_cap/c.fully_diluted_valuation:1;
-        return {sym:u.sym,sec:u.sec,mcfdv:mcfdv,ch:{'7d':c.price_change_percentage_7d_in_currency,'30d':c.price_change_percentage_30d_in_currency,'200d':c.price_change_percentage_200d_in_currency,'1y':c.price_change_percentage_1y_in_currency}};
-      }).filter(Boolean);
+        return {sym:(c.symbol||'').toUpperCase(),sec:SECMAP[c.id]||'—',mcfdv:mcfdv,ch:{'7d':c.price_change_percentage_7d_in_currency,'30d':c.price_change_percentage_30d_in_currency,'200d':c.price_change_percentage_200d_in_currency,'1y':c.price_change_percentage_1y_in_currency}};
+      });
       st.style.display='none';
       renderScreener();
     }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 載入失敗（'+e.message+'）—— CoinGecko 可能限流，按更新重試。'; });
