@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>合約開倉計算機 · U本位 / 幣本位</title>
+<title>₿ 加密貨幣工作台 · 開倉計算 + 基本面</title>
 <style>
   :root{
     --bg:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a3240;
@@ -62,12 +62,50 @@
   summary{cursor:pointer;padding:6px 0;}
   details p{margin:6px 0;line-height:1.6;}
   .foot{font-size:11px;color:var(--dim);text-align:center;margin-top:20px;line-height:1.6;}
+  /* ===== 頂層分頁 + 基本面分析（新增，IIFE 隔離，不影響計算器） ===== */
+  .topnav{display:flex;gap:8px;margin:0 0 16px;}
+  .topbtn{flex:1;padding:12px;border:1px solid var(--line);background:var(--card);color:var(--mut);
+    border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+  .topbtn.on{background:var(--card2);color:var(--txt);border-color:var(--amber);}
+  .section{display:none;} .section.on{display:block;}
+  .sechd{font-size:16px;font-weight:600;margin:0 0 2px;}
+  .fcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+  .fcard-h{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;margin-bottom:10px;}
+  .fbtn{background:var(--card2);border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
+  .fstatus{font-size:12px;color:var(--mut);padding:6px 0;}
+  .fnote{font-size:11px;color:var(--dim);margin-top:8px;}
+  .hrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .hrow:last-child{border-bottom:none;}
+  .hrow .hn{flex:1;font-size:13px;}
+  .hrow .hc{font-size:12px;color:var(--dim);min-width:54px;text-align:right;}
+  .hrow .hp{font-size:13px;font-weight:600;min-width:64px;text-align:right;}
+  .gitem{border:1px solid var(--line);border-left-width:3px;border-radius:8px;padding:9px 11px;margin-bottom:8px;background:var(--card2);}
+  .gtop{display:flex;justify-content:space-between;align-items:center;}
+  .gn{font-size:14px;font-weight:600;}
+  .gh{font-size:13px;}
+  .gw{font-size:12px;color:var(--mut);margin:3px 0 2px;}
+  .gt{font-size:12px;color:var(--blue);}
+  .g-hot{border-left-color:var(--red);}
+  .g-warm{border-left-color:var(--amber);}
+  .g-meme{border-left-color:#a371f7;}
+  .g-cold{border-left-color:var(--dim);}
+  .g-base{border-left-color:var(--green);}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>合約開倉計算機</h1>
+  <h1>₿ 加密貨幣工作台</h1>
+  <p class="sub">合約開倉風控 + 現貨基本面 / 板塊輪動</p>
+
+  <div class="topnav">
+    <button class="topbtn on" data-s="calc">📊 合約開倉計算器</button>
+    <button class="topbtn" data-s="fund">🔍 基本面分析</button>
+  </div>
+
+  <!-- ===================== 合約開倉計算器（原樣，未更動） ===================== -->
+  <div class="section on" id="sec-calc">
+  <h2 class="sechd">合約開倉計算機</h2>
   <p class="sub">兩種模式 · 定風險反推保證金，或自己填保證金看風險</p>
 
   <div class="tabs">
@@ -187,7 +225,91 @@
   </details>
 
   <p class="foot">僅為風控試算工具，非投資建議 · 數字以交易所實際成交為準</p>
+  </div><!-- /sec-calc -->
+
+  <!-- ===================== 基本面分析（新增） ===================== -->
+  <div class="section" id="sec-fund">
+    <h2 class="sechd">基本面分析 · 板塊輪動</h2>
+    <p class="sub">現貨 alpha＝敘事轉熱前卡進板塊 + 買龍頭</p>
+
+    <div class="fcard">
+      <div class="fcard-h"><span>📈 板塊熱度 24h</span><button id="f-refresh" class="fbtn">↻ 更新</button></div>
+      <div id="f-status" class="fstatus">載入中…</div>
+      <div id="f-heat"></div>
+      <div class="fnote" id="f-time"></div>
+    </div>
+
+    <div class="fcard">
+      <div class="fcard-h"><span>📚 板塊圖鑑 2026</span></div>
+      <div id="f-guide"></div>
+    </div>
+
+    <details>
+      <summary>現貨選幣框架</summary>
+      <p><b>底倉</b>：BTC / ETH / SOL，不參與輪動。</p>
+      <p><b>進攻倉</b>：押 1–2 個正在轉熱板塊的龍頭（買龍頭，不買第 20 名）。</p>
+      <p><b>判斷輪到誰</b>：資金流入 + 龍頭創新高 + 英文 KOL 開始反覆講（中文圈通常末段才講）。</p>
+    </details>
+    <p class="foot">資料 CoinGecko · 熱度／圖鑑為研究參考，非投資建議</p>
+  </div><!-- /sec-fund -->
 </div>
+
+<script>
+/* 頂層分頁切換（IIFE 隔離，不動計算器） */
+(function(){
+  var btns=document.querySelectorAll('.topbtn'); if(!btns.length)return;
+  btns.forEach(function(b){ b.addEventListener('click',function(){
+    btns.forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+    document.getElementById('sec-calc').classList.toggle('on', b.dataset.s==='calc');
+    document.getElementById('sec-fund').classList.toggle('on', b.dataset.s==='fund');
+  });});
+})();
+/* 基本面分析：CoinGecko 板塊熱度 + 精選圖鑑（IIFE 隔離） */
+(function(){
+  function $(id){return document.getElementById(id);}
+  var GUIDE=[
+    {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · Centrifuge · Maple',h:'🔥🔥',c:'hot'},
+    {n:'AI / AI Agent',w:'去中心算力·AI 代理經濟·推理市場',t:'TAO · RENDER · FET · VIRTUAL',h:'🔥🔥',c:'hot'},
+    {n:'隱私 / ZK',w:'零知識證明，機構合規必需',t:'ZEC · XMR · Aleo',h:'🔥🔥',c:'hot'},
+    {n:'穩定幣 / PayFi',w:'鏈上美元·無 gas 轉帳·24h 結算',t:'ENA · Plasma · USDC 生態',h:'🔥🔥',c:'hot'},
+    {n:'永續合約 DEX',w:'鏈上開合約，秒級成交',t:'HYPE · Aster · dYdX',h:'🔥',c:'warm'},
+    {n:'預測市場',w:'鏈上下注事件，兼情緒數據',t:'Polymarket 生態',h:'🌤',c:'warm'},
+    {n:'DePIN',w:'代幣激勵真實硬體（算力/網路/儲存）',t:'RENDER · HNT · FIL · AKT',h:'🌤',c:'warm'},
+    {n:'DeFi（老錢）',w:'借貸·交易·流動性',t:'UNI · AAVE · PENDLE · LDO',h:'🌤',c:'warm'},
+    {n:'Meme / 發射台',w:'純情緒博弈，賭性最高',t:'DOGE · PEPE · WIF · Pump.fun',h:'🎲',c:'meme'},
+    {n:'元宇宙 / GameFi',w:'虛擬世界 / 鏈遊（2021 那波）',t:'MANA · SAND · AXS · IMX',h:'❄️',c:'cold'},
+    {n:'基礎公鏈（地基）',w:'L1/L2，長期核心持倉非輪動',t:'BTC · ETH · SOL',h:'🪨',c:'base'}
+  ];
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function renderGuide(){
+    $('f-guide').innerHTML=GUIDE.map(function(g){
+      return '<div class="gitem g-'+g.c+'"><div class="gtop"><span class="gn">'+esc(g.n)+'</span><span class="gh">'+g.h+'</span></div>'+
+        '<div class="gw">'+esc(g.w)+'</div><div class="gt">'+esc(g.t)+'</div></div>';
+    }).join('');
+  }
+  function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
+  function fmtCap(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x);}
+  function loadHeat(){
+    var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
+    fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc')
+      .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){
+        var big=d.filter(function(c){return c.market_cap>1e9 && typeof c.market_cap_change_24h==='number';});
+        big.sort(function(a,b){return b.market_cap_change_24h-a.market_cap_change_24h;});
+        $('f-heat').innerHTML=big.slice(0,14).map(function(c){
+          var p=c.market_cap_change_24h, cls=p>=0?'pos':'neg';
+          return '<div class="hrow"><span class="hn">'+esc(c.name)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
+        }).join('');
+        st.style.display='none';
+        $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B 板塊依 24h 漲跌排序';
+      })
+      .catch(function(e){ st.style.display='block'; st.textContent='⚠ 即時熱度載入失敗（'+e.message+'）—— CoinGecko 可能限流，按「↻ 更新」重試；下方圖鑑不受影響。'; });
+  }
+  renderGuide();
+  var rb=$('f-refresh'); if(rb) rb.addEventListener('click',loadHeat);
+  loadHeat();
+})();
+</script>
 
 <script>
 (function(){
