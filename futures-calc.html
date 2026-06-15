@@ -15,7 +15,7 @@
   body{margin:0;background:var(--bg);color:var(--txt);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
     line-height:1.5;padding:16px;}
-  .wrap{max-width:560px;margin:0 auto;}
+  .wrap{max-width:900px;margin:0 auto;}
   h1{font-size:19px;font-weight:600;margin:4px 0 2px;}
   .sub{font-size:13px;color:var(--mut);margin:0 0 16px;}
   .tabs{display:flex;gap:8px;margin-bottom:14px;}
@@ -90,6 +90,11 @@
   .g-meme{border-left-color:#a371f7;}
   .g-cold{border-left-color:var(--dim);}
   .g-base{border-left-color:var(--green);}
+  #sec-calc{max-width:560px;margin:0 auto;}
+  .fcols{display:flex;gap:14px;align-items:flex-start;}
+  .fcols>.fcard{flex:1;min-width:0;}
+  .htk{display:block;font-size:11px;color:var(--blue);margin-top:2px;font-weight:400;}
+  @media(max-width:760px){ .fcols{flex-direction:column;} }
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -232,6 +237,7 @@
     <h2 class="sechd">基本面分析 · 板塊輪動</h2>
     <p class="sub">現貨 alpha＝敘事轉熱前卡進板塊 + 買龍頭</p>
 
+    <div class="fcols">
     <div class="fcard">
       <div class="fcard-h"><span>📈 板塊熱度 24h</span><button id="f-refresh" class="fbtn">↻ 更新</button></div>
       <div id="f-status" class="fstatus">載入中…</div>
@@ -243,6 +249,8 @@
       <div class="fcard-h"><span>📚 板塊圖鑑 2026</span></div>
       <div id="f-guide"></div>
     </div>
+    </div><!-- /fcols -->
+
 
     <details>
       <summary>現貨選幣框架</summary>
@@ -289,16 +297,34 @@
   }
   function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
   function fmtCap(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x);}
+  var SYM=null;
+  function loadSym(){
+    if(SYM) return Promise.resolve();
+    try{ var c=JSON.parse(localStorage.getItem('cg_sym')||'null');
+      if(c && c.t && (Date.now()-c.t<86400000) && c.m){ SYM=c.m; return Promise.resolve(); } }catch(e){}
+    return fetch('https://api.coingecko.com/api/v3/coins/list')
+      .then(function(r){ if(!r.ok)throw new Error('list '+r.status); return r.json(); })
+      .then(function(list){ var m={}; list.forEach(function(c){ if(c.id&&c.symbol) m[c.id]=c.symbol.toUpperCase(); }); SYM=m;
+        try{ localStorage.setItem('cg_sym',JSON.stringify({t:Date.now(),m:m})); }catch(e){} })
+      .catch(function(){ SYM=SYM||{}; });
+  }
+  function tickers(ids){
+    if(!ids||!ids.length||!SYM) return '';
+    var a=ids.map(function(id){return SYM[id];}).filter(Boolean).slice(0,3);
+    return a.length? '<small class="htk">'+esc(a.join(' · '))+'</small>' : '';
+  }
   function loadHeat(){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
-    fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc')
+    loadSym().then(function(){
+      return fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc');
+    })
       .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(d){
         var big=d.filter(function(c){return c.market_cap>1e9 && typeof c.market_cap_change_24h==='number';});
         big.sort(function(a,b){return b.market_cap_change_24h-a.market_cap_change_24h;});
         $('f-heat').innerHTML=big.slice(0,14).map(function(c){
           var p=c.market_cap_change_24h, cls=p>=0?'pos':'neg';
-          return '<div class="hrow"><span class="hn">'+esc(c.name)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
+          return '<div class="hrow"><span class="hn">'+esc(c.name)+tickers(c.top_3_coins_id)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
         }).join('');
         st.style.display='none';
         $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B 板塊依 24h 漲跌排序';
