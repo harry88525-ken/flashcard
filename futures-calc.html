@@ -125,6 +125,12 @@
   .srow .ssym{font-weight:700;color:var(--txt);}
   .srow .ssec{color:var(--mut);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .srow .sd{text-align:right;font-size:11px;}
+  .vrow{display:grid;grid-template-columns:24px 1fr 74px 56px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .vrow:last-child{border-bottom:none;}
+  .vrk{color:var(--dim);font-size:12px;text-align:center;}
+  .vsym{font-weight:700;}
+  .vvol{text-align:right;color:var(--mut);font-size:12px;}
+  .vch{text-align:right;font-weight:600;}
   @media(max-width:420px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -307,6 +313,10 @@
     <div class="fcard">
       <div class="fcard-h"><span>🌡 市場環境（參考）</span><button id="s-refresh" class="fbtn">↻ 更新</button></div>
       <div id="s-env" class="senv">點此分頁載入…</div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-h"><span>🔥 24h 成交量 Top10（排除穩定幣）</span></div>
+      <div id="s-vol"></div>
     </div>
     <div class="fcard">
       <div class="fcard-h"><span>🎯 候選清單 · 依相對強度排序</span></div>
@@ -619,14 +629,34 @@
         +'<span class="sp sd '+d[1]+'">'+d[0]+Math.round(r.mcfdv*100)+'</span></div>';
     }).join('');
   }
+  var STABLE={USDT:1,USDC:1,DAI:1,USDE:1,FDUSD:1,USDS:1,TUSD:1,USDD:1,PYUSD:1,BUSD:1,USD1:1,USDF:1,SUSDS:1,USDB:1,USDTB:1,GUSD:1,USDP:1};
+  function fmtVol(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x); }
+  function renderVol(list){
+    var el=$('s-vol'); if(!el) return;
+    if(!Array.isArray(list)) list=[];
+    var rows=list.filter(function(c){
+      if(!c||STABLE[(c.symbol||'').toUpperCase()]) return false;
+      var mc=c.market_cap||0, v=c.total_volume||0;
+      return mc>=5e8 && v<=mc*3;   // 市值門檻 + 成交量/市值比，濾掉洗量假量
+    }).slice(0,10);
+    if(!rows.length){ el.innerHTML='<div class="fstatus">—</div>'; return; }
+    el.innerHTML=rows.map(function(c,i){
+      var ch=c.price_change_percentage_24h, cls=(ch||0)>=0?'pos':'neg';
+      return '<div class="vrow"><span class="vrk">'+(i+1)+'</span><span class="vsym">'+esc((c.symbol||'').toUpperCase())+'</span>'
+        +'<span class="vvol">'+fmtVol(c.total_volume||0)+'</span>'
+        +'<span class="vch '+cls+'">'+(ch!=null?((ch>=0?'+':'')+ch.toFixed(1)+'%'):'—')+'</span></div>';
+    }).join('');
+  }
   function loadScreener(){
     var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中…';
     var ids=UNI.map(function(u){return u.sl;}); if(ids.indexOf('bitcoin')<0) ids.push('bitcoin');
     Promise.all([
       fetch('https://api.coingecko.com/api/v3/global').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d').then(function(r){return r.ok?r.json():[];})
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+ids.join(',')+'&per_page=250&price_change_percentage=7d,30d').then(function(r){return r.ok?r.json():[];}),
+      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=50&price_change_percentage=24h').then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
     ]).then(function(res){
-      var g=res[0], mk=res[1]||[], by={}; mk.forEach(function(c){by[c.id]=c;});
+      var g=res[0], mk=Array.isArray(res[1])?res[1]:[], by={}; mk.forEach(function(c){by[c.id]=c;});
+      renderVol(res[2]);
       var btc=by['bitcoin']||{}, btc7=btc.price_change_percentage_7d_in_currency||0, btc30=btc.price_change_percentage_30d_in_currency||0;
       renderEnv(g,btc7,btc30);
       var secsum={},seccnt={};
