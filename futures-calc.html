@@ -347,6 +347,38 @@
 /* 基本面分析：CoinGecko 板塊熱度 + 精選圖鑑（IIFE 隔離） */
 (function(){
   function $(id){return document.getElementById(id);}
+  /* ===== CoinGecko 取數層：快取 + 序列化 + 429 退避（解決免費版限流「Failed to fetch」） ===== */
+  var __cgMem={}, __cgFly={};
+  function __delay(ms){ return new Promise(function(res){ setTimeout(res,ms); }); }
+  function cgGet(url, ttl, force){
+    ttl = ttl||480000;                         // 預設快取 8 分鐘
+    var now=Date.now();
+    if(!force){
+      var m=__cgMem[url]; if(m && now-m.t<ttl) return Promise.resolve(m.v);
+      try{ var ls=JSON.parse(localStorage.getItem('cg:'+url)||'null');
+        if(ls && now-ls.t<ttl){ __cgMem[url]={t:ls.t,v:ls.v}; return Promise.resolve(ls.v); } }catch(e){}
+    }
+    if(__cgFly[url]) return __cgFly[url];       // 同網址併發只打一次
+    function attempt(n){
+      return fetch(url).then(function(r){
+        if(r.status===429){ if(n<3) return __delay(1500*Math.pow(2,n)).then(function(){return attempt(n+1);}); throw new Error('限流(429)'); }
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return r.json();
+      }).catch(function(e){
+        // 429 回應無 CORS header 時瀏覽器丟 TypeError「Failed to fetch」→ 一樣退避重試
+        if(n<3 && /fetch|429|限流|network/i.test(e.message||'')) return __delay(1500*Math.pow(2,n)).then(function(){return attempt(n+1);});
+        var stale=__cgMem[url]; if(stale) return stale.v;     // 重試仍敗：退回過期快取
+        try{ var s2=JSON.parse(localStorage.getItem('cg:'+url)||'null'); if(s2) return s2.v; }catch(_){}
+        throw e;
+      });
+    }
+    var p=attempt(0).then(function(v){
+      __cgMem[url]={t:Date.now(),v:v};
+      try{ localStorage.setItem('cg:'+url, JSON.stringify({t:Date.now(),v:v})); }catch(e){}
+      delete __cgFly[url]; return v;
+    },function(e){ delete __cgFly[url]; throw e; });
+    __cgFly[url]=p; return p;
+  }
   var GUIDE=[
     {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · CFG · SYRUP · POLYX · PLUME',h:'🔥🔥',c:'hot',
      d:'把現實世界的金融資產（美國國債、私募信貸、房地產、甚至股票）做成鏈上代幣，讓鏈上資金拿得到「真實世界的利息」，也讓傳統資產能 24 小時交易、被拆碎持有。這是 2025 機構入場的主敘事，貝萊德、富蘭克林坦伯頓都下場。⚠️ 但板塊「規模」主要靠穩定幣與代幣化美債撐起（那些不會噴），治理幣（如 ONDO）常因長期解鎖被稀釋，容易「協議成長、幣價脫鉤」。',
@@ -485,8 +517,7 @@
     $('f-modal').classList.add('on');
     var slugs=(g.k||[]).filter(function(x){return x.sl;}).map(function(x){return x.sl;});
     if(!slugs.length) return;
-    fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y')
-      .then(function(r){ return r.ok? r.json() : []; })
+    cgGet('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y', 600000)
       .then(function(mk){
         var by={}; (mk||[]).forEach(function(c){ by[c.id]=c; });
         (g.k||[]).forEach(function(x,i){
@@ -562,19 +593,17 @@
     }).join('');
     $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B · 依 '+lbl+' 排序（板塊龍頭均值近似）';
   }
-  function loadHeat(){
+  function loadHeat(force){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
     loadSym().then(function(){
-      return fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc');
+      return cgGet('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc', 600000, force);
     })
-      .then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(d){
-        RAW=d.filter(function(c){return c.market_cap>1e9;});
+        RAW=(d||[]).filter(function(c){return c.market_cap>1e9;});
         var ids={}; RAW.forEach(function(c){ (c.top_3_coins_id||[]).forEach(function(id){ if(id) ids[id]=1; }); });
         var idList=Object.keys(ids).slice(0,250).join(',');
-        return fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y');
+        return cgGet('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y', 480000, force);
       })
-      .then(function(r){ return r.ok? r.json() : []; })
       .then(function(mk){
         MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency, '200d':c.price_change_percentage_200d_in_currency, '1y':c.price_change_percentage_1y_in_currency }; });
         st.style.display='none';
@@ -586,7 +615,7 @@
   var mx=$('f-mx'); if(mx) mx.addEventListener('click',closeModal);
   var md=$('f-modal'); if(md) md.addEventListener('click',function(e){ if(e.target===md) closeModal(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
-  var rb=$('f-refresh'); if(rb) rb.addEventListener('click',loadHeat);
+  var rb=$('f-refresh'); if(rb) rb.addEventListener('click',function(){loadHeat(true);});
   var tf=$('f-tf'); if(tf) tf.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
     tf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); TF=b.dataset.tf; render();
   });});
@@ -655,17 +684,16 @@
         +'<span class="vch '+cls+'">'+(ch!=null?((ch>=0?'+':'')+ch.toFixed(1)+'%'):'—')+'</span></div>';
     }).join('');
   }
-  function loadScreener(){
+  function loadScreener(force){
     var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中（前 500 名）…';
     var pcp='&price_change_percentage=7d,30d,200d,1y', base='https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250';
-    Promise.all([
-      fetch('https://api.coingecko.com/api/v3/global').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-      fetch(base+'&page=1'+pcp).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
-      fetch(base+'&page=2'+pcp).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
-      fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=50&price_change_percentage=24h').then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
-    ]).then(function(res){
-      var g=res[0], all=(Array.isArray(res[1])?res[1]:[]).concat(Array.isArray(res[2])?res[2]:[]);
-      renderVol(res[3]);
+    var g=null, all=[];
+    cgGet('https://api.coingecko.com/api/v3/global', 600000, force).catch(function(){return null;}).then(function(r){ g=r; })
+    .then(function(){ return cgGet(base+'&page=1'+pcp, 480000, force); }).then(function(a){ all=all.concat(Array.isArray(a)?a:[]); })
+    .then(function(){ return cgGet(base+'&page=2'+pcp, 480000, force); }).then(function(b){ all=all.concat(Array.isArray(b)?b:[]); })
+    .then(function(){
+      // 成交量 Top10 由已抓的前 500 名直接排序得出（省一次 API 呼叫，減少限流）
+      renderVol(all.slice().sort(function(a,b){return (b.total_volume||0)-(a.total_volume||0);}));
       var btc={}; all.forEach(function(c){ if(c&&c.id==='bitcoin') btc=c; });
       BTCW={'7d':btc.price_change_percentage_7d_in_currency||0,'30d':btc.price_change_percentage_30d_in_currency||0,'200d':btc.price_change_percentage_200d_in_currency||0,'1y':btc.price_change_percentage_1y_in_currency||0};
       renderEnv(g,BTCW['7d'],BTCW['30d']);
@@ -681,7 +709,7 @@
   var sc=$('s-clean'), sh=$('s-hot'), srf=$('s-refresh');
   if(sc) sc.addEventListener('change',renderScreener);
   if(sh) sh.addEventListener('change',renderScreener);
-  if(srf) srf.addEventListener('click',loadScreener);
+  if(srf) srf.addEventListener('click',function(){loadScreener(true);});
   var stf=$('s-tf'); if(stf) stf.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ stf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); STF=b.dataset.tf; renderScreener(); }); });
 })();
 </script>
