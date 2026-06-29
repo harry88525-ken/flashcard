@@ -347,6 +347,12 @@
 /* 基本面分析：CoinGecko 板塊熱度 + 精選圖鑑（IIFE 隔離） */
 (function(){
   function $(id){return document.getElementById(id);}
+  /* ===== CoinGecko 來源：留空＝直連免費 API（會限流）；填入 Cloudflare Worker 反代網址＝永久免限流 =====
+     部署 Worker 後把下面這行改成你的網址（結尾 /v3），例：
+     var CG_PROXY='https://crypto-cg.你的帳號.workers.dev/v3';
+     部署步驟見 cloudflare-worker/README.md */
+  var CG_PROXY='';
+  var CG = CG_PROXY || 'https://api.coingecko.com/api/v3';
   /* ===== CoinGecko 取數層：快取 + 序列化 + 429 退避（解決免費版限流「Failed to fetch」） ===== */
   var __cgMem={}, __cgFly={};
   function __delay(ms){ return new Promise(function(res){ setTimeout(res,ms); }); }
@@ -517,7 +523,7 @@
     $('f-modal').classList.add('on');
     var slugs=(g.k||[]).filter(function(x){return x.sl;}).map(function(x){return x.sl;});
     if(!slugs.length) return;
-    cgGet('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y', 600000)
+    cgGet(CG+'/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y', 600000)
       .then(function(mk){
         var by={}; (mk||[]).forEach(function(c){ by[c.id]=c; });
         (g.k||[]).forEach(function(x,i){
@@ -564,7 +570,7 @@
     if(SYM) return Promise.resolve();
     try{ var c=JSON.parse(localStorage.getItem('cg_sym')||'null');
       if(c && c.t && (Date.now()-c.t<86400000) && c.m){ SYM=c.m; return Promise.resolve(); } }catch(e){}
-    return fetch('https://api.coingecko.com/api/v3/coins/list')
+    return fetch(CG+'/coins/list')
       .then(function(r){ if(!r.ok)throw new Error('list '+r.status); return r.json(); })
       .then(function(list){ var m={}; list.forEach(function(c){ if(c.id&&c.symbol) m[c.id]=c.symbol.toUpperCase(); }); SYM=m;
         try{ localStorage.setItem('cg_sym',JSON.stringify({t:Date.now(),m:m})); }catch(e){} })
@@ -596,13 +602,13 @@
   function loadHeat(force){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
     loadSym().then(function(){
-      return cgGet('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_change_24h_desc', 600000, force);
+      return cgGet(CG+'/coins/categories?order=market_cap_change_24h_desc', 600000, force);
     })
       .then(function(d){
         RAW=(d||[]).filter(function(c){return c.market_cap>1e9;});
         var ids={}; RAW.forEach(function(c){ (c.top_3_coins_id||[]).forEach(function(id){ if(id) ids[id]=1; }); });
         var idList=Object.keys(ids).slice(0,250).join(',');
-        return cgGet('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y', 480000, force);
+        return cgGet(CG+'/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y', 480000, force);
       })
       .then(function(mk){
         MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency, '200d':c.price_change_percentage_200d_in_currency, '1y':c.price_change_percentage_1y_in_currency }; });
@@ -686,9 +692,9 @@
   }
   function loadScreener(force){
     var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中（前 500 名）…';
-    var pcp='&price_change_percentage=7d,30d,200d,1y', base='https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250';
+    var pcp='&price_change_percentage=7d,30d,200d,1y', base=CG+'/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250';
     var g=null, all=[];
-    cgGet('https://api.coingecko.com/api/v3/global', 600000, force).catch(function(){return null;}).then(function(r){ g=r; })
+    cgGet(CG+'/global', 600000, force).catch(function(){return null;}).then(function(r){ g=r; })
     .then(function(){ return cgGet(base+'&page=1'+pcp, 480000, force); }).then(function(a){ all=all.concat(Array.isArray(a)?a:[]); })
     .then(function(){ return cgGet(base+'&page=2'+pcp, 480000, force); }).then(function(b){ all=all.concat(Array.isArray(b)?b:[]); })
     .then(function(){
