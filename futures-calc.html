@@ -347,43 +347,33 @@
 /* 基本面分析：CoinGecko 板塊熱度 + 精選圖鑑（IIFE 隔離） */
 (function(){
   function $(id){return document.getElementById(id);}
-  /* ===== CoinGecko 來源：留空＝直連免費 API（會限流）；填入 Cloudflare Worker 反代網址＝永久免限流 =====
-     部署 Worker 後把下面這行改成你的網址（結尾 /v3），例：
-     var CG_PROXY='https://crypto-cg.你的帳號.workers.dev/v3';
-     部署步驟見 cloudflare-worker/README.md */
-  var CG_PROXY='';
-  var CG = CG_PROXY || 'https://api.coingecko.com/api/v3';
-  /* ===== CoinGecko 取數層：快取 + 序列化 + 429 退避（解決免費版限流「Failed to fetch」） ===== */
-  var __cgMem={}, __cgFly={};
-  function __delay(ms){ return new Promise(function(res){ setTimeout(res,ms); }); }
-  function cgGet(url, ttl, force){
-    ttl = ttl||480000;                         // 預設快取 8 分鐘
-    var now=Date.now();
-    if(!force){
-      var m=__cgMem[url]; if(m && now-m.t<ttl) return Promise.resolve(m.v);
-      try{ var ls=JSON.parse(localStorage.getItem('cg:'+url)||'null');
-        if(ls && now-ls.t<ttl){ __cgMem[url]={t:ls.t,v:ls.v}; return Promise.resolve(ls.v); } }catch(e){}
-    }
-    if(__cgFly[url]) return __cgFly[url];       // 同網址併發只打一次
-    function attempt(n){
-      return fetch(url).then(function(r){
-        if(r.status===429){ if(n<3) return __delay(1500*Math.pow(2,n)).then(function(){return attempt(n+1);}); throw new Error('限流(429)'); }
-        if(!r.ok) throw new Error('HTTP '+r.status);
-        return r.json();
-      }).catch(function(e){
-        // 429 回應無 CORS header 時瀏覽器丟 TypeError「Failed to fetch」→ 一樣退避重試
-        if(n<3 && /fetch|429|限流|network/i.test(e.message||'')) return __delay(1500*Math.pow(2,n)).then(function(){return attempt(n+1);});
-        var stale=__cgMem[url]; if(stale) return stale.v;     // 重試仍敗：退回過期快取
-        try{ var s2=JSON.parse(localStorage.getItem('cg:'+url)||'null'); if(s2) return s2.v; }catch(_){}
-        throw e;
-      });
-    }
-    var p=attempt(0).then(function(v){
-      __cgMem[url]={t:Date.now(),v:v};
-      try{ localStorage.setItem('cg:'+url, JSON.stringify({t:Date.now(),v:v})); }catch(e){}
-      delete __cgFly[url]; return v;
-    },function(e){ delete __cgFly[url]; throw e; });
-    __cgFly[url]=p; return p;
+  /* ===== 資料來源：GitHub Actions 每 30 分鐘在伺服器端抓 CoinGecko 寫成 crypto-data.json，
+     網頁只讀同源本地檔 → 永遠不會被限流、不會「Failed to fetch」。
+     產生腳本：scripts/fetch-crypto-data.mjs；自動更新：.github/workflows/crypto-data.yml ===== */
+  var DATA=null, __dataP=null;
+  function loadData(force){
+    if(DATA && !force) return Promise.resolve(DATA);
+    if(__dataP && !force) return __dataP;
+    var bust = force ? Date.now() : Math.floor(Date.now()/300000); // 平時每 5 分鐘破一次快取；手動更新則即時
+    var url='./crypto-data.json?t='+bust;
+    __dataP=fetch(url).then(function(r){ if(!r.ok) throw new Error('資料檔 '+r.status); return r.json(); })
+      .then(function(d){ DATA=d; buildIndex(d); __dataP=null; return d; },
+            function(e){ __dataP=null; throw e; });
+    return __dataP;
+  }
+  function buildIndex(d){
+    SYM={}; MK={};   // id→symbol、id→各期間漲跌幅
+    (d.markets||[]).concat(d.guide||[]).forEach(function(c){
+      if(!c||!c.id) return;
+      MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency,
+                 '200d':c.price_change_percentage_200d_in_currency, '1y':c.price_change_percentage_1y_in_currency };
+      if(c.symbol) SYM[c.id]=c.symbol.toUpperCase();
+    });
+  }
+  function dataAge(d){
+    if(!d||!d.updated) return '';
+    var mins=Math.floor((Date.now()-new Date(d.updated).getTime())/60000);
+    if(mins<1) return '剛剛更新'; if(mins<60) return mins+' 分鐘前更新'; return Math.floor(mins/60)+' 小時前更新';
   }
   var GUIDE=[
     {n:'RWA / 資產代幣化',w:'美債·私募信貸·房產上鏈，可生息',t:'ONDO · CFG · SYRUP · POLYX · PLUME',h:'🔥🔥',c:'hot',
@@ -523,17 +513,14 @@
     $('f-modal').classList.add('on');
     var slugs=(g.k||[]).filter(function(x){return x.sl;}).map(function(x){return x.sl;});
     if(!slugs.length) return;
-    cgGet(CG+'/coins/markets?vs_currency=usd&ids='+slugs.join(',')+'&price_change_percentage=7d,30d,1y', 600000)
-      .then(function(mk){
-        var by={}; (mk||[]).forEach(function(c){ by[c.id]=c; });
-        (g.k||[]).forEach(function(x,i){
-          var el=document.getElementById('mcp-'+i); if(!el||!x.sl) return;
-          var c=by[x.sl]; if(!c){ el.textContent='—'; return; }
-          function seg(lb,v){ if(v==null) return ''; var cl=v>=0?'pos':'neg'; return '<span class="'+cl+'">'+lb+' '+(v>=0?'+':'')+v.toFixed(0)+'%</span>'; }
-          el.innerHTML=seg('7天',c.price_change_percentage_7d_in_currency)+seg('30天',c.price_change_percentage_30d_in_currency)+seg('1年',c.price_change_percentage_1y_in_currency);
-        });
-      })
-      .catch(function(){ (g.k||[]).forEach(function(x,i){ var el=document.getElementById('mcp-'+i); if(el&&x.sl) el.textContent=''; }); });
+    loadData().then(function(){
+      (g.k||[]).forEach(function(x,i){
+        var el=document.getElementById('mcp-'+i); if(!el||!x.sl) return;
+        var c=MK[x.sl]; if(!c){ el.textContent='—'; return; }
+        function seg(lb,v){ if(v==null) return ''; var cl=v>=0?'pos':'neg'; return '<span class="'+cl+'">'+lb+' '+(v>=0?'+':'')+v.toFixed(0)+'%</span>'; }
+        el.innerHTML=seg('7天',c['7d'])+seg('30天',c['30d'])+seg('1年',c['1y']);
+      });
+    }).catch(function(){ (g.k||[]).forEach(function(x,i){ var el=document.getElementById('mcp-'+i); if(el&&x.sl) el.textContent=''; }); });
   }
   function closeModal(){ $('f-modal').classList.remove('on'); }
   function fmtPct(x){return (x>=0?'+':'')+x.toFixed(1)+'%';}
@@ -566,16 +553,7 @@
   };
   function zh(n){ return NAMES[n]||n; }
   var SYM=null, MK=null, RAW=null, TF='7d', timer=null;
-  function loadSym(){
-    if(SYM) return Promise.resolve();
-    try{ var c=JSON.parse(localStorage.getItem('cg_sym')||'null');
-      if(c && c.t && (Date.now()-c.t<86400000) && c.m){ SYM=c.m; return Promise.resolve(); } }catch(e){}
-    return fetch(CG+'/coins/list')
-      .then(function(r){ if(!r.ok)throw new Error('list '+r.status); return r.json(); })
-      .then(function(list){ var m={}; list.forEach(function(c){ if(c.id&&c.symbol) m[c.id]=c.symbol.toUpperCase(); }); SYM=m;
-        try{ localStorage.setItem('cg_sym',JSON.stringify({t:Date.now(),m:m})); }catch(e){} })
-      .catch(function(){ SYM=SYM||{}; });
-  }
+  function loadSym(){ return loadData(); }  /* symbol 對照表已由 loadData→buildIndex 建好 */
   function tickers(ids){
     if(!ids||!ids.length||!SYM) return '';
     var a=ids.map(function(id){return SYM[id];}).filter(Boolean).slice(0,3);
@@ -592,30 +570,20 @@
     var rows=RAW.map(function(c){return {c:c,p:pctOf(c)};}).filter(function(o){return typeof o.p==='number'&&isFinite(o.p);});
     rows.sort(function(a,b){return b.p-a.p;});
     var LBL={'7d':'7天','30d':'30天','200d':'半年(≈200天)','1y':'1年'}, lbl=LBL[TF]||TF;
-    if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料（CoinGecko 可能限流），稍後按「↻ 手動更新」重試。</div>'; $('f-time').textContent=''; return; }
+    if(!rows.length){ $('f-heat').innerHTML='<div class="fstatus">'+lbl+' 暫無資料，稍後按「↻ 手動更新」重試。</div>'; $('f-time').textContent=''; return; }
     $('f-heat').innerHTML=rows.slice(0,14).map(function(o){
       var c=o.c,p=o.p,cls=p>=0?'pos':'neg';
       return '<div class="hrow"><span class="hn">'+esc(zh(c.name))+tickers(c.top_3_coins_id)+'</span><span class="hc">'+fmtCap(c.market_cap)+'</span><span class="hp '+cls+'">'+fmtPct(p)+'</span></div>';
     }).join('');
-    $('f-time').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW')+' · 市值 >$1B · 依 '+lbl+' 排序（板塊龍頭均值近似）';
+    $('f-time').textContent='資料 '+dataAge(DATA)+' · 市值 >$1B · 依 '+lbl+' 排序（板塊龍頭均值近似）';
   }
   function loadHeat(force){
     var st=$('f-status'); st.style.display='block'; st.textContent='載入中…';
-    loadSym().then(function(){
-      return cgGet(CG+'/coins/categories?order=market_cap_change_24h_desc', 600000, force);
-    })
-      .then(function(d){
-        RAW=(d||[]).filter(function(c){return c.market_cap>1e9;});
-        var ids={}; RAW.forEach(function(c){ (c.top_3_coins_id||[]).forEach(function(id){ if(id) ids[id]=1; }); });
-        var idList=Object.keys(ids).slice(0,250).join(',');
-        return cgGet(CG+'/coins/markets?vs_currency=usd&ids='+idList+'&per_page=250&price_change_percentage=7d,30d,200d,1y', 480000, force);
-      })
-      .then(function(mk){
-        MK={}; (mk||[]).forEach(function(c){ MK[c.id]={ '7d':c.price_change_percentage_7d_in_currency, '30d':c.price_change_percentage_30d_in_currency, '200d':c.price_change_percentage_200d_in_currency, '1y':c.price_change_percentage_1y_in_currency }; });
-        st.style.display='none';
-        render();
-      })
-      .catch(function(e){ st.style.display='block'; st.textContent='⚠ 即時熱度載入失敗（'+e.message+'）—— CoinGecko 可能限流，按「↻ 手動更新」重試；下方圖鑑不受影響。'; });
+    loadData(force).then(function(d){
+      RAW=(d.categories||[]).filter(function(c){return c.market_cap>1e9;});
+      st.style.display='none';
+      render();
+    }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 資料載入失敗（'+e.message+'）—— 稍後按「↻ 手動更新」重試；下方圖鑑不受影響。'; });
   }
   renderGuide();
   var mx=$('f-mx'); if(mx) mx.addEventListener('click',closeModal);
@@ -626,11 +594,11 @@
     tf.querySelectorAll('button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); TF=b.dataset.tf; render();
   });});
   loadHeat();
-  /* 自動更新：每 5 分鐘，僅在基本面分頁開著且頁面可見時 */
+  /* 自動更新：每 5 分鐘重抓靜態資料檔（撈伺服器端的新版），僅在基本面分頁開著且頁面可見時 */
   timer=setInterval(function(){
     if(document.hidden) return;
     var sf=document.getElementById('sec-fund');
-    if(sf && sf.classList.contains('on')) loadHeat();
+    if(sf && sf.classList.contains('on')) loadHeat(true);
   },300000);
 
   /* ===== 選幣篩子（共用 GUIDE 當宇宙；相對強度 + 反稀釋） ===== */
@@ -692,13 +660,9 @@
   }
   function loadScreener(force){
     var st=$('s-status'); if(!st) return; st.style.display='block'; st.textContent='載入中（前 500 名）…';
-    var pcp='&price_change_percentage=7d,30d,200d,1y', base=CG+'/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250';
-    var g=null, all=[];
-    cgGet(CG+'/global', 600000, force).catch(function(){return null;}).then(function(r){ g=r; })
-    .then(function(){ return cgGet(base+'&page=1'+pcp, 480000, force); }).then(function(a){ all=all.concat(Array.isArray(a)?a:[]); })
-    .then(function(){ return cgGet(base+'&page=2'+pcp, 480000, force); }).then(function(b){ all=all.concat(Array.isArray(b)?b:[]); })
-    .then(function(){
-      // 成交量 Top10 由已抓的前 500 名直接排序得出（省一次 API 呼叫，減少限流）
+    loadData(force).then(function(d){
+      var all=d.markets||[], g=d.global||null;
+      // 成交量 Top10 由前 500 名直接排序得出
       renderVol(all.slice().sort(function(a,b){return (b.total_volume||0)-(a.total_volume||0);}));
       var btc={}; all.forEach(function(c){ if(c&&c.id==='bitcoin') btc=c; });
       BTCW={'7d':btc.price_change_percentage_7d_in_currency||0,'30d':btc.price_change_percentage_30d_in_currency||0,'200d':btc.price_change_percentage_200d_in_currency||0,'1y':btc.price_change_percentage_1y_in_currency||0};
@@ -709,7 +673,7 @@
       });
       st.style.display='none';
       renderScreener();
-    }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 載入失敗（'+e.message+'）—— CoinGecko 可能限流，按更新重試。'; });
+    }).catch(function(e){ st.style.display='block'; st.textContent='⚠ 資料載入失敗（'+e.message+'）—— 稍後按「↻ 更新」重試。'; });
   }
   window.__loadScreener=loadScreener;
   var sc=$('s-clean'), sh=$('s-hot'), srf=$('s-refresh');

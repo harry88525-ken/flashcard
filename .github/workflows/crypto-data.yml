@@ -1,0 +1,39 @@
+name: 更新加密貨幣資料
+
+# 每 30 分鐘在 GitHub 伺服器端抓 CoinGecko，寫成 crypto-data.json 推回 repo。
+# 網頁(futures-calc.html)只讀這支靜態檔 → 瀏覽器永遠不會被限流 / Failed to fetch。
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}        # 也可在 Actions 頁手動按「Run workflow」
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 抓取 CoinGecko 資料
+        env:
+          CG_DEMO_KEY: ${{ secrets.CG_DEMO_KEY }}   # 選用，沒設也能跑(退回 keyless)
+        run: node scripts/fetch-crypto-data.mjs
+      - name: 有變更才提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add crypto-data.json
+          if git diff --staged --quiet; then
+            echo "資料無變更，略過"
+          else
+            git commit -m "chore: 更新加密貨幣資料 $(date -u +%FT%TZ)"
+            git push
+          fi
