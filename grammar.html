@@ -246,8 +246,8 @@ function renderContent(){
   t.vocab.forEach((c,i)=>{
     h += '<details class="cat"'+(i===0?' open':'')+'><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
     c.items.forEach(it=>{
-      h += '<div class="row"><div><span class="w">'+it.w+'</span>'+spk(it.w)+'<span class="z">'+it.z+'</span></div>'+
-           '<div class="ex"><span class="en">'+it.en+'</span>'+spk(it.en)+'<span class="zh">'+it.zh+'</span></div></div>';
+      h += '<div class="row"><div><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span>'+spk(it.w)+'</div>'+
+           '<div class="ex"><span class="en">'+it.en+'</span><span class="zh">'+it.zh+spk(it.en)+'</span></div></div>';
     });
     h += '</details>';
   });
