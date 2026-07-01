@@ -285,6 +285,7 @@ function homeScreen(){
       '<button class="home-btn" onclick="startReview()">🃏 單字卡複習<small>翻卡 + 遺忘曲線，幫你記住</small></button>'+
       '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+'<button class="home-btn" style="color:var(--star)" onclick="PD.open()">🎯 Pattern Drill 口說<small>出國 10 主題，聽提示開口講</small></button>'+
       '<button class="home-btn" style="color:var(--star)" onclick="PD.reviewHome()">📖 Pattern Drill 複習<small>整組中英對照，用看的滑著複習</small></button>'+
+      '<button class="home-btn" style="color:var(--self)" onclick="location.href=\'grammar.html\'">📚 文法學堂<small>主題式文法＋介系詞，像參考書一樣翻</small></button>'+
       '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
 }
 function startReview(){ deck=buildDeck(); i=0; history=[]; reviewScreen(); }

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>文法學堂</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#1a1d24; --card2:#22262f; --line:#2e333d;
+    --txt:#e9edf2; --dim:#9aa4b2; --accent:#f0801f; --accent2:#7ba3c4; --good:#5bbf7b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,"Segoe UI","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+    line-height:1.6;-webkit-text-size-adjust:100%}
+  a{color:inherit}
+  .wrap{max-width:820px;margin:0 auto;padding:16px 14px 60px}
+  header{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+  header h1{font-size:20px;margin:0;font-weight:700}
+  .back{font-size:13px;color:var(--accent2);text-decoration:none;border:1px solid var(--line);
+    padding:5px 10px;border-radius:8px;white-space:nowrap}
+  .sub{color:var(--dim);font-size:13px;margin:-6px 0 14px}
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+  .tab{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--txt);
+    padding:8px 14px;border-radius:20px;font-size:14px;cursor:pointer;white-space:nowrap}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#161616;font-weight:700}
+  .tab.soon{color:var(--dim);opacity:.7}
+  h2{font-size:17px;margin:26px 0 10px;padding-left:10px;border-left:4px solid var(--accent)}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--accent2)}
+  .cat{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .cat>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:600;font-size:15px;
+    display:flex;justify-content:space-between;align-items:center}
+  .cat>summary::-webkit-details-marker{display:none}
+  .cat>summary .arrow{color:var(--dim);font-size:12px;transition:transform .15s}
+  .cat[open]>summary .arrow{transform:rotate(90deg)}
+  .row{padding:10px 14px;border-top:1px solid var(--line)}
+  .row .w{font-weight:700;font-size:15px}
+  .row .z{color:var(--dim);font-size:13px;margin-left:6px}
+  .row .ex{margin-top:4px;font-size:14px}
+  .row .ex .en{color:var(--txt)}
+  .row .ex b{color:var(--accent)}
+  .row .ex .zh{color:var(--dim);font-size:13px;display:block}
+  .g{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+  .g .lead{font-size:14px;color:var(--dim);margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+  th,td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--accent2);font-weight:600;white-space:nowrap}
+  td b{color:var(--accent)}
+  .warn{background:#241a10;border:1px solid #4a361c;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+  .warn .t{color:var(--accent);font-weight:700;display:block;margin-bottom:4px}
+  .ok{color:var(--good)} .no{color:#e0736b}
+  .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:6px;
+    padding:1px 7px;font-size:12px;color:var(--accent2);margin-right:4px}
+  .soonbox{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:28px 14px;
+    text-align:center;color:var(--dim)}
+  footer{margin-top:30px;text-align:center;color:var(--dim);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>文法學堂</h1>
+    <a class="back" href="./index.html">← 回單字卡</a>
+  </header>
+  <div class="sub">主題式文法參考。每個單字配例句，底下接該用哪個介系詞／文法。像參考書一樣，隨時翻。</div>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+  <footer>文法學堂 · 資料以標準英文用法（Cambridge/Oxford 用法）為準</footer>
+</div>
+<script>
+const THEMES = {
+  time: {
+    name: "時間",
+    ready: true,
+    vocab: [
+      { cat: "鐘點時刻", items: [
+        {w:"o'clock", z:"整點", en:"We start at nine <b>o'clock</b>.", zh:"我們九點開始。"},
+        {w:"half past (two)", z:"…點半（2:30）", en:"It's <b>half past</b> two.", zh:"現在兩點半。"},
+        {w:"quarter past (ten)", z:"…點十五（10:15）", en:"The meeting is at a <b>quarter past</b> ten.", zh:"會議在十點十五分。"},
+        {w:"quarter to (six)", z:"差一刻…點（5:45）", en:"I got home at a <b>quarter to</b> six.", zh:"我六點差一刻到家。"},
+        {w:"a.m.", z:"上午", en:"The store opens at 9 <b>a.m.</b>", zh:"商店上午九點開門。"},
+        {w:"p.m.", z:"下午、晚上", en:"The movie starts at 8 <b>p.m.</b>", zh:"電影晚上八點開始。"},
+        {w:"noon / midday", z:"正午 12 點", en:"Let's meet at <b>noon</b>.", zh:"我們中午見。"},
+        {w:"midnight", z:"午夜 12 點", en:"The shop closes at <b>midnight</b>.", zh:"那家店午夜打烊。"},
+        {w:"sharp", z:"準點、整", en:"Be here at 8 <b>sharp</b>.", zh:"八點整到這裡。"},
+      ]},
+      { cat: "一天的時段", items: [
+        {w:"dawn", z:"黎明", en:"We left at <b>dawn</b>.", zh:"我們黎明時出發。"},
+        {w:"morning", z:"早上", en:"I exercise in the <b>morning</b>.", zh:"我早上運動。"},
+        {w:"afternoon", z:"下午", en:"She naps in the <b>afternoon</b>.", zh:"她下午小睡。"},
+        {w:"evening", z:"傍晚、晚上", en:"We talk in the <b>evening</b>.", zh:"我們傍晚聊天。"},
+        {w:"night", z:"夜晚", en:"I can't sleep at <b>night</b>.", zh:"我晚上睡不著。"},
+        {w:"sunrise", z:"日出", en:"The view at <b>sunrise</b> is amazing.", zh:"日出的景色很美。"},
+        {w:"sunset", z:"日落", en:"We watched the <b>sunset</b>.", zh:"我們看了日落。"},
+      ]},
+      { cat: "星期 / 週", items: [
+        {w:"Monday … Sunday", z:"週一到週日", en:"The class is on <b>Monday</b>.", zh:"這堂課在週一。"},
+        {w:"weekday", z:"平日（週一至五）", en:"I work on <b>weekdays</b>.", zh:"我平日上班。"},
+        {w:"weekend", z:"週末", en:"I relax on the <b>weekend</b>.", zh:"我週末放鬆。"},
+      ]},
+      { cat: "月份 / 季節", items: [
+        {w:"January … December", z:"一月到十二月", en:"My birthday is in <b>June</b>.", zh:"我生日在六月。"},
+        {w:"spring / summer", z:"春 / 夏", en:"We travel in <b>summer</b>.", zh:"我們夏天旅行。"},
+        {w:"autumn (fall) / winter", z:"秋 / 冬", en:"It's cold in <b>winter</b>.", zh:"冬天很冷。"},
+      ]},
+      { cat: "相對時間", items: [
+        {w:"now", z:"現在", en:"I'm busy <b>now</b>.", zh:"我現在很忙。"},
+        {w:"today", z:"今天", en:"I'm free <b>today</b>.", zh:"我今天有空。"},
+        {w:"tonight", z:"今晚", en:"Let's talk <b>tonight</b>.", zh:"我們今晚聊。"},
+        {w:"tomorrow", z:"明天", en:"See you <b>tomorrow</b>.", zh:"明天見。"},
+        {w:"yesterday", z:"昨天", en:"I saw her <b>yesterday</b>.", zh:"我昨天看到她。"},
+        {w:"the day after tomorrow", z:"後天", en:"We fly out <b>the day after tomorrow</b>.", zh:"我們後天出發。"},
+        {w:"the day before yesterday", z:"前天", en:"He arrived <b>the day before yesterday</b>.", zh:"他前天到的。"},
+        {w:"last / next week", z:"上週 / 下週", en:"The trip is <b>next week</b>.", zh:"旅行在下週。"},
+        {w:"ago", z:"…之前", en:"She left ten minutes <b>ago</b>.", zh:"她十分鐘前離開。"},
+        {w:"soon", z:"很快、不久", en:"I'll call you <b>soon</b>.", zh:"我很快打給你。"},
+        {w:"later", z:"稍後、待會", en:"Talk to you <b>later</b>.", zh:"待會聊。"},
+        {w:"just now", z:"剛剛", en:"He called <b>just now</b>.", zh:"他剛剛打來。"},
+        {w:"recently / lately", z:"最近", en:"I've been busy <b>lately</b>.", zh:"我最近很忙。"},
+        {w:"nowadays / these days", z:"現今", en:"Everyone uses phones <b>nowadays</b>.", zh:"現在大家都用手機。"},
+      ]},
+      { cat: "時間長度單位", items: [
+        {w:"second", z:"秒", en:"Wait a <b>second</b>.", zh:"等一下。"},
+        {w:"minute", z:"分鐘", en:"It takes five <b>minutes</b>.", zh:"要五分鐘。"},
+        {w:"hour", z:"小時", en:"I studied for an <b>hour</b>.", zh:"我讀了一小時。"},
+        {w:"day / week / month", z:"天 / 週 / 月", en:"I'll be back in a <b>week</b>.", zh:"我一週後回來。"},
+        {w:"year", z:"年", en:"I've lived here for <b>years</b>.", zh:"我住這裡好幾年了。"},
+        {w:"decade", z:"十年", en:"That was a <b>decade</b> ago.", zh:"那是十年前的事。"},
+        {w:"century", z:"世紀", en:"We live in the 21st <b>century</b>.", zh:"我們活在 21 世紀。"},
+        {w:"a moment / a while", z:"片刻 / 一陣子", en:"I haven't seen you in a <b>while</b>.", zh:"好一陣子沒見了。"},
+      ]},
+      { cat: "頻率", items: [
+        {w:"always", z:"總是", en:"She's <b>always</b> late.", zh:"她總是遲到。"},
+        {w:"usually", z:"通常", en:"I <b>usually</b> wake up at seven.", zh:"我通常七點起床。"},
+        {w:"often", z:"常常", en:"We <b>often</b> eat out.", zh:"我們常外食。"},
+        {w:"sometimes", z:"有時", en:"I <b>sometimes</b> walk to work.", zh:"我有時走路上班。"},
+        {w:"rarely / seldom", z:"很少", en:"He <b>rarely</b> eats out.", zh:"他很少外食。"},
+        {w:"never", z:"從不", en:"I <b>never</b> drink coffee.", zh:"我從不喝咖啡。"},
+        {w:"once / twice", z:"一次 / 兩次", en:"I go to the gym <b>twice</b> a week.", zh:"我一週去健身房兩次。"},
+        {w:"daily / weekly / monthly", z:"每日 / 每週 / 每月", en:"It's a <b>daily</b> habit.", zh:"這是每日習慣。"},
+      ]},
+      { cat: "準時 / 期限", items: [
+        {w:"early", z:"早", en:"I woke up <b>early</b>.", zh:"我很早起。"},
+        {w:"late", z:"晚、遲", en:"Sorry I'm <b>late</b>.", zh:"抱歉我遲到。"},
+        {w:"on time", z:"準時（按表定）", en:"The bus arrived <b>on time</b>.", zh:"公車準時到。"},
+        {w:"in time (for)", z:"及時、趕上", en:"I got there <b>in time</b> for the movie.", zh:"我及時趕上電影。"},
+        {w:"deadline", z:"截止日", en:"The <b>deadline</b> is this Friday.", zh:"截止日是這週五。"},
+        {w:"schedule", z:"行程、時刻表", en:"I have a busy <b>schedule</b>.", zh:"我行程很滿。"},
+        {w:"appointment", z:"預約、約診", en:"I have an <b>appointment</b> at 3.", zh:"我三點有預約。"},
+        {w:"punctual", z:"守時的", en:"He's always <b>punctual</b>.", zh:"他總是很準時。"},
+      ]},
+    ],
+    grammar: [
+      { title:"A. 三大時間介系詞：at / on / in（核心）",
+        lead:"口訣：範圍越小越精確用 <b>at</b>，某一「日」用 <b>on</b>，越大越長用 <b>in</b>。",
+        table:[
+          ["<b>at</b>","精確的「點」：鐘點、noon / midnight / night","at 7 o'clock、at 3:30、at noon、<b>at night</b>、at the moment"],
+          ["<b>on</b>","「日」：星期、日期、特定某天","on Monday、on July 1st、on my birthday、on Christmas Day"],
+          ["<b>in</b>","「長段」：月、年、季節、世紀＋一天的時段","<b>in the morning</b>、in July、in 2026、in summer、in the 21st century"],
+        ],
+        warns:[
+          "<b>night 用 at，但 morning／afternoon／evening 用 in</b>：<span class='ok'>at night ✓</span> 但 <span class='ok'>in the morning ✓</span>（不對稱，最多人錯的一個）。",
+          "<b>同時講「日＋時段」→ 用 on</b>：<span class='ok'>on Monday morning ✓</span>（不是 in the Monday morning）。「日」贏過「時段」。",
+          "<b>週末</b>：英式 <span class='ok'>at the weekend</span>、美式 <span class='ok'>on the weekend</span>，兩個都對。",
+        ] },
+      { title:"B. 期間與起點：for / since / ago / in / during",
+        lead:"這幾個最容易混，重點在「搭配的時態」。",
+        table:[
+          ["<b>for</b>","持續多久（一段長度）","I've studied English <b>for</b> three years.（持續三年）"],
+          ["<b>since</b>","從某個「起點」到現在 <span class='pill'>現在完成式</span>","I've studied English <b>since</b> 2020.（從 2020 到現在）"],
+          ["<b>ago</b>","從現在往回數 <span class='pill'>過去式</span>","I moved here three years <b>ago</b>.（三年前搬來）"],
+          ["<b>in</b>","從現在起「多久之後」<span class='pill'>未來</span>","I'll be there <b>in</b> ten minutes.（十分鐘後到）"],
+          ["<b>during</b>","在整段期間之內","I slept a lot <b>during</b> the summer.（整個夏天）"],
+        ],
+        warns:[
+          "<b>for vs since</b>：for＋<u>長度</u>（for three years）；since＋<u>起點</u>（since 2020）。都配現在完成式（have + p.p.）。",
+          "<b>ago vs in</b>：ago＝過去往回（配過去式）；in＝未來往後（I'll be back in an hour）。",
+        ] },
+      { title:"C. 期限與範圍：by / until / from…to",
+        lead:"截止 vs 持續，是兩回事。",
+        table:[
+          ["<b>by</b>","不晚於（截止點）","Finish it <b>by</b> Friday.（週五前完成）"],
+          ["<b>until / till</b>","一直持續到…為止","Wait <b>until</b> 5 p.m.（一直等到五點）"],
+          ["<b>from … to …</b>","從…到…（範圍）","I work <b>from</b> 9 <b>to</b> 5.（九點到五點）"],
+        ],
+        warns:[
+          "<b>by vs until</b>：by＝「在那之前做完某動作」（by Friday）；until＝「動作一直持續到那時」（stay until Friday）。差很多別搞混。",
+        ] },
+      { title:"D. 不加介系詞的陷阱（很多人多加）",
+        lead:"下面這些時間詞前面<b>不加</b> at / on / in。",
+        table:[
+          ["直接用，前面不加","today, tomorrow, yesterday, tonight","<span class='ok'>See you tomorrow. ✓</span> ／ <span class='no'>See you in tomorrow. ✗</span>"],
+          ["這些也是","this morning, last night, next week, every day","<span class='ok'>I'll call you tonight. ✓</span> ／ <span class='no'>at tonight ✗</span>"],
+        ],
+        warns:[] },
+      { title:"E. on time vs in time（長超像、意思不同）",
+        lead:"一個字之差，意思完全不一樣。",
+        table:[
+          ["<b>on time</b>","準時（正好按表定時間）","The train left <b>on time</b>.（火車準點開）"],
+          ["<b>in time (for)</b>","及時、趕得上（沒遲到）","I got there <b>in time</b> for the movie.（趕上電影）"],
+        ],
+        warns:[] },
+    ],
+  },
+  place:   { name:"地點", ready:false },
+  money:   { name:"金錢", ready:false },
+  feeling: { name:"情緒", ready:false },
+  work:    { name:"工作", ready:false },
+};
+
+const tabsEl = document.getElementById('tabs');
+const contentEl = document.getElementById('content');
+let current = 'time';
+
+function esc(s){return s;}
+
+function renderTabs(){
+  tabsEl.innerHTML = '';
+  Object.keys(THEMES).forEach(k=>{
+    const t = THEMES[k];
+    const b = document.createElement('button');
+    b.className = 'tab' + (k===current?' active':'') + (t.ready?'':' soon');
+    b.textContent = t.name + (t.ready?'':' · 準備中');
+    b.onclick = ()=>{ current=k; renderTabs(); renderContent(); window.scrollTo(0,0); };
+    tabsEl.appendChild(b);
+  });
+}
+
+function renderContent(){
+  const t = THEMES[current];
+  if(!t.ready){
+    contentEl.innerHTML = '<div class="soonbox">「'+t.name+'」主題準備中<br>先從「時間」開始練，之後照同一套骨架陸續補上。</div>';
+    return;
+  }
+  let h = '';
+  h += '<h2>Part 1 · 單字（每字配例句）</h2>';
+  t.vocab.forEach((c,i)=>{
+    h += '<details class="cat"'+(i===0?' open':'')+'><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
+    c.items.forEach(it=>{
+      h += '<div class="row"><div><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span></div>'+
+           '<div class="ex"><span class="en">'+it.en+'</span><span class="zh">'+it.zh+'</span></div></div>';
+    });
+    h += '</details>';
+  });
+  h += '<h2>Part 2 · 對應文法 / 介系詞</h2>';
+  t.grammar.forEach(g=>{
+    h += '<div class="g"><h3>'+g.title+'</h3>';
+    if(g.lead) h += '<div class="lead">'+g.lead+'</div>';
+    if(g.table && g.table.length){
+      h += '<table>';
+      g.table.forEach(r=>{ h += '<tr>'; r.forEach(c=>{ h += '<td>'+c+'</td>'; }); h += '</tr>'; });
+      h += '</table>';
+    }
+    (g.warns||[]).forEach(w=>{ h += '<div class="warn"><span class="t">易錯 / 重點</span>'+w+'</div>'; });
+    h += '</div>';
+  });
+  contentEl.innerHTML = h;
+}
+
+renderTabs();
+renderContent();
+</script>
+</body>
+</html>
