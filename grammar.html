@@ -40,6 +40,8 @@
   .row .ex .en{color:var(--txt)}
   .row .ex b{color:var(--accent)}
   .row .ex .zh{color:var(--dim);font-size:13px;display:block}
+  .spk{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:15px;padding:0 5px;vertical-align:middle;line-height:1}
+  .spk:active{opacity:.45}
   .g{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
   .g .lead{font-size:14px;color:var(--dim);margin-bottom:10px}
   table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
@@ -212,7 +214,14 @@ const tabsEl = document.getElementById('tabs');
 const contentEl = document.getElementById('content');
 let current = 'time';
 
-function esc(s){return s;}
+function cleanEng(raw){ return String(raw).replace(/<[^>]+>/g,'').replace(/[　-〿＀-￯一-鿿]/g,'').replace(/\s+/g,' ').trim(); }
+function spk(raw){ return spkSay(cleanEng(raw)); }
+function spkSay(say){ if(!say) return ''; var a=say.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); return ' <button class="spk" data-say="'+a+'" aria-label="唸給我聽">🔊</button>'; }
+var VOICE=null;
+function pickVoice(){ try{ var vs=speechSynthesis.getVoices(); VOICE = vs.find(function(v){return /en[-_]US/i.test(v.lang)&&/natural|google|samantha|aria|jenny|zira/i.test(v.name);}) || vs.find(function(v){return /en[-_]US/i.test(v.lang);}) || vs.find(function(v){return /^en/i.test(v.lang);}) || null; }catch(e){} }
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function speak(t){ if(!('speechSynthesis' in window)||!t) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=0.9; if(VOICE)u.voice=VOICE; speechSynthesis.speak(u); }
+document.addEventListener('click',function(e){ var b=e.target.closest('.spk'); if(b){ e.preventDefault(); e.stopPropagation(); speak(b.getAttribute('data-say')); } });
 
 function renderTabs(){
   tabsEl.innerHTML = '';
@@ -237,8 +246,8 @@ function renderContent(){
   t.vocab.forEach((c,i)=>{
     h += '<details class="cat"'+(i===0?' open':'')+'><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
     c.items.forEach(it=>{
-      h += '<div class="row"><div><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span></div>'+
-           '<div class="ex"><span class="en">'+it.en+'</span><span class="zh">'+it.zh+'</span></div></div>';
+      h += '<div class="row"><div><span class="w">'+it.w+'</span>'+spk(it.w)+'<span class="z">'+it.z+'</span></div>'+
+           '<div class="ex"><span class="en">'+it.en+'</span>'+spk(it.en)+'<span class="zh">'+it.zh+'</span></div></div>';
     });
     h += '</details>';
   });
@@ -248,7 +257,7 @@ function renderContent(){
     if(g.lead) h += '<div class="lead">'+g.lead+'</div>';
     if(g.table && g.table.length){
       h += '<table>';
-      g.table.forEach(r=>{ h += '<tr>'; r.forEach(c=>{ h += '<td>'+c+'</td>'; }); h += '</tr>'; });
+      g.table.forEach(r=>{ h += '<tr>'; r.forEach(c=>{ var say=cleanEng(c); h += '<td>'+c+(/[a-zA-Z]/.test(say)?spkSay(say):'')+'</td>'; }); h += '</tr>'; });
       h += '</table>';
     }
     (g.warns||[]).forEach(w=>{ h += '<div class="warn"><span class="t">易錯 / 重點</span>'+w+'</div>'; });
