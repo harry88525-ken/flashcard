@@ -251,7 +251,7 @@ function renderContent(){
   let h = '';
   h += '<h2>Part 1 · 單字（每字配例句）</h2>';
   t.vocab.forEach((c,i)=>{
-    h += '<details class="cat"'+(i===0?' open':'')+'><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
+    h += '<details class="cat"><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
     c.items.forEach(it=>{
       var head;
       if(it.list){
