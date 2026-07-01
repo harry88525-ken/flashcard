@@ -1,0 +1,37 @@
+name: 更新美股成交量
+
+# 每天抓美股日線、算近7/30天成交額排名，寫 us-volume.json 推回 repo。
+# 排在美股收盤後（美東 16:00 收盤 → 台北隔天清晨），用 UTC 抓最完整的前一交易日。
+on:
+  schedule:
+    - cron: '0 22 * * 1-5'      # 22:00 UTC ≈ 美東 17:00/18:00（收盤後）
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: us-volume
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 抓美股成交量
+        run: node scripts/fetch-us-volume.mjs
+      - name: 有變更才提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add us-volume.json
+          if git diff --staged --quiet; then
+            echo "資料無變更，略過"
+          else
+            git commit -m "chore: 更新美股成交量 $(date -u +%FT%TZ)"
+            git push
+          fi

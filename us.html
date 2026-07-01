@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美股成交量排名</title>
+<style>
+  :root{
+    --bg:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a3240;
+    --txt:#e6edf3; --mut:#8b949e; --dim:#6e7681;
+    --green:#16c784; --red:#ea3943; --blue:#3b82f6; --amber:#f0b90b; --r:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.5;}
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{font-size:18px;font-weight:600;margin:0 0 2px;}
+  .sub{font-size:12px;color:var(--mut);margin:0 0 14px;}
+  .tfseg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 6px;}
+  .tfseg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
+  .tfseg button.on{background:var(--card2);color:#7eb6ff;}
+  .time{font-size:11px;color:var(--dim);margin:0 0 10px;}
+  .status{font-size:13px;color:var(--mut);padding:16px 0;}
+  .head,.row{display:grid;grid-template-columns:34px 74px 1fr 96px 64px;gap:8px;align-items:center;
+    padding:9px 6px;border-bottom:1px solid var(--line);font-size:13px;}
+  .head{color:var(--dim);font-weight:600;font-size:11px;position:sticky;top:0;background:var(--bg);}
+  .head span:nth-child(n+4),.row .r{text-align:right;}
+  .row .rk{color:var(--dim);text-align:center;}
+  .row .sym{font-weight:700;}
+  .row .nm{color:var(--mut);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .dv{text-align:right;font-weight:600;}
+  .row .ch{text-align:right;font-weight:600;}
+  .pos{color:var(--green);} .neg{color:var(--red);}
+  .foot{font-size:11px;color:var(--dim);margin-top:16px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>美股成交量排名</h1>
+  <p class="sub">近 7 天 / 近 30 天 · 平均每日成交額(美元)由大到小</p>
+  <div class="tfseg" id="tf">
+    <button class="on" data-w="7d">近 7 天</button>
+    <button data-w="30d">近 30 天</button>
+  </div>
+  <div class="time" id="time"></div>
+  <div class="head"><span>#</span><span>代號</span><span>名稱</span><span>日均成交額</span><span>期間漲跌</span></div>
+  <div id="status" class="status">載入中…</div>
+  <div id="list"></div>
+  <p class="foot">成交額＝該期間「平均每日成交金額」(收盤×成交量)。7天≈近5交易日、30天≈近21交易日。資料每日更新 · Yahoo Finance · 僅供研究參考,非投資建議。</p>
+</div>
+<script>
+(function(){
+  function $(id){return document.getElementById(id);}
+  var DATA=null, W='7d';
+  function fmt(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x); }
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function age(d){ if(!d||!d.updated)return''; var m=Math.floor((Date.now()-new Date(d.updated).getTime())/60000); return m<60?('資料 '+m+' 分鐘前更新'):('資料 '+Math.floor(m/60)+' 小時前更新'); }
+  function render(){
+    if(!DATA) return;
+    var rows=DATA[W]||[];
+    $('time').textContent=age(DATA)+(DATA.universe?(' · 掃描 '+DATA.universe+' 檔'):'');
+    if(!rows.length){ $('list').innerHTML='<div class="status">暫無資料</div>'; return; }
+    $('list').innerHTML=rows.map(function(x){
+      var cls=(x.chg==null?'':(x.chg>=0?'pos':'neg'));
+      var chg=(x.chg==null?'—':((x.chg>=0?'+':'')+x.chg+'%'));
+      return '<div class="row"><span class="rk">'+x.rank+'</span><span class="sym">'+esc(x.sym)+'</span>'+
+        '<span class="nm">'+esc(x.name||'')+'</span>'+
+        '<span class="dv">'+fmt(x.dollar_vol)+'</span>'+
+        '<span class="ch '+cls+'">'+chg+'</span></div>';
+    }).join('');
+  }
+  function load(){
+    fetch('./us-volume.json?t='+Math.floor(Date.now()/300000))
+      .then(function(r){ if(!r.ok)throw new Error('資料檔 '+r.status); return r.json(); })
+      .then(function(d){ DATA=d; $('status').style.display='none'; render(); })
+      .catch(function(e){ $('status').textContent='⚠ 載入失敗（'+e.message+'）,稍後重試。'; });
+  }
+  $('tf').querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
+    $('tf').querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); W=b.dataset.w; render();
+  });});
+  load();
+})();
+</script>
+</body>
+</html>
