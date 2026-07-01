@@ -42,6 +42,13 @@
   .row .ex .zh{color:var(--dim);font-size:13px;display:block}
   .spk{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:15px;padding:0 5px;vertical-align:middle;line-height:1}
   .spk:active{opacity:.45}
+  .sub>summary{list-style:none;cursor:pointer;display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+  .sub>summary::-webkit-details-marker{display:none}
+  .subarrow{color:var(--accent2);font-size:12px;margin-left:8px;border:1px solid var(--line);border-radius:6px;padding:1px 8px}
+  .sub[open] .subarrow{color:var(--accent);border-color:var(--accent)}
+  .sublist{display:flex;flex-wrap:wrap;gap:6px 8px;margin:9px 0 2px;padding-top:9px;border-top:1px dashed var(--line)}
+  .subitem{display:inline-flex;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:3px 4px 3px 9px}
+  .subitem b{font-weight:700} .subitem .z{margin-left:5px;font-size:12px}
   .g{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
   .g .lead{font-size:14px;color:var(--dim);margin-bottom:10px}
   table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
@@ -96,12 +103,12 @@ const THEMES = {
         {w:"sunset", z:"日落", en:"We watched the <b>sunset</b>.", zh:"我們看了日落。"},
       ]},
       { cat: "星期 / 週", items: [
-        {w:"Monday … Sunday", z:"週一到週日", en:"The class is on <b>Monday</b>.", zh:"這堂課在週一。"},
+        {w:"Monday … Sunday", z:"週一到週日", en:"The class is on <b>Monday</b>.", zh:"這堂課在週一。", list:[{w:"Monday",z:"週一"},{w:"Tuesday",z:"週二"},{w:"Wednesday",z:"週三"},{w:"Thursday",z:"週四"},{w:"Friday",z:"週五"},{w:"Saturday",z:"週六"},{w:"Sunday",z:"週日"}]},
         {w:"weekday", z:"平日（週一至五）", en:"I work on <b>weekdays</b>.", zh:"我平日上班。"},
         {w:"weekend", z:"週末", en:"I relax on the <b>weekend</b>.", zh:"我週末放鬆。"},
       ]},
       { cat: "月份 / 季節", items: [
-        {w:"January … December", z:"一月到十二月", en:"My birthday is in <b>June</b>.", zh:"我生日在六月。"},
+        {w:"January … December", z:"一月到十二月", en:"My birthday is in <b>June</b>.", zh:"我生日在六月。", list:[{w:"January",z:"一月"},{w:"February",z:"二月"},{w:"March",z:"三月"},{w:"April",z:"四月"},{w:"May",z:"五月"},{w:"June",z:"六月"},{w:"July",z:"七月"},{w:"August",z:"八月"},{w:"September",z:"九月"},{w:"October",z:"十月"},{w:"November",z:"十一月"},{w:"December",z:"十二月"}]},
         {w:"spring / summer", z:"春 / 夏", en:"We travel in <b>summer</b>.", zh:"我們夏天旅行。"},
         {w:"autumn (fall) / winter", z:"秋 / 冬", en:"It's cold in <b>winter</b>.", zh:"冬天很冷。"},
       ]},
@@ -246,7 +253,14 @@ function renderContent(){
   t.vocab.forEach((c,i)=>{
     h += '<details class="cat"'+(i===0?' open':'')+'><summary>'+c.cat+'<span class="arrow">▶</span></summary>';
     c.items.forEach(it=>{
-      h += '<div class="row"><div><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span>'+spk(it.w)+'</div>'+
+      var head;
+      if(it.list){
+        head = '<details class="sub"><summary><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span>'+spk(it.w)+'<span class="subarrow">展開全部 ▾</span></summary>'+
+          '<div class="sublist">'+it.list.map(function(s){ return '<span class="subitem"><b>'+s.w+'</b><span class="z">'+s.z+'</span>'+spk(s.w)+'</span>'; }).join('')+'</div></details>';
+      } else {
+        head = '<div><span class="w">'+it.w+'</span><span class="z">'+it.z+'</span>'+spk(it.w)+'</div>';
+      }
+      h += '<div class="row">'+head+
            '<div class="ex"><span class="en">'+it.en+'</span><span class="zh">'+it.zh+spk(it.en)+'</span></div></div>';
     });
     h += '</details>';
