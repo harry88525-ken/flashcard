@@ -221,7 +221,20 @@ const tabsEl = document.getElementById('tabs');
 const contentEl = document.getElementById('content');
 let current = 'time';
 
-function cleanEng(raw){ return String(raw).replace(/<[^>]+>/g,'').replace(/[　-〿＀-￯一-鿿]/g,'').replace(/\s*\/\s*/g,', ').replace(/\s+/g,' ').trim(); }
+function cleanEng(raw){ return String(raw)
+  .replace(/<[^>]+>/g,'')
+  .replace(/[、，]/g,', ')
+  .replace(/。/g,'. ')
+  .replace(/\s*[\/／]\s*/g,', ')
+  .replace(/…|\.{3}/g,', ')
+  .replace(/[—–]/g,', ')
+  .replace(/[✓✔✗✘✅❌🔊•·]/g,' ')
+  .replace(/[　-〿＀-￯一-鿿]/g,'')
+  .replace(/(,\s*){2,}/g,', ')
+  .replace(/\s+([,.])/g,'$1')
+  .replace(/\s+/g,' ')
+  .replace(/^[\s,]+|[\s,]+$/g,'')
+  .trim(); }
 function spk(raw){ return spkSay(cleanEng(raw)); }
 function spkSay(say){ if(!say) return ''; var a=say.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); return ' <button class="spk" data-say="'+a+'" aria-label="唸給我聽">🔊</button>'; }
 var VOICE=null;
