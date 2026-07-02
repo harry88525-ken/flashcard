@@ -30,11 +30,12 @@
   .lg{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle;}
   .lg.real{background:var(--green);} .lg.weak{background:var(--amber);}
   .lg.ext{background:var(--red);} .lg.wait{background:var(--dim);}
-  .wrap{max-width:1000px;margin:0 auto;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:660px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
   th,td{padding:9px 10px;text-align:right;white-space:nowrap;}
-  th{color:var(--dim);font-weight:500;border-bottom:1px solid var(--line);font-size:11px;
-     position:sticky;top:0;background:var(--bg);}
+  thead tr{position:sticky;top:0;z-index:5;}
+  th{color:var(--mut);font-weight:600;border-bottom:1px solid var(--line);font-size:11px;
+     position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line);}
   th.l,td.l{text-align:left;}
   tbody tr{border-bottom:1px solid #1a2029;}
   tbody tr.s-real{background:rgba(22,199,132,.08);}
@@ -63,7 +64,7 @@
     <div class="titlerow">
       <h1>台股 · 盤中狙擊<span class="rk"> 即時</span></h1>
     </div>
-    <p class="sub">LEADERS + READY tier1 狙擊清單 × Fugle 即時報價</p>
+    <p class="sub">LEADERS + READY 待突破清單（全等級 · 觀察中）× Fugle 即時報價</p>
     <div class="status" id="status">
       <span id="sess"></span><span id="updated"></span><span id="asof"></span>
     </div>
@@ -89,7 +90,7 @@
   <div class="empty" id="empty" style="display:none;"></div>
 
   <p class="foot">
-    名單＝每日 VCP 選股的 LEADERS＋READY tier1「待突破」者（收盤後更新）；現價為 Fugle 即時報價（每 30 秒自動刷新，免手動重整）。<br>
+    名單＝每日 VCP 選股的 LEADERS＋READY 全等級「待突破」者（收盤後更新）；現價為 Fugle 即時報價（每 30 秒自動刷新，免手動重整）。<br>
     <b>狀態邏輯</b>：已延伸(現價≥買點×1.05) → 真突破(站上＋量能≥100%) → 量不足(站上但量不夠) → 待突破。量能＝今日量 ÷（50日均量×1.4）。<br>
     ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤紅綠燈。
   </p>
