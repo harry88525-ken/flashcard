@@ -56,15 +56,13 @@
   .vok{color:var(--green);font-weight:600;} .vbad{color:var(--dim);}
   .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
   .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
-  .sidebar{position:fixed;left:14px;top:150px;width:190px;max-height:72vh;overflow:auto;
-    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:none;}
-  @media(min-width:1340px){.sidebar{display:block;}}
-  .sidebar h3{font-size:12px;margin:0 0 9px;font-weight:700;color:var(--txt);}
-  .sbrow{display:flex;align-items:baseline;gap:7px;padding:5px 0;border-bottom:1px solid #1a2029;font-size:12px;}
-  .sbrow .rk{color:var(--dim);width:15px;flex:0 0 auto;font-variant-numeric:tabular-nums;}
-  .sbrow .nm{flex:1;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .sbrow .tv{color:var(--amber);font-variant-numeric:tabular-nums;font-size:11px;flex:0 0 auto;}
-  .sbfoot{font-size:10px;color:var(--dim);margin-top:8px;}
+  .sidebar{position:fixed;left:14px;top:88px;width:176px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;max-height:82vh;overflow:auto;}
+  .sidebar h3{font-size:12px;margin:0 0 8px;color:var(--txt);}
+  .sidebar ol{margin:0;padding-left:22px;}
+  .sidebar li{margin-bottom:6px;line-height:1.3;}
+  .sidebar .v{color:var(--mut);font-size:11px;}
+  .sidebar .sbnote{color:var(--mut);font-size:10px;margin-top:8px;border-top:1px solid var(--line);padding-top:6px;}
+  @media(max-width:1480px){.sidebar{display:none;}}
 </style>
 </head>
 <body>
@@ -134,9 +132,9 @@ function fmtVol(t){
 function renderSidebar(d){
   const tv=d.top_volume||[];
   if(!tv.length){ $('sidebar').innerHTML=''; return; }
-  $('sidebar').innerHTML='<h3>昨日成交值 Top10</h3>'+tv.map((x,i)=>
-    `<div class="sbrow"><span class="rk">${i+1}</span><span class="nm">${x.stock_id} ${x.name}</span><span class="tv">${Math.round((x.turnover_last||0)/1e8)}億</span></div>`
-  ).join('')+'<div class="sbfoot">排除金融 / ETF</div>';
+  $('sidebar').innerHTML='<h3>🔊 昨日成交值 Top'+tv.length+'</h3><ol>'+
+    tv.map(x=>`<li><b>${x.stock_id}</b> ${x.name}<br><span class="v">${Math.round((x.turnover_last||0)/1e8)} 億　收 ${x.close}</span></li>`).join('')+
+    '</ol><div class="sbnote">當日最大量能（排除金融/ETF）</div>';
 }
 
 async function load(){
