@@ -8,15 +8,14 @@
   :root{
     --bg:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a3240;
     --txt:#e6edf3; --mut:#8b949e; --dim:#6e7681;
-    --green:#16c784; --red:#ea3943; --blue:#3b82f6; --amber:#f0b90b;
+    --green:#16c784; --red:#ea3943; --blue:#3b82f6; --amber:#f0b90b; --purple:#a371f7;
     --r:10px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{margin:0;background:var(--bg);color:var(--txt);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
-    padding:14px 14px 40px;}
-  header{max-width:1000px;margin:0 auto 12px;}
-  .titlerow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+    padding:14px 14px 60px;}
+  header{max-width:1040px;margin:0 auto 10px;}
   h1{font-size:18px;font-weight:700;margin:0;}
   h1 .rk{color:var(--amber);}
   .sub{font-size:12px;color:var(--mut);margin:4px 0 0;}
@@ -25,18 +24,30 @@
   .live .dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.6s infinite;}
   .closed .dot{background:var(--dim);}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .wrap{max-width:1000px;margin:0 auto;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
-  th,td{padding:9px 10px;text-align:right;white-space:nowrap;}
-  th{color:var(--dim);font-weight:500;border-bottom:1px solid var(--line);font-size:11px;
-     position:sticky;top:0;background:var(--bg);}
+  .wrap{max-width:1040px;margin:0 auto;}
+
+  .sec{margin-top:22px;}
+  .sechd{display:flex;align-items:baseline;gap:10px;padding:0 2px 8px;border-bottom:1px solid var(--line);}
+  .sdot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .sdot.breakout{background:var(--green);} .sdot.approaching{background:var(--amber);}
+  .sdot.leaders{background:var(--blue);} .sdot.ready{background:var(--dim);}
+  .sectitle{font-size:15px;font-weight:700;}
+  .seccount{font-size:12px;color:var(--dim);}
+  .secsub{font-size:11px;color:var(--dim);margin-left:auto;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  .tblwrap{overflow-x:auto;}
+  th,td{padding:8px 9px;text-align:right;white-space:nowrap;}
+  th{color:var(--dim);font-weight:500;font-size:11px;border-bottom:1px solid #1a2029;}
   th.l,td.l{text-align:left;}
-  tbody tr{border-bottom:1px solid #1a2029;}
-  tbody tr.hit{background:rgba(22,199,132,.07);}
-  tbody tr.hit td.name{border-left:3px solid var(--green);padding-left:8px;}
+  tbody tr.row{border-bottom:1px solid #161c25;cursor:pointer;}
+  tbody tr.row:hover{background:#141a22;}
+  tbody tr.row.hit{background:rgba(22,199,132,.06);}
+  tbody tr.row.hit td.nm{border-left:3px solid var(--green);padding-left:6px;}
+  tbody tr.row.open{background:#151b24;}
   .code{color:var(--mut);font-variant-numeric:tabular-nums;}
-  .name{font-weight:600;}
-  .ind{color:var(--dim);font-size:11px;}
+  .caret{color:var(--dim);font-size:10px;margin-right:4px;}
+  .nm b{font-weight:600;} .ind{color:var(--dim);font-size:11px;}
   .num{font-variant-numeric:tabular-nums;}
   .price{font-weight:700;}
   .up{color:var(--green);} .down{color:var(--red);}
@@ -44,103 +55,174 @@
   .tag.hit{background:rgba(22,199,132,.15);color:var(--green);}
   .tag.near{background:rgba(240,185,11,.12);color:var(--amber);}
   .tag.far{background:#20262f;color:var(--dim);}
-  .vol .bad{color:var(--dim);} .vol .ok{color:var(--green);font-weight:600;}
-  .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
-  .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
+  .vbad{color:var(--dim);} .vok{color:var(--green);font-weight:600;}
+
+  tr.detail td{padding:0;background:#10151c;border-bottom:1px solid #1a2029;}
+  .dbox{padding:12px 14px;}
+  .drow{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--mut);}
+  .drow b{color:var(--txt);font-weight:600;}
+  .dsec-t{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 5px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .chip{font-size:11px;padding:3px 9px;border-radius:6px;background:#1b2029;color:var(--mut);}
+  .chip.g{background:rgba(22,199,132,.13);color:var(--green);}
+  .chip.r{background:rgba(234,57,67,.13);color:var(--red);}
+  .chip.a{background:rgba(240,185,11,.13);color:var(--amber);}
+  .summary{margin-top:9px;font-size:12.5px;line-height:1.75;color:var(--txt);
+    background:#141a22;border-left:2px solid var(--blue);padding:8px 11px;border-radius:0 6px 6px 0;}
+  .loading{color:var(--dim);font-size:12px;}
+  .foot{max-width:1040px;margin:22px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
+  .empty{color:var(--mut);font-size:12px;padding:10px 2px;}
 </style>
 </head>
 <body>
   <header>
-    <div class="titlerow">
-      <h1>台股 · 盤中狙擊<span class="rk"> 即時</span></h1>
-      <a href="https://harry88525-ken.github.io/vcp-screener/" target="_blank"
-         style="margin-left:auto;font-size:12px;color:var(--blue);text-decoration:none;">完整選股報告 →</a>
-    </div>
-    <p class="sub">待突破名單 × Fugle 即時報價　—　站上買點即標記</p>
-    <div class="status" id="status">
-      <span id="sess"></span>
-      <span id="updated"></span>
-      <span id="asof"></span>
-    </div>
+    <h1>台股 · 盤中狙擊<span class="rk"> 即時</span></h1>
+    <p class="sub">四類即時追蹤 × Fugle 即時報價　—　點代號展開基本面</p>
+    <div class="status" id="status"><span id="sess"></span><span id="updated"></span><span id="asof"></span><span id="mkt"></span></div>
   </header>
 
-  <div class="wrap">
-    <table>
-      <thead>
-        <tr>
-          <th class="l">代號</th><th class="l">名稱</th><th>RS</th>
-          <th>買點</th><th>現價</th><th>距買點</th><th>量能</th><th class="l">狀態</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </div>
-  <div class="empty" id="empty" style="display:none;"></div>
+  <div class="wrap" id="wrap"></div>
 
   <p class="foot">
-    資料：狙擊清單來自每日 VCP 選股（收盤後更新）＋ Fugle 整市場即時報價（每 30 秒刷新）。<br>
-    「距買點」負值＝已站上買點。「量能」＝今日累計量 ÷（50 日均量×1.4）門檻；盤中量會逐步累積。<br>
-    ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤。
+    名單來自每日 VCP 選股（收盤後更新）；現價為 Fugle 整市場即時報價（每 30 秒刷新）。<br>
+    點代號展開：今天突破／即將突破／LEADERS 會即時抓 FinMind 基本面（EPS／月營收／法人）；READY 只看即時報價。<br>
+    「距買點」負值＝已站上。「量能」＝今日累計量 ÷（50 日均量×1.4）門檻，盤中會逐步累積。⚠️ 僅供研究，非投資建議。
   </p>
 
 <script>
-const API="https://vcp-breakout-monitor.harry88525.workers.dev/live";
+const API="https://vcp-breakout-monitor.harry88525.workers.dev";
 const $=id=>document.getElementById(id);
+const SECTIONS=[
+  {key:'breakout',   cls:'breakout',   name:'今天突破', sub:'當日已站上買點', fund:true},
+  {key:'approaching',cls:'approaching', name:'即將突破', sub:'逼近買點，站上即推播', fund:true},
+  {key:'leaders',    cls:'leaders',    name:'LEADERS 主攻', sub:'全門檻通過 · 詳細分析', fund:true, detailed:true},
+  {key:'ready',      cls:'ready',      name:'READY 觀察池', sub:'即時報價（不抓基本面）', fund:false},
+];
+let DATA=null; const expanded=new Set(); const fundCache=new Map();
 
-function fmtDist(t){
-  const p=t.distPct*100;
-  if(t.crossed) return `<span class="up">▲ +${Math.abs(p).toFixed(1)}%</span>`;
-  return `<span class="num">${p.toFixed(1)}%</span>`;
-}
-function fmtVol(t){
-  if(t.volPct==null) return '<span class="vol"><span class="bad">-</span></span>';
-  const ok=t.volPct>=100;
-  return `<span class="vol"><span class="${ok?'ok':'bad'}">${t.volPct}%</span></span>`;
-}
-function statusTag(t){
-  if(t.crossed) return '<span class="tag hit">✅ 站上買點</span>';
-  const near=t.distPct<=0.02;
-  return `<span class="tag ${near?'near':'far'}">${near?'⚡ 逼近':'待突破'}</span>`;
-}
+const pct=(v,d=1)=>v==null?'-':(v*100).toFixed(d)+'%';
+function distCell(t){const p=t.distPct*100; return t.crossed?`<span class="up">▲ +${Math.abs(p).toFixed(1)}%</span>`:`<span class="num">${p.toFixed(1)}%</span>`;}
+function volCell(t){if(t.volPct==null)return '<span class="vbad">-</span>';return `<span class="${t.volPct>=100?'vok':'vbad'}">${t.volPct}%</span>`;}
+function stateCell(t){if(t.crossed)return '<span class="tag hit">✅ 站上買點</span>';return t.distPct<=0.02?'<span class="tag near">⚡ 逼近</span>':'<span class="tag far">待突破</span>';}
 
-async function load(){
-  try{
-    const r=await fetch(API,{cache:"no-store"});
-    const d=await r.json();
-    if(d.error){ $('empty').style.display='block'; $('empty').textContent='資料暫時讀取失敗，稍後自動重試…'; return; }
-    render(d);
-  }catch(e){
-    $('empty').style.display='block'; $('empty').textContent='連線失敗，稍後自動重試…';
-  }
+async function loadLive(){
+  try{ const r=await fetch(API+"/live",{cache:"no-store"}); DATA=await r.json();
+    if(DATA.error){ $('wrap').innerHTML='<p class="empty">資料暫時讀取失敗，自動重試中…</p>'; return; } render();
+  }catch(e){ $('wrap').innerHTML='<p class="empty">連線失敗，自動重試中…</p>'; }
 }
 
-function render(d){
-  // 狀態列
+function render(){
+  const d=DATA; if(!d) return;
   const live=d.in_session;
   $('sess').parentElement.className='status '+(live?'live':'closed');
-  $('sess').innerHTML=`<span class="dot"></span>${live?'盤中即時':'非交易時段（顯示最近報價）'}`;
+  $('sess').innerHTML=`<span class="dot"></span>${live?'盤中即時':'非交易時段（最近報價）'}`;
   $('updated').textContent='更新 '+(d.server_time||'--:--');
   $('asof').textContent='名單日 '+(d.as_of||'-');
+  if(d.market)$('mkt').textContent=`大盤 ${d.market.light==='green'?'🟢綠燈':d.market.light==='red'?'🔴紅燈':'🟡黃燈'} 廣度${Math.round((d.market.score||0)*100)}%`;
 
-  const rows=d.targets||[];
-  if(!rows.length){ $('empty').style.display='block'; $('empty').textContent='今日無待突破名單。'; return; }
-  $('empty').style.display='none';
-
-  $('rows').innerHTML=rows.map(t=>`
-    <tr class="${t.crossed?'hit':''}">
-      <td class="l code">${t.id}</td>
-      <td class="l name">${t.name}${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
-      <td class="num">${t.rs??'-'}</td>
-      <td class="num">${t.buy}</td>
-      <td class="num price">${t.price??'-'}</td>
-      <td>${fmtDist(t)}</td>
-      <td>${fmtVol(t)}</td>
-      <td class="l">${statusTag(t)}</td>
-    </tr>`).join('');
+  $('wrap').innerHTML=SECTIONS.map(s=>{
+    const rows=(d[s.key]||[]);
+    const body=rows.length?rows.map(t=>rowHTML(t,s)).join(''):`<tr><td colspan="8" class="empty">目前無</td></tr>`;
+    return `<div class="sec"><div class="sechd">
+        <span class="sdot ${s.cls}"></span><span class="sectitle">${s.name}</span>
+        <span class="seccount">${rows.length}</span><span class="secsub">${s.sub}</span></div>
+      <div class="tblwrap"><table>
+        <thead><tr><th class="l">代號</th><th class="l">名稱</th><th>RS</th><th>買點</th><th>現價</th><th>距買點</th><th>量能</th><th class="l">狀態</th></tr></thead>
+        <tbody>${body}</tbody></table></div></div>`;
+  }).join('');
 }
 
-load();
-setInterval(load,30000);
+function rowHTML(t,s){
+  const key=s.key+':'+t.id, open=expanded.has(key);
+  let html=`<tr class="row ${t.crossed?'hit':''} ${open?'open':''}" onclick="toggle('${s.key}','${t.id}',${s.fund})">
+    <td class="l code"><span class="caret">${open?'▾':'▸'}</span>${t.id}</td>
+    <td class="l nm"><b>${t.name}</b>${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
+    <td class="num">${t.rs??'-'}</td><td class="num">${t.buy}</td>
+    <td class="num price">${t.price??'-'}</td><td>${distCell(t)}</td><td>${volCell(t)}</td>
+    <td class="l">${stateCell(t)}</td></tr>`;
+  if(open) html+=`<tr class="detail"><td colspan="8"><div class="dbox">${detailHTML(t,s)}</div></td></tr>`;
+  return html;
+}
+
+function detailHTML(t,s){
+  // 共通：型態/風控
+  let h=`<div class="drow">
+    <span>買點 <b>${t.buy}</b></span><span>停損 <b>${t.stop??'-'}</b></span>
+    <span>風險 <b>${pct(t.riskPct)}</b></span><span>風報比 <b>${t.rewardRisk?t.rewardRisk.toFixed(2):'-'}</b></span>
+    <span>量門檻 <b>${t.volThresholdLots}張</b></span><span>量能 <b>${t.volPct??'-'}%</b></span></div>`;
+  // LEADERS 詳細：內建 VCP/基本面欄位 + 白話
+  if(s.detailed) h+=leaderDetail(t);
+  // 基本面（FinMind 即時）
+  if(s.fund){
+    const f=fundCache.get(t.id);
+    h+=`<div class="dsec-t">基本面（FinMind 即時）</div>`;
+    h+= f===undefined ? `<div class="loading">載入中…</div>` : fundHTML(f);
+  } else {
+    h+=`<div class="dsec-t">基本面</div><div class="loading">READY 觀察池不抓基本面（依你設定省用量）。要看請升級關注或等它進即將突破。</div>`;
+  }
+  return h;
+}
+
+function leaderDetail(t){
+  const chips=[];
+  chips.push(t.isVcp?`<span class="chip g">VCP 型態成立</span>`:`<span class="chip">型態未定</span>`);
+  if(t.grade)chips.push(`<span class="chip">收縮品質 ${t.grade}</span>`);
+  if(t.contractions&&t.contractions.length)chips.push(`<span class="chip">收縮 ${t.contractions.map(c=>Math.round(c*100)+'%').join('→')}</span>`);
+  if(t.rsLineNewHigh)chips.push(`<span class="chip g">RS線創新高</span>`);
+  if(t.groupTop)chips.push(`<span class="chip g">族群前段(排${t.groupRank})</span>`);
+  else if(t.groupRank)chips.push(`<span class="chip">族群排${t.groupRank}</span>`);
+  if(t.instNetBuy)chips.push(`<span class="chip g">法人買超</span>`);
+  if(t.trustStreak>=3)chips.push(`<span class="chip a">投信連買${t.trustStreak}日</span>`);
+  const f=[];
+  if(t.epsYoy!=null)f.push(`季EPS年增 ${pct(t.epsYoy)}`);
+  if(t.roe!=null)f.push(`ROE ${pct(t.roe)}`);
+  if(t.rev3mYoy!=null)f.push(`近3月營收YoY ${pct(t.rev3mYoy)}`);
+  if(t.dist52wHigh!=null)f.push(`距52週高 ${pct(t.dist52wHigh)}`);
+  let sum=`<b>${t.name}</b>：`;
+  sum+= t.isVcp?`VCP 型態成立`:`型態尚未完全收斂`;
+  sum+= t.grade?`（收縮品質 ${t.grade}）`:'';
+  sum+= `，RS ${t.rs}`;
+  sum+= t.rsLineNewHigh?`、RS線創新高（強度領先股價，多頭訊號）`:'';
+  sum+= '。';
+  if(f.length)sum+=`基本面：${f.join('、')}。`;
+  sum+= t.instNetBuy?`籌碼面法人站買方`:`籌碼面法人未明顯買超`;
+  sum+= t.trustStreak>=3?`、投信連買 ${t.trustStreak} 日（飆股常見）`:'';
+  sum+= '。';
+  sum+= t.groupTop?`所屬族群排名前段（第${t.groupRank}），有族群加分。`:'';
+  sum+= ` 進場破買點 ${t.buy}、停損 ${t.stop}（風險 ${pct(t.riskPct)}）、風報比 ${t.rewardRisk?t.rewardRisk.toFixed(2):'-'}。`;
+  return `<div class="dsec-t">型態 · 籌碼 · 族群</div><div class="chips">${chips.join('')}</div><div class="summary">${sum}</div>`;
+}
+
+function fundHTML(f){
+  if(f.error)return `<div class="loading">基本面讀取失敗。</div>`;
+  const parts=[];
+  if(f.revenue){const y=f.revenue.yoy; const tag=y==null?'':(y>=20?'g':y>=0?'a':'r');
+    parts.push(`<span>月營收 ${f.revenue.ym} <b>${f.revenue.yi}億</b> ${y!=null?`<span class="chip ${tag}">YoY ${y}%</span>`:''}</span>`);}
+  if(f.eps){const neg=f.eps.value<0; parts.push(`<span>最新單季EPS(${f.eps.date}) <b class="${neg?'down':''}">${f.eps.value}</b></span>`);}
+  if(f.inst5){const sell=f.inst5.lots<0; parts.push(`<span>近5日法人 <b class="${sell?'down':'up'}">${f.inst5.lots>0?'+':''}${f.inst5.lots} 張</b></span>`);}
+  if(!parts.length)return `<div class="loading">查無基本面資料。</div>`;
+  // 白話
+  let note='';
+  if(f.revenue&&f.revenue.yoy!=null){note+= f.revenue.yoy>=20?'營收年增強勁':f.revenue.yoy>=0?'營收年增溫和':'營收年減轉弱';}
+  if(f.eps){note+=(note?'、':'')+(f.eps.value<0?'單季仍虧損':'單季獲利');}
+  if(f.inst5){note+=(note?'、':'')+(f.inst5.lots<0?'法人近5日賣超（籌碼偏空）':'法人近5日買超（籌碼偏多）');}
+  return `<div class="drow">${parts.join('')}</div>${note?`<div class="summary">${note}。</div>`:''}`;
+}
+
+async function fetchFund(id){
+  try{ const r=await fetch(`${API}/fundamentals?id=${id}`,{cache:"no-store"}); fundCache.set(id, await r.json()); }
+  catch(e){ fundCache.set(id,{error:true}); }
+}
+function toggle(key,id,fund){
+  const k=key+':'+id;
+  if(expanded.has(k)){ expanded.delete(k); render(); return; }
+  expanded.add(k); render();
+  if(fund && !fundCache.has(id)){ fetchFund(id).then(render); }
+}
+window.toggle=toggle;
+
+loadLive();
+setInterval(loadLive,30000);
 </script>
 </body>
 </html>
