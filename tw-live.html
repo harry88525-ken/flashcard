@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台股 · 盤中狙擊即時</title>
+<style>
+  :root{
+    --bg:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a3240;
+    --txt:#e6edf3; --mut:#8b949e; --dim:#6e7681;
+    --green:#16c784; --red:#ea3943; --blue:#3b82f6; --amber:#f0b90b;
+    --r:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    padding:14px 14px 40px;}
+  header{max-width:1000px;margin:0 auto 12px;}
+  .titlerow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  h1{font-size:18px;font-weight:700;margin:0;}
+  h1 .rk{color:var(--amber);}
+  .sub{font-size:12px;color:var(--mut);margin:4px 0 0;}
+  .status{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut);}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+  .live .dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.6s infinite;}
+  .closed .dot{background:var(--dim);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .wrap{max-width:1000px;margin:0 auto;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
+  th,td{padding:9px 10px;text-align:right;white-space:nowrap;}
+  th{color:var(--dim);font-weight:500;border-bottom:1px solid var(--line);font-size:11px;
+     position:sticky;top:0;background:var(--bg);}
+  th.l,td.l{text-align:left;}
+  tbody tr{border-bottom:1px solid #1a2029;}
+  tbody tr.hit{background:rgba(22,199,132,.07);}
+  tbody tr.hit td.name{border-left:3px solid var(--green);padding-left:8px;}
+  .code{color:var(--mut);font-variant-numeric:tabular-nums;}
+  .name{font-weight:600;}
+  .ind{color:var(--dim);font-size:11px;}
+  .num{font-variant-numeric:tabular-nums;}
+  .price{font-weight:700;}
+  .up{color:var(--green);} .down{color:var(--red);}
+  .tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;}
+  .tag.hit{background:rgba(22,199,132,.15);color:var(--green);}
+  .tag.near{background:rgba(240,185,11,.12);color:var(--amber);}
+  .tag.far{background:#20262f;color:var(--dim);}
+  .vol .bad{color:var(--dim);} .vol .ok{color:var(--green);font-weight:600;}
+  .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
+  .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
+</style>
+</head>
+<body>
+  <header>
+    <div class="titlerow">
+      <h1>台股 · 盤中狙擊<span class="rk"> 即時</span></h1>
+      <a href="https://harry88525-ken.github.io/vcp-screener/" target="_blank"
+         style="margin-left:auto;font-size:12px;color:var(--blue);text-decoration:none;">完整選股報告 →</a>
+    </div>
+    <p class="sub">待突破名單 × Fugle 即時報價　—　站上買點即標記</p>
+    <div class="status" id="status">
+      <span id="sess"></span>
+      <span id="updated"></span>
+      <span id="asof"></span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="l">代號</th><th class="l">名稱</th><th>RS</th>
+          <th>買點</th><th>現價</th><th>距買點</th><th>量能</th><th class="l">狀態</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <div class="empty" id="empty" style="display:none;"></div>
+
+  <p class="foot">
+    資料：狙擊清單來自每日 VCP 選股（收盤後更新）＋ Fugle 整市場即時報價（每 30 秒刷新）。<br>
+    「距買點」負值＝已站上買點。「量能」＝今日累計量 ÷（50 日均量×1.4）門檻；盤中量會逐步累積。<br>
+    ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤。
+  </p>
+
+<script>
+const API="https://vcp-breakout-monitor.harry88525.workers.dev/live";
+const $=id=>document.getElementById(id);
+
+function fmtDist(t){
+  const p=t.distPct*100;
+  if(t.crossed) return `<span class="up">▲ +${Math.abs(p).toFixed(1)}%</span>`;
+  return `<span class="num">${p.toFixed(1)}%</span>`;
+}
+function fmtVol(t){
+  if(t.volPct==null) return '<span class="vol"><span class="bad">-</span></span>';
+  const ok=t.volPct>=100;
+  return `<span class="vol"><span class="${ok?'ok':'bad'}">${t.volPct}%</span></span>`;
+}
+function statusTag(t){
+  if(t.crossed) return '<span class="tag hit">✅ 站上買點</span>';
+  const near=t.distPct<=0.02;
+  return `<span class="tag ${near?'near':'far'}">${near?'⚡ 逼近':'待突破'}</span>`;
+}
+
+async function load(){
+  try{
+    const r=await fetch(API,{cache:"no-store"});
+    const d=await r.json();
+    if(d.error){ $('empty').style.display='block'; $('empty').textContent='資料暫時讀取失敗，稍後自動重試…'; return; }
+    render(d);
+  }catch(e){
+    $('empty').style.display='block'; $('empty').textContent='連線失敗，稍後自動重試…';
+  }
+}
+
+function render(d){
+  // 狀態列
+  const live=d.in_session;
+  $('sess').parentElement.className='status '+(live?'live':'closed');
+  $('sess').innerHTML=`<span class="dot"></span>${live?'盤中即時':'非交易時段（顯示最近報價）'}`;
+  $('updated').textContent='更新 '+(d.server_time||'--:--');
+  $('asof').textContent='名單日 '+(d.as_of||'-');
+
+  const rows=d.targets||[];
+  if(!rows.length){ $('empty').style.display='block'; $('empty').textContent='今日無待突破名單。'; return; }
+  $('empty').style.display='none';
+
+  $('rows').innerHTML=rows.map(t=>`
+    <tr class="${t.crossed?'hit':''}">
+      <td class="l code">${t.id}</td>
+      <td class="l name">${t.name}${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
+      <td class="num">${t.rs??'-'}</td>
+      <td class="num">${t.buy}</td>
+      <td class="num price">${t.price??'-'}</td>
+      <td>${fmtDist(t)}</td>
+      <td>${fmtVol(t)}</td>
+      <td class="l">${statusTag(t)}</td>
+    </tr>`).join('');
+}
+
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>
