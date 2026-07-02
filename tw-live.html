@@ -33,9 +33,8 @@
   .wrap{max-width:1000px;margin:0 auto;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th,td{padding:9px 10px;text-align:right;white-space:nowrap;}
-  thead tr{position:sticky;top:0;z-index:5;}
-  th{color:var(--mut);font-weight:600;border-bottom:1px solid var(--line);font-size:11px;
-     position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line);}
+  th{color:var(--mut);font-weight:600;font-size:11px;
+     position:sticky;top:0;z-index:5;background:#10141b;box-shadow:inset 0 -1px 0 var(--line);}
   th.l,td.l{text-align:left;}
   tbody tr{border-bottom:1px solid #1a2029;}
   tbody tr.s-real{background:rgba(22,199,132,.08);}
@@ -57,6 +56,15 @@
   .vok{color:var(--green);font-weight:600;} .vbad{color:var(--dim);}
   .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
   .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
+  .sidebar{position:fixed;left:14px;top:150px;width:190px;max-height:72vh;overflow:auto;
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:none;}
+  @media(min-width:1340px){.sidebar{display:block;}}
+  .sidebar h3{font-size:12px;margin:0 0 9px;font-weight:700;color:var(--txt);}
+  .sbrow{display:flex;align-items:baseline;gap:7px;padding:5px 0;border-bottom:1px solid #1a2029;font-size:12px;}
+  .sbrow .rk{color:var(--dim);width:15px;flex:0 0 auto;font-variant-numeric:tabular-nums;}
+  .sbrow .nm{flex:1;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sbrow .tv{color:var(--amber);font-variant-numeric:tabular-nums;font-size:11px;flex:0 0 auto;}
+  .sbfoot{font-size:10px;color:var(--dim);margin-top:8px;}
 </style>
 </head>
 <body>
@@ -75,6 +83,8 @@
       <span><span class="lg wait"></span><b>待突破</b>＝還沒站上（盯著）</span>
     </div>
   </header>
+
+  <div class="sidebar" id="sidebar"></div>
 
   <div class="wrap">
     <table>
@@ -121,6 +131,14 @@ function fmtVol(t){
   return `<span class="${t.volPct>=100?'vok':'vbad'}">${t.volPct}%</span>`;
 }
 
+function renderSidebar(d){
+  const tv=d.top_volume||[];
+  if(!tv.length){ $('sidebar').innerHTML=''; return; }
+  $('sidebar').innerHTML='<h3>昨日成交值 Top10</h3>'+tv.map((x,i)=>
+    `<div class="sbrow"><span class="rk">${i+1}</span><span class="nm">${x.stock_id} ${x.name}</span><span class="tv">${Math.round((x.turnover_last||0)/1e8)}億</span></div>`
+  ).join('')+'<div class="sbfoot">排除金融 / ETF</div>';
+}
+
 async function load(){
   try{
     const r=await fetch(API,{cache:"no-store"}); const d=await r.json();
@@ -136,6 +154,7 @@ function render(d){
   $('updated').textContent='更新 '+(d.server_time||'--:--');
   $('asof').textContent='名單日 '+(d.as_of||'-');
 
+  renderSidebar(d);
   let rows=(d.approaching||[]).map(t=>({t,s:statusOf(t)}));
   if(!rows.length){ $('empty').style.display='block'; $('empty').textContent='今日無狙擊名單。'; return; }
   $('empty').style.display='none';
