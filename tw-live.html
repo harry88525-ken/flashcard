@@ -25,26 +25,35 @@
   .live .dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.6s infinite;}
   .closed .dot{background:var(--dim);}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .legend{display:flex;gap:6px 14px;flex-wrap:wrap;margin-top:9px;font-size:11.5px;color:var(--mut);}
+  .legend b{font-weight:600;}
+  .lg{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+  .lg.real{background:var(--green);} .lg.weak{background:var(--amber);}
+  .lg.ext{background:var(--red);} .lg.wait{background:var(--dim);}
   .wrap{max-width:1000px;margin:0 auto;overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:660px;}
   th,td{padding:9px 10px;text-align:right;white-space:nowrap;}
   th{color:var(--dim);font-weight:500;border-bottom:1px solid var(--line);font-size:11px;
      position:sticky;top:0;background:var(--bg);}
   th.l,td.l{text-align:left;}
   tbody tr{border-bottom:1px solid #1a2029;}
-  tbody tr.hit{background:rgba(22,199,132,.07);}
-  tbody tr.hit td.name{border-left:3px solid var(--green);padding-left:8px;}
+  tbody tr.s-real{background:rgba(22,199,132,.08);}
+  tbody tr.s-real td.name{border-left:3px solid var(--green);padding-left:8px;}
+  tbody tr.s-weak td.name{border-left:3px solid var(--amber);padding-left:8px;}
+  tbody tr.s-ext{opacity:.72;}
+  tbody tr.s-ext td.name{border-left:3px solid var(--red);padding-left:8px;}
   .code{color:var(--mut);font-variant-numeric:tabular-nums;}
   .name{font-weight:600;}
   .ind{color:var(--dim);font-size:11px;}
   .num{font-variant-numeric:tabular-nums;}
   .price{font-weight:700;}
   .up{color:var(--green);} .down{color:var(--red);}
-  .tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;}
-  .tag.hit{background:rgba(22,199,132,.15);color:var(--green);}
-  .tag.near{background:rgba(240,185,11,.12);color:var(--amber);}
-  .tag.far{background:#20262f;color:var(--dim);}
-  .vol .bad{color:var(--dim);} .vol .ok{color:var(--green);font-weight:600;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;}
+  .tag.real{background:rgba(22,199,132,.16);color:var(--green);}
+  .tag.weak{background:rgba(240,185,11,.14);color:var(--amber);}
+  .tag.ext{background:rgba(234,57,67,.15);color:var(--red);}
+  .tag.wait{background:#20262f;color:var(--dim);}
+  .vok{color:var(--green);font-weight:600;} .vbad{color:var(--dim);}
   .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
   .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
 </style>
@@ -54,11 +63,15 @@
     <div class="titlerow">
       <h1>台股 · 盤中狙擊<span class="rk"> 即時</span></h1>
     </div>
-    <p class="sub">待突破名單 × Fugle 即時報價　—　站上買點即標記</p>
+    <p class="sub">LEADERS + READY tier1 狙擊清單 × Fugle 即時報價</p>
     <div class="status" id="status">
-      <span id="sess"></span>
-      <span id="updated"></span>
-      <span id="asof"></span>
+      <span id="sess"></span><span id="updated"></span><span id="asof"></span>
+    </div>
+    <div class="legend">
+      <span><span class="lg real"></span><b>真突破</b>＝站上買點＋量能≥100%＋未延伸（可考慮）</span>
+      <span><span class="lg weak"></span><b>量不足</b>＝站上但量&lt;100%（疑似假突破）</span>
+      <span><span class="lg ext"></span><b>已延伸</b>＝噴超過買點5%（別追）</span>
+      <span><span class="lg wait"></span><b>待突破</b>＝還沒站上（盯著）</span>
     </div>
   </header>
 
@@ -76,40 +89,43 @@
   <div class="empty" id="empty" style="display:none;"></div>
 
   <p class="foot">
-    資料：狙擊清單來自每日 VCP 選股（收盤後更新）＋ Fugle 整市場即時報價（每 30 秒刷新）。<br>
-    「距買點」負值＝已站上買點。「量能」＝今日累計量 ÷（50 日均量×1.4）門檻；盤中量會逐步累積。<br>
-    ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤。
+    名單＝每日 VCP 選股的 LEADERS＋READY tier1「待突破」者（收盤後更新）；現價為 Fugle 即時報價（每 30 秒自動刷新，免手動重整）。<br>
+    <b>狀態邏輯</b>：已延伸(現價≥買點×1.05) → 真突破(站上＋量能≥100%) → 量不足(站上但量不夠) → 待突破。量能＝今日量 ÷（50日均量×1.4）。<br>
+    ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤紅綠燈。
   </p>
 
 <script>
 const API="https://vcp-breakout-monitor.harry88525.workers.dev/live";
 const $=id=>document.getElementById(id);
+const EXT=1.05; // 買點×1.05 以上＝已延伸
+
+function statusOf(t){
+  if(t.price==null) return {k:'wait',cls:'wait',label:'待突破'};
+  if(t.price >= t.buy*EXT) return {k:'ext',cls:'ext',label:'🔴 已延伸·別追'};
+  if(t.price >= t.buy){
+    if(t.volPct!=null && t.volPct>=100) return {k:'real',cls:'real',label:'✅ 真突破'};
+    return {k:'weak',cls:'weak',label:'⚠️ 站上·量不足'};
+  }
+  return {k:'wait',cls:'wait',label: t.distPct<=0.02 ? '逼近' : '待突破'};
+}
+const ORDER={real:0,weak:1,wait:2,ext:3};
 
 function fmtDist(t){
+  if(t.price==null) return '<span class="num">-</span>';
   const p=t.distPct*100;
-  if(t.crossed) return `<span class="up">▲ +${Math.abs(p).toFixed(1)}%</span>`;
-  return `<span class="num">${p.toFixed(1)}%</span>`;
+  return t.price>=t.buy ? `<span class="up">▲ +${Math.abs(p).toFixed(1)}%</span>` : `<span class="num">${p.toFixed(1)}%</span>`;
 }
 function fmtVol(t){
-  if(t.volPct==null) return '<span class="vol"><span class="bad">-</span></span>';
-  const ok=t.volPct>=100;
-  return `<span class="vol"><span class="${ok?'ok':'bad'}">${t.volPct}%</span></span>`;
-}
-function statusTag(t){
-  if(t.crossed) return '<span class="tag hit">✅ 站上買點</span>';
-  const near=t.distPct<=0.02;
-  return `<span class="tag ${near?'near':'far'}">${near?'⚡ 逼近':'待突破'}</span>`;
+  if(t.volPct==null) return '<span class="vbad">-</span>';
+  return `<span class="${t.volPct>=100?'vok':'vbad'}">${t.volPct}%</span>`;
 }
 
 async function load(){
   try{
-    const r=await fetch(API,{cache:"no-store"});
-    const d=await r.json();
-    if(d.error){ $('empty').style.display='block'; $('empty').textContent='資料暫時讀取失敗，稍後自動重試…'; return; }
+    const r=await fetch(API,{cache:"no-store"}); const d=await r.json();
+    if(d.error){ $('empty').style.display='block'; $('empty').textContent='資料暫時讀取失敗，自動重試中…'; return; }
     render(d);
-  }catch(e){
-    $('empty').style.display='block'; $('empty').textContent='連線失敗，稍後自動重試…';
-  }
+  }catch(e){ $('empty').style.display='block'; $('empty').textContent='連線失敗，自動重試中…'; }
 }
 
 function render(d){
@@ -119,12 +135,13 @@ function render(d){
   $('updated').textContent='更新 '+(d.server_time||'--:--');
   $('asof').textContent='名單日 '+(d.as_of||'-');
 
-  const rows=d.approaching||[];
-  if(!rows.length){ $('empty').style.display='block'; $('empty').textContent='今日無待突破名單。'; return; }
+  let rows=(d.approaching||[]).map(t=>({t,s:statusOf(t)}));
+  if(!rows.length){ $('empty').style.display='block'; $('empty').textContent='今日無狙擊名單。'; return; }
   $('empty').style.display='none';
+  rows.sort((a,b)=> ORDER[a.s.k]-ORDER[b.s.k] || a.t.distPct-b.t.distPct);
 
-  $('rows').innerHTML=rows.map(t=>`
-    <tr class="${t.crossed?'hit':''}">
+  $('rows').innerHTML=rows.map(({t,s})=>`
+    <tr class="s-${s.k}">
       <td class="l code">${t.id}</td>
       <td class="l name">${t.name}${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
       <td class="num">${t.rs??'-'}</td>
@@ -132,7 +149,7 @@ function render(d){
       <td class="num price">${t.price??'-'}</td>
       <td>${fmtDist(t)}</td>
       <td>${fmtVol(t)}</td>
-      <td class="l">${statusTag(t)}</td>
+      <td class="l"><span class="tag ${s.cls}">${s.label}</span></td>
     </tr>`).join('');
 }
 
