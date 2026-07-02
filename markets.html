@@ -82,7 +82,7 @@
     Object.keys(panes).forEach(function(k){
       var el=document.getElementById(panes[k]);
       var on=(k===m); el.classList.toggle('on', on);
-      if(on){ var f=el.querySelector('iframe'); if(f && !f.src && f.dataset.src) f.src=f.dataset.src; }
+      if(on){ var f=el.querySelector('iframe'); if(f && !f.src && f.dataset.src) f.src=f.dataset.src+(f.dataset.src.indexOf('?')<0?'?':'&')+'t='+Date.now(); }
     });
     try{ location.hash=m; }catch(e){}
   }
@@ -95,7 +95,7 @@
   document.querySelectorAll('.subbtn').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('.subbtn').forEach(function(x){ x.classList.toggle('on', x===b); });
-      twFrame.src=twSrc[b.dataset.tw];
+      twFrame.src=twSrc[b.dataset.tw]+'?t='+Date.now();
     });
   });
 
