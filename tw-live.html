@@ -54,6 +54,9 @@
   .tag.ext{background:rgba(234,57,67,.15);color:var(--red);}
   .tag.wait{background:#20262f;color:var(--dim);}
   .vok{color:var(--green);font-weight:600;} .vbad{color:var(--dim);}
+  .tier{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:10px;font-weight:700;vertical-align:middle;}
+  .tier-leader{background:rgba(240,185,11,.18);color:var(--amber);}
+  .tier-ready{background:rgba(59,130,246,.18);color:var(--blue);}
   .foot{max-width:1000px;margin:14px auto 0;font-size:11px;color:var(--dim);line-height:1.7;}
   .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--mut);}
   .sidebar{position:fixed;left:14px;top:88px;width:176px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;max-height:82vh;overflow:auto;}
@@ -99,7 +102,8 @@
 
   <p class="foot">
     名單＝每日 VCP 選股的 LEADERS＋READY 全等級「待突破」者（收盤後更新）；現價為 Fugle 即時報價（每 30 秒自動刷新，免手動重整）。<br>
-    <b>狀態邏輯</b>：已延伸(現價≥買點×1.05) → 真突破(站上＋量能≥100%) → 量不足(站上但量不夠) → 待突破。量能＝今日量 ÷（50日均量×1.4）。<br>
+    <b>名稱旁標籤</b>：<span class="tier tier-leader">LEADER</span>＝主攻股；<span class="tier tier-ready">READY·T1~3</span>＝即將收緊觀察股，數字越小代表 pivot 越緊（越接近真正突破）。<br>
+    <b>狀態邏輯</b>：已延伸(現價≥買點×1.05) → 真突破(站上＋量能≥100%) → 量不足(站上但量不夠) → 待突破。量能＝今日量 ÷（50日均量×1.4），也就是拿「50日均量的1.4倍」當100%基準，今日成交量達標才算爆量確認。<br>
     ⚠️ 僅供研究參考，非投資建議。實際進場請依你的紀律確認量價與大盤紅綠燈。
   </p>
 
@@ -127,6 +131,11 @@ function fmtDist(t){
 function fmtVol(t){
   if(t.volPct==null) return '<span class="vbad">-</span>';
   return `<span class="${t.volPct>=100?'vok':'vbad'}">${t.volPct}%</span>`;
+}
+function tierBadge(t){
+  if(t.bucket==='LEADER') return '<span class="tier tier-leader">LEADER</span>';
+  if(t.bucket==='READY') return `<span class="tier tier-ready">READY${t.readyTier?'·T'+t.readyTier:''}</span>`;
+  return '';
 }
 
 function renderSidebar(d){
@@ -161,7 +170,7 @@ function render(d){
   $('rows').innerHTML=rows.map(({t,s})=>`
     <tr class="s-${s.k}">
       <td class="l code">${t.id}</td>
-      <td class="l name">${t.name}${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
+      <td class="l name">${t.name}${tierBadge(t)}${t.industry?`<div class="ind">${t.industry}</div>`:''}</td>
       <td class="num">${t.rs??'-'}</td>
       <td class="num">${t.buy}</td>
       <td class="num price">${t.price??'-'}</td>
