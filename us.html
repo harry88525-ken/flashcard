@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>美股成交量排名</title>
+<title>美股注意力儀表板</title>
 <style>
   :root{
     --bg:#0e1117; --card:#161b22; --card2:#1c2230; --line:#2a3240;
@@ -17,63 +17,98 @@
   h1{font-size:18px;font-weight:600;margin:0 0 2px;}
   .sub{font-size:12px;color:var(--mut);margin:0 0 14px;}
   .tfseg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 6px;}
-  .tfseg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
+  .tfseg button{flex:1;background:var(--card);color:var(--mut);border:none;padding:10px 4px;font-size:14px;font-weight:600;cursor:pointer;}
   .tfseg button.on{background:var(--card2);color:#7eb6ff;}
+  .tfseg button small{display:block;font-size:10px;font-weight:400;color:var(--dim);}
   .time{font-size:11px;color:var(--dim);margin:0 0 10px;}
   .status{font-size:13px;color:var(--mut);padding:16px 0;}
-  .head,.row{display:grid;grid-template-columns:34px 74px 1fr 96px 64px;gap:8px;align-items:center;
-    padding:9px 6px;border-bottom:1px solid var(--line);font-size:13px;}
-  .head{color:var(--dim);font-weight:600;font-size:11px;position:sticky;top:0;background:var(--bg);}
-  .head span:nth-child(n+4),.row .r{text-align:right;}
-  .row .rk{color:var(--dim);text-align:center;}
-  .row .sym{font-weight:700;}
-  .row .nm{color:var(--mut);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .row .dv{text-align:right;font-weight:600;}
-  .row .ch{text-align:right;font-weight:600;}
+  .head,.row{display:grid;grid-template-columns:44px minmax(0,1fr) 80px 88px;gap:8px;align-items:center;
+    padding:8px 6px;border-bottom:1px solid var(--line);font-size:13px;}
+  .head{color:var(--dim);font-weight:600;font-size:11px;position:sticky;top:0;background:var(--bg);z-index:1;}
+  .head span:nth-child(n+3){text-align:right;}
+  .row.hot{background:rgba(240,185,11,.08);border-left:3px solid var(--amber);padding-left:3px;}
+  .rkc{text-align:center;line-height:1.2;}
+  .rkc .rk{color:var(--txt);font-weight:600;}
+  .rkc .mv{display:block;font-size:10px;font-weight:700;}
+  .mv.up{color:var(--green);} .mv.dn{color:var(--red);} .mv.flat{color:var(--dim);} .mv.new{color:var(--amber);}
+  .namec{min-width:0;line-height:1.3;}
+  .namec .sym{font-weight:700;}
+  .namec .nm{display:block;color:var(--mut);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pricec{text-align:right;line-height:1.3;}
+  .pricec .px{font-weight:600;}
+  .pricec .ch{display:block;font-size:11px;font-weight:600;}
   .pos{color:var(--green);} .neg{color:var(--red);}
+  .dv{text-align:right;font-weight:600;}
   .foot{font-size:11px;color:var(--dim);margin-top:16px;line-height:1.7;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>美股成交量排名</h1>
-  <p class="sub">近 7 天 / 近 30 天 · 平均每日成交額(美元)由大到小</p>
+  <h1>美股注意力儀表板</h1>
+  <p class="sub">成交金額排行 — 看今天誰在爆量。熱度榜，不是買賣訊號。</p>
   <div class="tfseg" id="tf">
-    <button class="on" data-w="7d">近 7 天</button>
-    <button data-w="30d">近 30 天</button>
+    <button class="on" data-w="1d">當日<small>最近交易日</small></button>
+    <button data-w="7d">7 日均<small>近 7 交易日</small></button>
+    <button data-w="21d">21 日均<small>近 21 交易日</small></button>
   </div>
   <div class="time" id="time"></div>
-  <div class="head"><span>#</span><span>代號</span><span>名稱</span><span>日均成交額</span><span>期間漲跌</span></div>
+  <div class="head"><span>#</span><span>代號 / 名稱</span><span>價格 / 日漲跌</span><span>成交金額</span></div>
   <div id="status" class="status">載入中…</div>
   <div id="list"></div>
-  <p class="foot">成交額＝該期間「平均每日成交金額」(收盤×成交量)。7天≈近5交易日、30天≈近21交易日。資料每日更新 · Yahoo Finance · 僅供研究參考,非投資建議。</p>
+  <p class="foot" id="foot">箭頭＝與前一交易日排名相比的變化；NEW＝新進榜（前一日在 40 名外）；排名竄升 10 名以上整列高亮。
+    成交金額＝收盤價×成交量；7 日均 / 21 日均為該期間平均每日成交金額。
+    資料每日美股收盤後更新 · Yahoo Finance · 僅供研究參考，非投資建議。</p>
 </div>
 <script>
 (function(){
   function $(id){return document.getElementById(id);}
-  var DATA=null, W='7d';
+  var DATA=null, W='1d';
   function fmt(x){ if(x>=1e9)return '$'+(x/1e9).toFixed(1)+'B'; if(x>=1e6)return '$'+(x/1e6).toFixed(0)+'M'; return '$'+Math.round(x); }
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function age(d){ if(!d||!d.updated)return''; var m=Math.floor((Date.now()-new Date(d.updated).getTime())/60000); return m<60?('資料 '+m+' 分鐘前更新'):('資料 '+Math.floor(m/60)+' 小時前更新'); }
+  function taipei(iso){
+    try{ return new Date(iso).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}); }
+    catch(e){ return iso; }
+  }
+  // 取歷史裡最新日的前一個交易日，回傳該窗口的 symbol→rank 對照
+  function prevRanks(w){
+    var h=DATA&&DATA.history; if(!h) return null;
+    var dates=Object.keys(h).sort();
+    if(dates.length<2) return null;
+    var prev=h[dates[dates.length-2]]; if(!prev||!prev[w]) return null;
+    var m={}; prev[w].forEach(function(s,i){ m[s]=i+1; });
+    return m;
+  }
   function render(){
     if(!DATA) return;
     var rows=DATA[W]||[];
-    $('time').textContent=age(DATA)+(DATA.universe?(' · 掃描 '+DATA.universe+' 檔'):'');
+    var pv=prevRanks(W);
+    $('time').textContent='資料日 '+(DATA.latest_date||'')+' · 更新於 '+taipei(DATA.updated)+' 台北時間'+(DATA.universe?(' · 掃描 '+DATA.universe+' 檔'):'');
     if(!rows.length){ $('list').innerHTML='<div class="status">暫無資料</div>'; return; }
     $('list').innerHTML=rows.map(function(x){
-      var cls=(x.chg==null?'':(x.chg>=0?'pos':'neg'));
-      var chg=(x.chg==null?'—':((x.chg>=0?'+':'')+x.chg+'%'));
-      return '<div class="row"><span class="rk">'+x.rank+'</span><span class="sym">'+esc(x.sym)+'</span>'+
-        '<span class="nm">'+esc(x.name||'')+'</span>'+
-        '<span class="dv">'+fmt(x.dollar_vol)+'</span>'+
-        '<span class="ch '+cls+'">'+chg+'</span></div>';
+      var mv='<span class="mv flat">–</span>', hot=false;
+      if(pv){
+        var p=pv[x.sym];
+        if(p==null){ mv='<span class="mv new">NEW</span>'; hot=(x.rank<=31); }        // 前一日 41 名外 → 至少升 10 名才高亮
+        else{
+          var d=p-x.rank;
+          if(d>0){ mv='<span class="mv up">&#8593;'+d+'</span>'; hot=(d>=10); }
+          else if(d<0){ mv='<span class="mv dn">&#8595;'+(-d)+'</span>'; }
+        }
+      }
+      var chCls=(x.chg==null?'':(x.chg>=0?'pos':'neg'));
+      var ch=(x.chg==null?'—':((x.chg>=0?'+':'')+x.chg+'%'));
+      return '<div class="row'+(hot?' hot':'')+'">'+
+        '<span class="rkc"><span class="rk">'+x.rank+'</span>'+mv+'</span>'+
+        '<span class="namec"><span class="sym">'+esc(x.sym)+'</span><span class="nm">'+esc(x.name||'')+'</span></span>'+
+        '<span class="pricec"><span class="px">'+(x.last==null?'—':x.last)+'</span><span class="ch '+chCls+'">'+ch+'</span></span>'+
+        '<span class="dv">'+fmt(x.dollar_vol)+'</span></div>';
     }).join('');
   }
   function load(){
     fetch('./us-volume.json?t='+Math.floor(Date.now()/300000))
       .then(function(r){ if(!r.ok)throw new Error('資料檔 '+r.status); return r.json(); })
       .then(function(d){ DATA=d; $('status').style.display='none'; render(); })
-      .catch(function(e){ $('status').textContent='⚠ 載入失敗（'+e.message+'）,稍後重試。'; });
+      .catch(function(e){ $('status').textContent='載入失敗（'+e.message+'），稍後重試。'; });
   }
   $('tf').querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){
     $('tf').querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
