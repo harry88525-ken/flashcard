@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>丁火雙盤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --paper:#ECEDF0;
+  --surface:#F6F7F9;
+  --sunk:#E2E4EB;
+  --ink:#171A22;
+  --ink-2:#4E5464;
+  --ink-3:#7C8394;
+  --rule:#C6CAD4;
+  --rule-soft:#DADDE4;
+  --accent:#1F2A50;
+  --accent-soft:#DCE0EC;
+  --wood:#37765A;
+  --fire:#AE3325;
+  --earth:#8E6C2C;
+  --metal:#5F6879;
+  --water:#2A578B;
+  --tint-good:#EBF1EC;
+  --tint-warn:#F6EAE7;
+  --shadow:0 1px 2px rgba(23,26,34,.06),0 8px 24px -16px rgba(23,26,34,.28);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1118;
+    --surface:#171A22;
+    --sunk:#12151C;
+    --ink:#E4E7EE;
+    --ink-2:#9BA3B4;
+    --ink-3:#727A8B;
+    --rule:#2C313D;
+    --rule-soft:#232833;
+    --accent:#A8B7E3;
+    --accent-soft:#242B41;
+    --wood:#6DBB8E;
+    --fire:#E8796A;
+    --earth:#D2A85B;
+    --metal:#9BA4B3;
+    --water:#6FA1DA;
+    --tint-good:#16211B;
+    --tint-warn:#241816;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1118;
+  --surface:#171A22;
+  --sunk:#12151C;
+  --ink:#E4E7EE;
+  --ink-2:#9BA3B4;
+  --ink-3:#727A8B;
+  --rule:#2C313D;
+  --rule-soft:#232833;
+  --accent:#A8B7E3;
+  --accent-soft:#242B41;
+  --wood:#6DBB8E;
+  --fire:#E8796A;
+  --earth:#D2A85B;
+  --metal:#9BA4B3;
+  --water:#6FA1DA;
+  --tint-good:#16211B;
+  --tint-warn:#241816;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Noto Sans TC","Hiragino Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:clamp(28px,5vw,72px) clamp(18px,4vw,40px) 80px}
+
+/* ---- element colors ---- */
+.e-wood{color:var(--wood)}
+.e-fire{color:var(--fire)}
+.e-earth{color:var(--earth)}
+.e-metal{color:var(--metal)}
+.e-water{color:var(--water)}
+
+/* ---- masthead ---- */
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 18px;
+}
+h1{
+  font-family:"Noto Serif TC",serif;font-weight:900;
+  font-size:clamp(2.6rem,8vw,4.4rem);line-height:1.02;
+  letter-spacing:.02em;margin:0;text-wrap:balance;
+}
+h1 .x{color:var(--ink-3);font-weight:400;padding:0 .12em}
+.dek{
+  margin:20px 0 0;max-width:60ch;
+  font-size:1.05rem;color:var(--ink-2);
+}
+.dek strong{color:var(--ink);font-weight:500}
+
+.subjects{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  margin-top:40px;border-radius:3px;overflow:hidden;
+}
+.subj{background:var(--surface);padding:20px 22px}
+.subj .who{
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+}
+.subj .name{font-family:"Noto Serif TC",serif;font-size:1.5rem;font-weight:600;margin-top:4px}
+.subj dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:14px 0 0;font-size:.88rem}
+.subj dt{color:var(--ink-3)}
+.subj dd{margin:0;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;font-size:.85rem}
+.subj dd.zh{font-family:"Noto Sans TC",sans-serif;font-size:.88rem}
+
+/* ---- sections ---- */
+section{margin-top:clamp(56px,8vw,88px)}
+.sec-head{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:28px}
+.sec-head h2{
+  font-family:"Noto Serif TC",serif;font-weight:600;
+  font-size:clamp(1.5rem,3.4vw,2rem);margin:0;letter-spacing:.03em;
+}
+.sec-head .note{font-size:.85rem;color:var(--ink-3);margin-left:auto;text-align:right}
+
+/* ---- four pillars ---- */
+.chart{margin-bottom:34px}
+.chart-cap{
+  display:flex;align-items:baseline;gap:12px;margin-bottom:12px;
+}
+.chart-cap .tag{
+  font-family:"Noto Serif TC",serif;font-size:1.1rem;font-weight:600;
+  border:1px solid var(--rule);padding:1px 10px;border-radius:2px;background:var(--surface);
+}
+.chart-cap .sum{font-size:.85rem;color:var(--ink-2)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pillars{
+  display:grid;grid-template-columns:repeat(4,minmax(132px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);min-width:560px;border-radius:3px;overflow:hidden;
+}
+.pillar{background:var(--surface);padding:14px 12px 16px;text-align:center}
+.pillar.day{background:var(--accent-soft)}
+.pillar .pos{
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pillar .star{font-size:.85rem;color:var(--ink-2);margin-top:2px;font-weight:500}
+.gz{font-family:"Noto Serif TC",serif;font-weight:900;font-size:2.9rem;line-height:1.12;margin-top:6px}
+.gz.zhi{margin-top:-2px}
+.hid{margin-top:10px;padding-top:9px;border-top:1px dashed var(--rule);font-size:.76rem;line-height:1.7;color:var(--ink-2)}
+.hid b{font-family:"Noto Serif TC",serif;font-weight:600;font-size:.86rem}
+.ss{margin-top:9px;font-size:.7rem;line-height:1.6;color:var(--ink-3)}
+.nayin{margin-top:8px;font-size:.68rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;letter-spacing:.04em}
+
+/* ---- five elements diverging ---- */
+.wuxing{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px clamp(14px,3vw,26px)}
+.wx-legend{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
+.wx-row{display:grid;grid-template-columns:1fr 62px 1fr;align-items:center;gap:0;margin-bottom:9px}
+.wx-bar{height:26px;display:flex;align-items:center}
+.wx-bar.l{justify-content:flex-end}
+.wx-fill{height:100%;border-radius:2px;display:flex;align-items:center;padding:0 8px;font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--paper);font-weight:500}
+.wx-fill.l{justify-content:flex-start;border-radius:2px 0 0 2px}
+.wx-fill.r{justify-content:flex-end;border-radius:0 2px 2px 0}
+.wx-fill.zero{background:none!important;color:var(--fire);font-weight:500;padding-right:10px}
+.wx-name{
+  text-align:center;font-family:"Noto Serif TC",serif;font-size:1.15rem;font-weight:600;
+  border-left:1px solid var(--rule);border-right:1px solid var(--rule);line-height:26px;
+}
+.wx-foot{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule-soft);font-size:.9rem;color:var(--ink-2)}
+.wx-foot p{margin:0 0 6px}
+.wx-foot p:last-child{margin-bottom:0}
+
+/* ---- ledger ---- */
+.ledger{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.col{border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.col > header{padding:12px 18px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+.col.good > header{background:var(--tint-good)}
+.col.warn > header{background:var(--tint-warn)}
+.col > header h3{font-family:"Noto Serif TC",serif;font-size:1.12rem;font-weight:600;margin:0;letter-spacing:.04em}
+.col > header .cnt{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-3)}
+.item{padding:15px 18px;border-bottom:1px solid var(--rule-soft);background:var(--surface)}
+.item:last-child{border-bottom:0}
+.formula{
+  font-family:"Noto Serif TC",serif;font-size:1.12rem;font-weight:600;
+  letter-spacing:.05em;margin-bottom:5px;
+}
+.formula .op{color:var(--ink-3);font-weight:400;font-size:.94rem;padding:0 .18em}
+.item p{margin:0;font-size:.9rem;color:var(--ink-2);line-height:1.7}
+.item p b{color:var(--ink);font-weight:500}
+
+/* ---- luck band ---- */
+.band-wrap{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:22px clamp(14px,3vw,26px) 18px}
+.band-scroll{overflow-x:auto}
+.band-inner{min-width:660px;position:relative}
+.years{display:flex;font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-3);margin-bottom:6px}
+.years span{flex:0 0 23.26%}
+.years span:first-child{flex-basis:2.09%}
+.lane{display:flex;gap:2px;margin-bottom:8px;height:52px}
+.lane-label{
+  font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;
+}
+.spacer{flex:0 0 auto}
+.seg{
+  flex:0 0 23.26%;background:var(--sunk);border:1px solid var(--rule-soft);border-radius:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
+}
+.seg .gzs{font-family:"Noto Serif TC",serif;font-size:1.18rem;font-weight:600;line-height:1.2}
+.seg .yrs{font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--ink-3)}
+.seg.now{background:var(--accent-soft);border-color:var(--accent)}
+.now-line{
+  position:absolute;top:22px;bottom:14px;left:50.3%;width:1px;
+  background:var(--fire);pointer-events:none;
+}
+.now-line::after{
+  content:"2026";position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--fire);
+  background:var(--surface);padding:0 4px;letter-spacing:.06em;
+}
+.band-notes{margin-top:18px;padding-top:16px;border-top:1px solid var(--rule-soft);display:grid;gap:12px}
+.bn{display:grid;grid-template-columns:82px 1fr;gap:14px;font-size:.9rem}
+.bn .when{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--accent);padding-top:2px;font-weight:500}
+.bn p{margin:0;color:var(--ink-2)}
+.bn p b{color:var(--ink);font-weight:500}
+
+/* ---- advice ---- */
+.advice{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.adv{background:var(--surface);padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.adv .n{
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-3);
+  border:1px solid var(--rule);border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 26px;margin-top:3px;
+}
+.adv h3{font-family:"Noto Serif TC",serif;font-size:1.14rem;font-weight:600;margin:0 0 4px;letter-spacing:.03em}
+.adv p{margin:0;font-size:.94rem;color:var(--ink-2)}
+
+/* ---- prose ---- */
+.prose{max-width:66ch}
+.prose p{margin:0 0 14px}
+.prose p:last-child{margin-bottom:0}
+.prose b{font-weight:500;color:var(--ink)}
+.prose .lead{font-size:1.06rem;color:var(--ink)}
+
+footer{
+  margin-top:72px;padding-top:22px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-3);max-width:66ch;
+}
+footer p{margin:0 0 8px}
+footer p:last-child{margin-bottom:0}
+
+@media (max-width:560px){
+  .wx-row{grid-template-columns:1fr 50px 1fr}
+  .bn{grid-template-columns:1fr;gap:2px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<p class="eyebrow">八字合盤 · 乾坤對照</p>
+<h1><span class="e-fire">丁</span>火<span class="x">×</span><span class="e-fire">丁</span>火</h1>
+<p class="dek">兩張命盤的日主都是丁火——燭燈之火。<strong>同日主在合盤裡是「比肩」</strong>：不必解釋就懂彼此，但也缺少天然的上下位。以下把兩盤疊起來，看合、看沖、看兩人的運勢節奏對不對得上。</p>
+
+<div class="subjects">
+  <div class="subj">
+    <p class="who">乾造 · 男</p>
+    <p class="name">己卯 己巳 <span class="e-fire">丁</span>丑 庚戌</p>
+    <dl>
+      <dt>生辰</dt><dd>1999-05-25　戌時 19–21</dd>
+      <dt>日主</dt><dd class="zh">丁火 · 身弱</dd>
+      <dt>格局</dt><dd class="zh">正財格</dd>
+      <dt>大運</dt><dd class="zh">逆行 · 6歲6月起運</dd>
+    </dl>
+  </div>
+  <div class="subj">
+    <p class="who">坤造 · 女</p>
+    <p class="name">庚辰 癸未 <span class="e-fire">丁</span>亥 乙巳</p>
+    <dl>
+      <dt>生辰</dt><dd>2000-07-28　巳時 09–11</dd>
+      <dt>日主</dt><dd class="zh">丁火 · 不弱偏旺</dd>
+      <dt>格局</dt><dd class="zh">七殺透干</dd>
+      <dt>大運</dt><dd class="zh">逆行 · 7歲1月起運</dd>
+    </dl>
+  </div>
+</div>
+
+<section>
+  <div class="sec-head">
+    <h2>四柱對照</h2>
+    <p class="note">字色依本氣五行　<span class="e-wood">木</span>·<span class="e-fire">火</span>·<span class="e-earth">土</span>·<span class="e-metal">金</span>·<span class="e-water">水</span></p>
+  </div>
+
+  <div class="chart">
+    <div class="chart-cap">
+      <span class="tag">乾造</span>
+      <span class="sum">土四重、火二、<b>水全無</b>——洩身太過，財星卻旺，典型財多身弱。</span>
+    </div>
+    <div class="scroll">
+      <div class="pillars">
+        <div class="pillar">
+          <p class="pos">年柱</p><p class="star">食神</p>
+          <div class="gz e-earth">己</div><div class="gz zhi e-wood">卯</div>
+          <div class="hid"><b class="e-wood">乙</b> 偏印</div>
+          <p class="ss">太極貴人</p>
+          <p class="nayin">城頭土 · 病</p>
+        </div>
+        <div class="pillar">
+          <p class="pos">月柱</p><p class="star">食神</p>
+          <div class="gz e-earth">己</div><div class="gz zhi e-fire">巳</div>
+          <div class="hid"><b class="e-fire">丙</b> 劫財<br><b class="e-metal">庚</b> 正財<br><b class="e-earth">戊</b> 傷官</div>
+          <p class="ss">驛馬 · 羊刃<br>喪門 · 孤辰</p>
+          <p class="nayin">大林木 · 帝旺</p>
+        </div>
+        <div class="pillar day">
+          <p class="pos">日柱</p><p class="star">元男</p>
+          <div class="gz e-fire">丁</div><div class="gz zhi e-earth">丑</div>
+          <div class="hid"><b class="e-earth">己</b> 食神<br><b class="e-water">癸</b> 七殺<br><b class="e-metal">辛</b> 偏財</div>
+          <p class="ss">太極貴人 · 陰差陽錯<br>弔客 · 寡宿</p>
+          <p class="nayin">澗下水 · 墓</p>
+        </div>
+        <div class="pillar">
+          <p class="pos">時柱</p><p class="star">正財</p>
+          <div class="gz e-metal">庚</div><div class="gz zhi e-earth">戌</div>
+          <div class="hid"><b class="e-earth">戊</b> 傷官<br><b class="e-metal">辛</b> 偏財<br><b class="e-fire">丁</b> 比肩</div>
+          <p class="ss">太極貴人 · 月德貴人<br>德秀貴人</p>
+          <p class="nayin">釵釧金 · 養</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart">
+    <div class="chart-cap">
+      <span class="tag">坤造</span>
+      <span class="sum">五行俱全、結構完整，但沖剋多——內在拉扯大、變動頻繁。</span>
+    </div>
+    <div class="scroll">
+      <div class="pillars">
+        <div class="pillar">
+          <p class="pos">年柱</p><p class="star">正財</p>
+          <div class="gz e-metal">庚</div><div class="gz zhi e-earth">辰</div>
+          <div class="hid"><b class="e-earth">戊</b> 傷官<br><b class="e-wood">乙</b> 偏印<br><b class="e-water">癸</b> 七殺</div>
+          <p class="ss">國印貴人</p>
+          <p class="nayin">白蠟金 · 衰</p>
+        </div>
+        <div class="pillar">
+          <p class="pos">月柱</p><p class="star">七殺</p>
+          <div class="gz e-water">癸</div><div class="gz zhi e-earth">未</div>
+          <div class="hid"><b class="e-earth">己</b> 食神<br><b class="e-fire">丁</b> 比肩<br><b class="e-wood">乙</b> 偏印</div>
+          <p class="ss">天乙貴人 · 華蓋<br>紅艷煞 · 勾絞煞<br>六甲空亡</p>
+          <p class="nayin">楊柳木 · 冠帶</p>
+        </div>
+        <div class="pillar day">
+          <p class="pos">日柱</p><p class="star">元女</p>
+          <div class="gz e-fire">丁</div><div class="gz zhi e-water">亥</div>
+          <div class="hid"><b class="e-water">壬</b> 正官<br><b class="e-wood">甲</b> 正印</div>
+          <p class="ss">天乙 · 太極 · 福星<br>文昌 · 天廚 · 德秀<br>十惡大敗 · 紅鸞<br>飛刃 · 亡神</p>
+          <p class="nayin">屋上土 · 胎</p>
+        </div>
+        <div class="pillar">
+          <p class="pos">時柱</p><p class="star">偏印</p>
+          <div class="gz e-wood">乙</div><div class="gz zhi e-fire">巳</div>
+          <div class="hid"><b class="e-fire">丙</b> 劫財<br><b class="e-metal">庚</b> 正財<br><b class="e-earth">戊</b> 傷官</div>
+          <p class="ss">德秀貴人 · 天喜<br>學堂 · 驛馬 · 羊刃<br>天羅地網 · 劫煞 · 孤辰</p>
+          <p class="nayin">覆燈火 · 帝旺</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>五行結構</h2>
+    <p class="note">本氣計數 · 天干地支各一</p>
+  </div>
+  <div class="wuxing">
+    <div class="wx-legend"><span>← 乾造</span><span>坤造 →</span></div>
+
+    <div class="wx-row">
+      <div class="wx-bar l"><div class="wx-fill l" style="width:25%;background:var(--wood)">1</div></div>
+      <div class="wx-name e-wood">木</div>
+      <div class="wx-bar r"><div class="wx-fill r" style="width:25%;background:var(--wood)">1</div></div>
+    </div>
+    <div class="wx-row">
+      <div class="wx-bar l"><div class="wx-fill l" style="width:50%;background:var(--fire)">2</div></div>
+      <div class="wx-name e-fire">火</div>
+      <div class="wx-bar r"><div class="wx-fill r" style="width:50%;background:var(--fire)">2</div></div>
+    </div>
+    <div class="wx-row">
+      <div class="wx-bar l"><div class="wx-fill l" style="width:100%;background:var(--earth)">4</div></div>
+      <div class="wx-name e-earth">土</div>
+      <div class="wx-bar r"><div class="wx-fill r" style="width:50%;background:var(--earth)">2</div></div>
+    </div>
+    <div class="wx-row">
+      <div class="wx-bar l"><div class="wx-fill l" style="width:25%;background:var(--metal)">1</div></div>
+      <div class="wx-name e-metal">金</div>
+      <div class="wx-bar r"><div class="wx-fill r" style="width:25%;background:var(--metal)">1</div></div>
+    </div>
+    <div class="wx-row">
+      <div class="wx-bar l"><div class="wx-fill zero l" style="width:100%;justify-content:flex-end">缺 0</div></div>
+      <div class="wx-name e-water">水</div>
+      <div class="wx-bar r"><div class="wx-fill r" style="width:50%;background:var(--water)">2</div></div>
+    </div>
+
+    <div class="wx-foot">
+      <p><b>乾造土四重而水全無。</b>土是食傷——事情多、想法多、消耗大；水是官殺，缺位代表少一個「框」，方向感與紀律要靠外力給。</p>
+      <p><b>坤造五行俱全。</b>結構完整，但癸水七殺透干直剋日主，是她命裡的壓力源。</p>
+      <p>兩盤疊起來，<b>她的水正好落在他的空位上</b>——這是這組合盤最實際的一項互補。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>干支交互</h2>
+    <p class="note">兩盤之間的合、生、沖、刑</p>
+  </div>
+  <div class="ledger">
+
+    <div class="col good">
+      <header>
+        <h3>相生相合</h3>
+        <span class="cnt">4 組</span>
+      </header>
+      <div class="item">
+        <p class="formula"><span class="e-wood">亥</span> <span class="op">+</span> <span class="e-wood">卯</span> <span class="op">+</span> <span class="e-wood">未</span> <span class="op">＝</span> 三合木局</p>
+        <p>她命中亥、未拱卯，<b>他的年支卯剛好把木局補全</b>。木局成形即生丁火，補的正是他身弱最需要的印星。這是整張合盤最有力的一筆——他在她身邊會明顯比較有底氣。</p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-earth">己</span> <span class="op">制</span> <span class="e-water">癸</span></p>
+        <p>他兩個己土食神，制她月干癸水七殺。<b>他天生能化解她的緊繃</b>——這不是刻意經營來的，是結構本來就這樣。她在他面前會鬆下來。</p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-wood">乙</span> <span class="op">生</span> <span class="e-fire">丁</span></p>
+        <p>她時干乙木偏印直生他的日主丁火。她對他是滋養型的——給能量、給方向，是他命裡的印星。</p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-metal">庚</span> <span class="op">合</span> <span class="e-wood">乙</span> <span class="op">·</span> 時柱</p>
+        <p>兩人時干乙庚相合化金。時柱主晚運與子女宮，<b>越往後越同心</b>，不是前熱後冷的類型。</p>
+      </div>
+    </div>
+
+    <div class="col warn">
+      <header>
+        <h3>相沖相刑</h3>
+        <span class="cnt">4 組</span>
+      </header>
+      <div class="item">
+        <p class="formula"><span class="e-fire">巳</span> <span class="op">沖</span> <span class="e-water">亥</span> <span class="op">·</span> 加重</p>
+        <p>她本身已有巳亥沖，<b>他的月支巳再沖她的日支——配偶宮</b>。巳亥是驛馬沖：聚少離多、常搬動、話講到一半又改。距離與反覆會是長期議題，不是誰的錯。</p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-earth">丑</span> <span class="op">·</span> <span class="e-earth">戌</span> <span class="op">·</span> <span class="e-earth">未</span> <span class="op">＝</span> 三刑齊</p>
+        <p>他帶丑、戌，她帶未，合起來三刑成立。土刑主口舌是非、金錢財產糾紛、脾胃皮膚。<b>具體結論：不合資、不共同投資、不金錢借貸。</b></p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-earth">丑</span> <span class="op">沖</span> <span class="e-earth">未</span></p>
+        <p>他的日支（配偶宮）沖她的月柱（家庭宮）。<b>長輩、原生家庭、家人意見</b>會是反覆卡關的地方。</p>
+      </div>
+      <div class="item">
+        <p class="formula"><span class="e-water">癸</span> <span class="op">剋</span> <span class="e-fire">丁</span></p>
+        <p>她的七殺直剋他的日主。她情緒或要求上來時是直接打過去的，不拐彎；而他身弱，接得辛苦。另有卯辰相害一組，屬小事上的暗耗。</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>大運節奏</h2>
+    <p class="note">兩人皆逆行 · 十年一步</p>
+  </div>
+  <div class="band-wrap">
+    <div class="band-scroll">
+      <div class="band-inner">
+        <div class="years">
+          <span></span><span>2005</span><span>2015</span><span>2025</span><span>2035</span>
+        </div>
+        <p class="lane-label">乾造</p>
+        <div class="lane">
+          <div class="spacer" style="flex-basis:2.09%"></div>
+          <div class="seg"><span class="gzs">戊辰</span><span class="yrs">05–15</span></div>
+          <div class="seg"><span class="gzs">丁卯</span><span class="yrs">15–25</span></div>
+          <div class="seg now"><span class="gzs">丙寅</span><span class="yrs">25–35</span></div>
+          <div class="seg"><span class="gzs">乙丑</span><span class="yrs">35–45</span></div>
+        </div>
+        <p class="lane-label">坤造</p>
+        <div class="lane">
+          <div class="spacer" style="flex-basis:6.28%"></div>
+          <div class="seg"><span class="gzs">壬午</span><span class="yrs">07–17</span></div>
+          <div class="seg now"><span class="gzs">辛巳</span><span class="yrs">17–27</span></div>
+          <div class="seg"><span class="gzs">庚辰</span><span class="yrs">27–37</span></div>
+          <div class="seg"><span class="gzs">己卯</span><span class="yrs">37–47</span></div>
+        </div>
+        <div class="now-line"></div>
+      </div>
+    </div>
+
+    <div class="band-notes">
+      <div class="bn">
+        <span class="when">現在</span>
+        <p><b>節奏不同步。</b>他 2025 底進丙寅運——丙火幫身、寅木生身，寅又與命中戌卯半合火，正是身弱最需要的火木一次到位，這十年該衝就衝。她卻還在辛巳運尾聲，巳再沖亥，感情、住所、工作都在動。<b>他在上升，她在動盪</b>；她這兩年的不穩，多半不是針對他。</p>
+      </div>
+      <div class="bn">
+        <span class="when">2026 丙午</span>
+        <p>火旺年。對他加分（丙助身、午戌半合火），惟午丑相害，配偶宮小受擾。對她則是火上加火——情緒燥、易衝動下決定、易破財。<b>她今年做大決定前，值得多攔一下。</b></p>
+      </div>
+      <div class="bn">
+        <span class="when">2027 丁未</span>
+        <p><b>最需要留意的一年。</b>流年未沖他的丑，且丑戌未三刑當年齊全——是非年、財務年。錢的事、家人的事，提前一年處理乾淨。同年她轉庚辰運。</p>
+      </div>
+      <div class="bn">
+        <span class="when">2027–35</span>
+        <p><b>兩人同時走順的窗口。</b>她庚辰運正財透、傷官生財，事業財運明顯轉好；他仍在丙寅。關係要往前推就在這一段。惟他財多身弱，她事業起飛時他心態要調適。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>神煞</h2>
+    <p class="note">性情與緣分的旁證</p>
+  </div>
+  <div class="prose">
+    <p><b>她日柱丁亥坐了一整排貴人</b>——天乙、太極、福星、文昌、天廚、德秀。聰明、有才、貴人緣厚，是走到哪都有人幫的類型。但同柱也有十惡大敗、亡神、飛刃：錢財來得快去得也快，要防大意失財。加上紅鸞、天喜、紅艷煞，桃花明顯，異性緣旺。</p>
+    <p><b>他三柱太極貴人，另有月德、德秀</b>——心性厚道、逢凶化吉，與玄學宗教有緣。</p>
+    <p><b>兩人都有德秀貴人</b>，氣質對得上。但<b>兩人也都帶孤辰</b>（他還多一個寡宿）——都是能自己待很久的人。這段關係不會自己長大，得有人主動。兩人也都帶羊刃：脾氣上來時，兩邊都很衝。</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>三件事</h2>
+  </div>
+  <div class="advice">
+    <div class="adv">
+      <span class="n">1</span>
+      <div>
+        <h3>認清分工：她是印，你是緩衝</h3>
+        <p>她給你能量與方向，你化她的焦慮。這是這段關係真正的價值所在。別倒過來要她當被照顧的那一個——雙比肩的組合最容易卡在「誰先低頭」，而那個問題沒有答案。</p>
+      </div>
+    </div>
+    <div class="adv">
+      <span class="n">2</span>
+      <div>
+        <h3>錢分開</h3>
+        <p>丑戌未三刑齊全，加上你財多身弱——這組合最容易翻船的地方就是共同財務。不合資、不共同投資、不互相借貸。日常各付各的反而長久。</p>
+      </div>
+    </div>
+    <div class="adv">
+      <span class="n">3</span>
+      <div>
+        <h3>2027 之前把地基打穩</h3>
+        <p>2027 是三刑齊、流年沖配偶宮的節點；跨過去之後的 2027–2035 才是你們能一起往前的十年。在那之前，把錢的事與家人的事處理乾淨，剩下的交給時間。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>命盤資料出自 suanming.com.tw 排盤截圖。日柱與起運時間已反推驗算：乾造 1999-05-25 戌時（起運 2005-11-30，差 1 日內），坤造 2000-07-28 巳時（起運 2007-09-01，差 1 日內），皆與截圖相符。</p>
+  <p>八字是傳統命理，當作理解自己與彼此的一種框架就好——別拿它當人生決策的唯一依據。</p>
+</footer>
+
+</div>
+
+</body>
+</html>
