@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>英語學堂月</title>
+<style>
+  :root{
+    --navy:#2C4D7A; --cream:#F5F1E8; --line:#e3ddcf; --ink:#22303f; --muted:#6b7785;
+    --self:#3a6ea5; --x:#c62828; --warn:#b8860b; --ok:#2e7d32; --star:#7b5cd6; --other:#e8833a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Microsoft JhengHei','PingFang TC',sans-serif;background:var(--cream);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px;}
+  button{font-family:inherit}
+  .app{width:100%;max-width:520px}
+  .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+  .top a{color:var(--navy);text-decoration:underline}
+  h1{color:var(--navy);font-size:24px;text-align:center;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:13px;text-align:center;margin-bottom:16px;line-height:1.6}
+
+  /* 統計 */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:0 4px 14px rgba(44,77,122,.07)}
+  .stat b{display:block;font-size:24px;color:var(--navy);line-height:1.2}
+  .stat small{font-size:12px;color:var(--muted)}
+  .stat.fire b{color:var(--other)}
+  .bar{height:8px;background:#e3ddcf;border-radius:99px;overflow:hidden;margin-bottom:6px}
+  .bar>i{display:block;height:100%;background:var(--navy);width:0;transition:width .3s}
+  .goalrow{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:16px}
+  .goalrow .edit{cursor:pointer;color:var(--navy);text-decoration:underline}
+
+  /* 今日任務 */
+  .today{background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(44,77,122,.08);margin-bottom:18px}
+  .today .lbl{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .today .task{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .today .emo{font-size:32px;flex:none}
+  .today .nm b{display:block;font-size:19px;color:var(--navy)}
+  .today .nm small{font-size:13px;color:var(--muted);line-height:1.5}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .btn{display:block;padding:13px 8px;font-size:15px;font-weight:700;color:#fff;background:var(--navy);border:none;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none}
+  .btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line)}
+  .btn.done{background:var(--ok)}
+
+  /* 月曆 */
+  .cal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 12px 10px;box-shadow:0 6px 18px rgba(44,77,122,.08);margin-bottom:16px}
+  .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .calhead b{font-size:17px;color:var(--navy)}
+  .calhead button{background:none;border:1px solid var(--line);border-radius:8px;color:var(--navy);font-size:15px;padding:4px 12px;cursor:pointer}
+  .calhead button:disabled{opacity:.3;cursor:default}
+  .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .wd{font-size:11px;color:var(--muted);text-align:center;padding:2px 0 6px}
+  .day{position:relative;min-width:0;height:46px;border-radius:10px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;background:#faf8f3}
+  .day.empty{background:none;cursor:default}
+  .day .n{font-size:13px;color:var(--ink);line-height:1}
+  .day .e{font-size:13px;line-height:1;opacity:.7}
+  .day.future{opacity:.45;cursor:default}
+  .day.today{border-color:var(--navy);box-shadow:0 0 0 2px rgba(44,77,122,.15)}
+  .day.done{background:var(--ok);}
+  .day.done .n{color:#fff;font-weight:700}
+  .day.done .e{opacity:1}
+  .day.miss .n{color:var(--x)}
+  .caltip{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+
+  /* 每週節奏 */
+  h2{font-size:15px;color:var(--navy);margin:6px 0 10px;padding-left:10px;border-left:4px solid var(--navy)}
+  .plan{list-style:none;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+  .plan li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px dashed var(--line);font-size:14px}
+  .plan li:last-child{border-bottom:none}
+  .plan .wk{flex:none;width:34px;color:var(--muted);font-size:13px}
+  .plan .emo{flex:none;font-size:18px}
+  .plan .t{flex:1}
+  .plan .t small{display:block;color:var(--muted);font-size:12px}
+  .plan a{color:var(--navy);font-size:12px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:3px 8px;white-space:nowrap}
+  .plan li.now{background:#F5F1E8}
+  .foot{text-align:center;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7}
+  .foot .reset{cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><a href="./index.html">← 回單字卡首頁</a><span id="tz"></span></div>
+  <h1>📅 英語學堂月</h1>
+  <p class="sub">一個月一張課表：每天一件事，做完打卡。<br>單字卡 · Pattern Drill · 文法學堂 輪著練，把英文變成每天的習慣。</p>
+
+  <div class="stats">
+    <div class="stat"><b id="sDone">0</b><small>本月已完成</small></div>
+    <div class="stat fire"><b id="sStreak">0</b><small>連續天數 🔥</small></div>
+    <div class="stat"><b id="sBest">0</b><small>本月最長連續</small></div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="goalrow"><span id="goalTxt"></span><span class="edit" onclick="editGoal()">改目標</span></div>
+
+  <div class="today" id="todayBox"></div>
+
+  <div class="cal">
+    <div class="calhead">
+      <button id="prevBtn" onclick="shiftMonth(-1)">‹</button>
+      <b id="calTitle"></b>
+      <button id="nextBtn" onclick="shiftMonth(1)">›</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="caltip">點日期可補打卡／取消（只能點今天或過去）</div>
+  </div>
+
+  <h2>每週節奏</h2>
+  <ul class="plan" id="plan"></ul>
+
+  <div class="foot">打卡紀錄存在這台裝置的瀏覽器裡（和 Pattern Drill 進度一樣）。<br><span class="reset" onclick="resetMonth()">清除本月打卡</span></div>
+</div>
+
+<script>
+/* ===== 每週節奏：0=週日 … 6=週六 ===== */
+const PLAN = [
+  {emo:"📋", name:"週總複習", desc:"打開單字卡總攬，把這週的卡整批掃過一遍",       href:"./index.html#overview"},
+  {emo:"🃏", name:"單字卡複習", desc:"翻卡把到期的清掉，遺忘曲線會幫你排",       href:"./index.html#review"},
+  {emo:"🎯", name:"Pattern Drill 口說", desc:"選一個出國主題，聽提示開口講",       href:"./index.html#pd"},
+  {emo:"📚", name:"文法學堂", desc:"翻一個主題的單字＋介系詞，唸例句",             href:"./grammar.html"},
+  {emo:"🃏", name:"單字卡複習", desc:"翻卡把到期的清掉，遺忘曲線會幫你排",       href:"./index.html#review"},
+  {emo:"📖", name:"Pattern Drill 看的複習", desc:"整組中英對照滑著看，點 🔊 聽發音", href:"./index.html#pdreview"},
+  {emo:"🎯", name:"Pattern Drill 口說", desc:"挑「該複習」的主題再練一次",         href:"./index.html#pd"},
+];
+const WD = ["日","一","二","三","四","五","六"];
+const KEY_DONE = "esm_done", KEY_GOAL = "esm_goal";
+
+function load(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let done = load(KEY_DONE, {});   // {"2026-09-11": true}
+let goal = load(KEY_GOAL, 20);   // 每月目標天數
+
+const pad = n => String(n).padStart(2,"0");
+const key = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayKey = () => key(new Date());
+const monthKey = d => d.getFullYear()+"-"+pad(d.getMonth()+1);
+const el = id => document.getElementById(id);
+
+let view = new Date(); view.setDate(1);
+
+function toggle(k){
+  if(k > todayKey()) return;
+  if(done[k]) delete done[k]; else done[k] = true;
+  save(KEY_DONE, done); render();
+}
+function editGoal(){
+  const v = prompt("這個月想練幾天？（1–31）", goal);
+  if(v===null) return;
+  const n = parseInt(v,10);
+  if(n>=1 && n<=31){ goal=n; save(KEY_GOAL, goal); render(); }
+}
+function resetMonth(){
+  const mk = monthKey(view);
+  if(!confirm("確定清除 "+mk+" 的所有打卡？")) return;
+  Object.keys(done).forEach(k=>{ if(k.startsWith(mk)) delete done[k]; });
+  save(KEY_DONE, done); render();
+}
+function shiftMonth(n){ view.setMonth(view.getMonth()+n); render(); }
+
+/* 連續天數：從今天（或昨天，今天還沒打）往回數 */
+function streak(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  if(!done[key(d)]) d.setDate(d.getDate()-1);
+  let s=0; while(done[key(d)]){ s++; d.setDate(d.getDate()-1); }
+  return s;
+}
+function bestStreakIn(y,m){
+  const days = new Date(y,m+1,0).getDate(); let best=0, cur=0;
+  for(let i=1;i<=days;i++){ if(done[y+"-"+pad(m+1)+"-"+pad(i)]){ cur++; best=Math.max(best,cur);} else cur=0; }
+  return best;
+}
+
+function render(){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const tk = todayKey();
+  const y = view.getFullYear(), m = view.getMonth();
+  const isCurMonth = monthKey(view)===monthKey(now);
+  const viewMk = monthKey(view);
+
+  /* 統計（以月曆顯示的月份為準） */
+  const doneCnt = Object.keys(done).filter(k=>k.startsWith(viewMk)).length;
+  el("sDone").textContent = doneCnt;
+  el("sStreak").textContent = streak();
+  el("sBest").textContent = bestStreakIn(y,m);
+  el("bar").style.width = Math.min(100, Math.round(doneCnt/goal*100))+"%";
+  el("goalTxt").textContent = (isCurMonth?"本月":viewMk)+"目標 "+goal+" 天 · "+
+    (doneCnt>=goal?"🎉 達標！":"還差 "+(goal-doneCnt)+" 天");
+
+  /* 今日任務 */
+  const t = PLAN[now.getDay()];
+  const isDone = !!done[tk];
+  el("todayBox").innerHTML =
+    '<div class="lbl">'+(now.getMonth()+1)+' 月 '+now.getDate()+' 日（週'+WD[now.getDay()]+'）· 今天的任務</div>'+
+    '<div class="task"><span class="emo">'+t.emo+'</span><span class="nm"><b>'+t.name+'</b><small>'+t.desc+'</small></span></div>'+
+    '<div class="btns"><a class="btn" href="'+t.href+'">開始練習 →</a>'+
+    '<button class="btn '+(isDone?'done':'alt')+'" onclick="toggle(\''+tk+'\')">'+(isDone?'✓ 今天完成了':'做完了，打卡')+'</button></div>';
+
+  /* 月曆 */
+  el("calTitle").textContent = y+" 年 "+(m+1)+" 月";
+  el("nextBtn").disabled = isCurMonth || view > now;
+  let h = WD.map(w=>'<div class="wd">'+w+'</div>').join("");
+  const first = new Date(y,m,1).getDay(), days = new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++) h += '<div class="day empty"></div>';
+  for(let d=1; d<=days; d++){
+    const dt = new Date(y,m,d), k = key(dt);
+    const cls = ["day"];
+    if(k===tk) cls.push("today");
+    if(dt>now) cls.push("future");
+    if(done[k]) cls.push("done"); else if(dt<now) cls.push("miss");
+    h += '<div class="'+cls.join(" ")+'" onclick="toggle(\''+k+'\')"><span class="n">'+d+'</span><span class="e">'+(done[k]?'✓':PLAN[dt.getDay()].emo)+'</span></div>';
+  }
+  el("grid").innerHTML = h;
+
+  /* 每週節奏 */
+  el("plan").innerHTML = [1,2,3,4,5,6,0].map(i=>{
+    const p = PLAN[i];
+    return '<li class="'+(i===now.getDay()?'now':'')+'"><span class="wk">週'+WD[i]+'</span><span class="emo">'+p.emo+'</span>'+
+      '<span class="t">'+p.name+'<small>'+p.desc+'</small></span><a href="'+p.href+'">去練</a></li>';
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>
