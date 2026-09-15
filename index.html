@@ -242,9 +242,17 @@ async function login(){
     const rows = await fetchJSON(SUPA_URL+"/rest/v1/progress?select=*&passcode=eq."+encodeURIComponent(code), {headers:H});
     prog={}; rows.forEach(r=> prog[r.card_id]={errorCount:r.error_count, nextReview:r.next_review, stability:r.stability, difficulty:r.difficulty, state:r.state, reps:r.reps, lapses:r.lapses, last_review:r.last_review});
     homeScreen();
+    routeHash();   // 英語學堂月等外部頁面用 #review / #overview / #pd / #pdreview 直接跳到對應模組
   }catch(e){ gateScreen("連線失敗，請再試一次"); }
 }
 function logout(){ localStorage.removeItem("fc_passcode"); passcode=""; gateScreen(); }
+function routeHash(){
+  const h = (location.hash||"").replace("#","");
+  if(!h) return;
+  window.history.replaceState(null, "", location.pathname+location.search);   // 用 window. 避開單字卡的 history 陣列；清掉 hash，返回首頁時不會又跳走
+  const go = {review:startReview, overview:overviewScreen, pd:()=>window.PD&&PD.open(), pdreview:()=>window.PD&&PD.reviewHome()}[h];
+  if(go) go();
+}
 
 function appearProb(e){ return e>=3?0.6 : e>=2?0.4 : e>=1?0.2 : 0.1; }
 function buildDeck(){
@@ -286,6 +294,7 @@ function homeScreen(){
       '<button class="home-btn alt" onclick="overviewScreen()">📋 單字卡總攬<small>選範圍，直接看全部答案</small></button>'+'<button class="home-btn" style="color:var(--star)" onclick="PD.open()">🎯 Pattern Drill 口說<small>出國 10 主題，聽提示開口講</small></button>'+
       '<button class="home-btn" style="color:var(--star)" onclick="PD.reviewHome()">📖 Pattern Drill 複習<small>整組中英對照，用看的滑著複習</small></button>'+
       '<button class="home-btn" style="color:var(--self)" onclick="location.href=\'grammar.html\'">📚 文法學堂<small>主題式文法＋介系詞，像參考書一樣翻</small></button>'+
+      '<button class="home-btn" style="color:var(--ok)" onclick="location.href=\'month.html\'">📅 英語學堂月<small>一個月一張課表，每天一件事，做完打卡</small></button>'+
       '<div class="home-foot"><span class="logout" onclick="logout()">換 passcode</span></div></div>';
 }
 function startReview(){ deck=buildDeck(); i=0; history=[]; reviewScreen(); }
