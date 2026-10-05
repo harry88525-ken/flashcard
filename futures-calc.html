@@ -319,16 +319,16 @@
       <div id="s-vol"></div>
     </div>
     <div class="fcard">
-      <div class="fcard-h"><span>🎯 候選清單 · 依相對強度排序</span></div>
+      <div class="fcard-h"><span>🎯 觀察名單 · 依相對強度排序（名次≠買進順序）</span></div>
       <div class="tfseg" id="s-tf"><button data-tf="7d">7天</button><button class="on" data-tf="30d">30天</button><button data-tf="200d">半年</button><button data-tf="1y">1年</button></div>
       <div class="sfilters">
         <label><input type="checkbox" id="s-clean" checked> 只看籌碼乾淨(防稀釋)</label>
-        <label><input type="checkbox" id="s-hot"> 只看熱板塊</label>
+        <label><input type="checkbox" id="s-hot" checked> 只看熱板塊(試行)</label>
       </div>
       <div id="s-status" class="fstatus">載入中…</div>
       <div class="shead"><span>幣</span><span>板塊</span><span id="s-thp">30天</span><span>RS</span><span>籌碼</span></div>
       <div id="s-table"></div>
-      <div class="fnote">RS＝相對 BTC 強度(百分點，脫鉤向上=強) · 籌碼＝流通/全稀釋市值%，越高越不會被解鎖砸盤(防 ONDO) · 軟 gate：僅崩盤建議縮手 · 進場時機自行看圖</div>
+      <div class="fnote">RS＝相對 BTC 強度(百分點) · 籌碼＝流通/全稀釋市值%，越高越不會被解鎖砸盤(防 ONDO) · 已排除 24h 量 &lt; $1M 與釘住資產 · 2026-10 回測(97 天)：RS 名次本身沒有預測力、前 5/前 10 名籃子輸給單抱 BTC；有正向證據的只有「熱板塊」與「籌碼乾淨」兩個濾網 · 進場時機自行看圖</div>
     </div>
   </div><!-- /sec-screen -->
 </div>
@@ -617,7 +617,7 @@
     var co=cls==='pos'?'var(--green)':cls==='neg'?'var(--red)':'var(--amber)';
     $('s-env').innerHTML='BTC 30天 <span class="'+(btc30>=0?'pos':'neg')+'">'+fmtPct(btc30)+'</span> · 7天 <span class="'+(btc7>=0?'pos':'neg')+'">'+fmtPct(btc7)+'</span>'+(btcd!=null?' · BTC 市佔 '+btcd.toFixed(1)+'%':'')
       +'<br><span class="regime" style="background:'+bg+';color:'+co+';">'+regime+'</span>'
-      +'<div class="fnote" style="margin-top:6px;">軟判斷僅供參考：只有偏崩盤才建議縮手；BTC 橫盤時能逆勢走強的幣反而最強。</div>';
+      +'<div class="fnote" style="margin-top:6px;">只看 BTC 30 天漲跌（≤−15% 偏崩盤、≥+10% 多頭）。回測：強勢幣籃子只在多頭段贏 BTC，盤整與崩盤段都輸。</div>';
   }
   function renderScreener(){
     if(!SROWS) return;
@@ -667,7 +667,11 @@
       var btc={}; all.forEach(function(c){ if(c&&c.id==='bitcoin') btc=c; });
       BTCW={'7d':btc.price_change_percentage_7d_in_currency||0,'30d':btc.price_change_percentage_30d_in_currency||0,'200d':btc.price_change_percentage_200d_in_currency||0,'1y':btc.price_change_percentage_1y_in_currency||0};
       renderEnv(g,BTCW['7d'],BTCW['30d']);
-      SROWS=all.filter(function(c){ if(!c) return false; var sym=(c.symbol||'').toUpperCase(); return !STABLE[sym] && !WRAP[sym]; }).map(function(c){
+      SROWS=all.filter(function(c){ if(!c) return false; var sym=(c.symbol||'').toUpperCase(); if(STABLE[sym] || WRAP[sym]) return false;
+        if((c.total_volume||0) < 1e6) return false;   // 流動性門檻：24h 量 < $1M 買不到（也擋 CoinGecko 殭屍資料）
+        var a7=c.price_change_percentage_7d_in_currency, a30=c.price_change_percentage_30d_in_currency;
+        if(typeof a7==='number' && typeof a30==='number' && Math.abs(a7)<1 && Math.abs(a30)<2) return false;   // 釘住資產（穩定幣／代幣化國庫券漏網）
+        return true; }).map(function(c){
         var mcfdv=(c.fully_diluted_valuation&&c.market_cap)?c.market_cap/c.fully_diluted_valuation:1;
         return {sym:(c.symbol||'').toUpperCase(),sec:SECMAP[c.id]||'—',mcfdv:mcfdv,ch:{'7d':c.price_change_percentage_7d_in_currency,'30d':c.price_change_percentage_30d_in_currency,'200d':c.price_change_percentage_200d_in_currency,'1y':c.price_change_percentage_1y_in_currency}};
       });
